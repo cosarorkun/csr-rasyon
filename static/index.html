@@ -1,0 +1,927 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>DOYA Besi Rasyon Hesaplayıcı</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --border: #e2e5ea;
+    --text: #1a1f2b;
+    --muted: #5b6473;
+    --primary: #1f7a4d;
+    --primary-dark: #155a37;
+    --accent: #f4a300;
+    --ok: #1f7a4d;
+    --warn: #c0392b;
+    --warn-bg: #fdecea;
+    --ok-bg: #e8f5ee;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-text-size-adjust: 100%;
+  }
+  header.app-header {
+    background: var(--primary);
+    color: white;
+    padding: 14px 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  header.app-header h1 { margin: 0; font-size: 18px; font-weight: 600; }
+  header.app-header .who {
+    display: flex; align-items: center; gap: 10px; font-size: 13px;
+  }
+  header.app-header .who .badge {
+    background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  header.app-header button.logout {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+    font-size: 13px;
+  }
+  header.app-header button.logout:hover { background: rgba(255,255,255,0.25); }
+
+  nav.tabs {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    display: flex; overflow-x: auto;
+  }
+  nav.tabs button {
+    flex: 1; min-width: 100px;
+    padding: 12px 14px;
+    background: white; border: 0; border-bottom: 3px solid transparent;
+    font-size: 14px; cursor: pointer; color: var(--muted);
+    white-space: nowrap;
+  }
+  nav.tabs button.active {
+    color: var(--primary-dark); border-bottom-color: var(--primary);
+    font-weight: 600;
+  }
+
+  main { max-width: 960px; margin: 0 auto; padding: 16px; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px; margin-bottom: 16px;
+  }
+  .card h2 {
+    margin: 0 0 12px 0; font-size: 16px; color: var(--primary-dark); font-weight: 600;
+  }
+
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  input[type="number"], input[type="text"], input[type="password"], select {
+    width: 100%; padding: 10px 12px;
+    border: 1px solid var(--border); border-radius: 8px;
+    font-size: 15px; background: white; color: var(--text);
+    -webkit-appearance: none; appearance: none;
+  }
+  input:focus, select:focus {
+    outline: 2px solid var(--primary); outline-offset: -1px; border-color: var(--primary);
+  }
+
+  .row { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  @media (min-width: 600px) {
+    .row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .row.cols-2 { grid-template-columns: 1fr 1fr; }
+    .row.cols-5 { grid-template-columns: repeat(5, 1fr); }
+  }
+
+  .ration-table { display: flex; flex-direction: column; gap: 8px; }
+  .ration-row {
+    display: grid; grid-template-columns: 1fr 110px 36px;
+    gap: 8px; align-items: center;
+  }
+  .ration-row .remove-btn {
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 8px; height: 40px; color: var(--warn);
+    font-size: 18px; cursor: pointer;
+  }
+  .ration-row .remove-btn:hover { background: var(--warn-bg); }
+
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  button.btn {
+    padding: 11px 16px; border-radius: 8px; border: 1px solid var(--border);
+    background: white; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text);
+  }
+  button.btn:hover { background: #f0f2f5; }
+  button.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.btn.primary {
+    background: var(--primary); color: white; border-color: var(--primary);
+  }
+  button.btn.primary:hover { background: var(--primary-dark); }
+  button.btn.primary:disabled { background: #8aa999; border-color: #8aa999; }
+  button.btn.danger { color: var(--warn); border-color: #f1bdb6; }
+  button.btn.danger:hover { background: var(--warn-bg); }
+
+  .calc-bar {
+    position: sticky; bottom: 0;
+    background: var(--bg); padding: 12px 0; margin: -12px 0 12px 0; z-index: 5;
+  }
+  .calc-bar button { width: 100%; padding: 14px; font-size: 16px; }
+  .save-bar { margin-top: 12px; display: flex; gap: 8px; }
+  .save-bar button { flex: 1; }
+
+  .results { display: none; }
+  .results.visible { display: block; }
+  .results .grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 16px;
+  }
+  @media (min-width: 600px) {
+    .results .grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .stat { border-bottom: 1px solid var(--border); padding: 8px 0; }
+  .stat .label { font-size: 12px; color: var(--muted); }
+  .stat .value { font-size: 17px; font-weight: 600; margin-top: 2px; }
+  .stat .unit { font-size: 12px; color: var(--muted); font-weight: 400; }
+
+  .pill {
+    display: inline-block; padding: 2px 8px; border-radius: 12px;
+    font-size: 11px; font-weight: 600; margin-left: 6px;
+  }
+  .pill.ok { background: var(--ok-bg); color: var(--ok); }
+  .pill.warn { background: var(--warn-bg); color: var(--warn); }
+  .pill.muted { background: #eef0f3; color: var(--muted); }
+
+  .gain-highlight {
+    background: linear-gradient(135deg, #f4f9f5 0%, #e8f5ee 100%);
+    border: 1px solid #cfe6d8; border-radius: 10px;
+    padding: 14px; margin-top: 12px; text-align: center;
+  }
+  .gain-highlight .big {
+    font-size: 32px; font-weight: 700; color: var(--primary-dark);
+  }
+  .gain-highlight .label { font-size: 13px; color: var(--muted); }
+  .gain-highlight .bottleneck { margin-top: 8px; font-size: 12px; color: var(--muted); }
+
+  table.detail, table.list { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.detail th, table.detail td,
+  table.list th, table.list td {
+    border-bottom: 1px solid var(--border); padding: 8px 6px; text-align: right;
+  }
+  table.detail th:first-child, table.detail td:first-child,
+  table.list th:first-child, table.list td:first-child { text-align: left; }
+  table.detail th, table.list th {
+    font-weight: 600; color: var(--muted); background: #f9fafb;
+  }
+  table.list tbody tr { cursor: pointer; }
+  table.list tbody tr:hover { background: #f6faf7; }
+
+  .scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  .compare {
+    display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; font-size: 13px;
+  }
+  .compare > div { padding: 8px 6px; border-bottom: 1px solid var(--border); }
+  .compare .head {
+    font-weight: 600; color: var(--muted); background: #f9fafb; font-size: 12px;
+  }
+
+  .error {
+    background: var(--warn-bg); color: var(--warn);
+    padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; font-size: 14px;
+  }
+  .info {
+    background: #eef6ee; color: var(--primary-dark);
+    padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; font-size: 14px;
+  }
+
+  .empty { text-align: center; padding: 24px 8px; color: var(--muted); font-size: 14px; }
+
+  /* Login screen */
+  #login-view {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 16px; background: linear-gradient(135deg, #1f7a4d 0%, #155a37 100%);
+  }
+  #login-view .login-card {
+    background: white; border-radius: 14px;
+    padding: 28px 24px; width: 100%; max-width: 380px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+  #login-view h2 {
+    margin: 0 0 4px; color: var(--primary-dark); font-size: 22px;
+  }
+  #login-view .sub { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  #login-view .field { margin-bottom: 14px; }
+  #login-view button { width: 100%; padding: 13px; font-size: 15px; }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50;
+  }
+  .modal {
+    background: white; border-radius: 12px; padding: 20px;
+    width: 100%; max-width: 420px;
+  }
+  .modal h3 { margin: 0 0 12px; color: var(--primary-dark); }
+  .modal .actions { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+
+  footer {
+    text-align: center; color: var(--muted); font-size: 12px;
+    padding: 24px 16px 32px;
+  }
+
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN VIEW -->
+<div id="login-view">
+  <form class="login-card" id="login-form">
+    <h2>DOYA Besi Rasyon</h2>
+    <div class="sub">Hesaplayıcıya giriş yapın</div>
+    <div id="login-error" class="error" style="display:none;"></div>
+    <div class="field">
+      <label for="login_username">Kullanıcı Adı</label>
+      <input id="login_username" type="text" autocomplete="username" required />
+    </div>
+    <div class="field">
+      <label for="login_password">Şifre</label>
+      <input id="login_password" type="password" autocomplete="current-password" required />
+    </div>
+    <button class="btn primary" type="submit" id="login_btn">Giriş Yap</button>
+  </form>
+</div>
+
+<!-- MAIN APP VIEW -->
+<div id="app-view" hidden>
+  <header class="app-header">
+    <h1>DOYA Besi Rasyon Hesaplayıcı</h1>
+    <div class="who">
+      <span id="who_name">—</span>
+      <span id="who_admin_badge" class="badge" hidden>Yönetici</span>
+      <button class="logout" type="button" id="logout_btn">Çıkış</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button data-tab="calc" class="active" type="button">Hesaplayıcı</button>
+    <button data-tab="history" type="button">Geçmiş Rasyonlar</button>
+    <button data-tab="admin" type="button" id="admin_tab_btn" hidden>Yönetim</button>
+  </nav>
+
+  <main>
+    <div id="error" class="error" style="display:none;"></div>
+    <div id="info" class="info" style="display:none;"></div>
+
+    <!-- CALC TAB -->
+    <div id="tab-calc">
+      <section class="card">
+        <h2>1. Sürü Bilgileri</h2>
+        <div class="row cols-3">
+          <div>
+            <label for="live_weight">Ortalama Canlı Ağırlık (kg)</label>
+            <input id="live_weight" type="number" min="100" max="900" step="1" inputmode="numeric" placeholder="örn. 450" />
+          </div>
+          <div>
+            <label for="target_gain">Hedef Günlük CA Artışı (g/gün)</label>
+            <input id="target_gain" type="number" min="0" max="3000" step="50" inputmode="numeric" placeholder="opsiyonel, örn. 1400" />
+          </div>
+          <div>
+            <label for="breed">Irk</label>
+            <select id="breed"></select>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>2. Rasyon Girişi</h2>
+        <div id="ration" class="ration-table"></div>
+        <div class="actions">
+          <button class="btn" id="add_row" type="button">+ Satır Ekle</button>
+          <button class="btn" id="reset_btn" type="button">Sıfırla</button>
+        </div>
+      </section>
+
+      <div class="calc-bar">
+        <button class="btn primary" id="calc_btn" type="button">Hesapla</button>
+      </div>
+
+      <section id="results" class="results">
+        <div class="card">
+          <h2>TMR Özeti</h2>
+          <div class="grid" id="tmr_summary"></div>
+        </div>
+        <div class="card">
+          <h2>Beklenen Performans</h2>
+          <div class="grid" id="performance_summary"></div>
+          <div class="gain-highlight">
+            <div class="label">Tahmini Günlük CA Artışı</div>
+            <div class="big"><span id="estimated_gain">–</span> <span style="font-size:18px;color:var(--muted);">g/gün</span></div>
+            <div class="bottleneck" id="bottleneck_note"></div>
+          </div>
+        </div>
+        <div class="card" id="inra_card" style="display:none;">
+          <h2>INRA Karşılaştırması</h2>
+          <div class="compare" id="inra_compare"></div>
+        </div>
+        <div class="card">
+          <h2>Rasyon Detay Tablosu</h2>
+          <div class="scroll-x">
+            <table class="detail" id="detail_table"></table>
+          </div>
+          <div class="save-bar">
+            <button class="btn primary" id="save_btn" type="button">Kaydet</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- HISTORY TAB -->
+    <div id="tab-history" hidden>
+      <section class="card">
+        <h2>Geçmiş Rasyonlar</h2>
+        <div class="scroll-x">
+          <table class="list" id="history_table"></table>
+        </div>
+      </section>
+    </div>
+
+    <!-- ADMIN TAB -->
+    <div id="tab-admin" hidden>
+      <section class="card">
+        <h2>Yem Ekle</h2>
+        <div class="row cols-2">
+          <div><label>Yem Adı</label><input type="text" id="f_name" /></div>
+          <div><label>KM% (dm_pct)</label><input type="number" step="0.1" id="f_dm_pct" /></div>
+        </div>
+        <div class="row cols-5" style="margin-top:8px;">
+          <div><label>UFV/kg KM</label><input type="number" step="0.001" id="f_ufv" /></div>
+          <div><label>Protein %</label><input type="number" step="0.1" id="f_protein" /></div>
+          <div><label>PDIE</label><input type="number" step="0.1" id="f_pdie" /></div>
+          <div><label>PDIN</label><input type="number" step="0.1" id="f_pdin" /></div>
+          <div><label>Nişasta %</label><input type="number" step="0.1" id="f_starch" /></div>
+        </div>
+        <div class="row cols-3" style="margin-top:8px;">
+          <div><label>HS (cf) %</label><input type="number" step="0.1" id="f_cf" /></div>
+          <div><label>Yağ %</label><input type="number" step="0.1" id="f_fat" /></div>
+          <div><label>Kül %</label><input type="number" step="0.1" id="f_ash" /></div>
+        </div>
+        <div class="actions">
+          <button class="btn primary" id="add_feed_btn" type="button">Ekle</button>
+          <button class="btn" id="clear_feed_btn" type="button">Temizle</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Yem Listesi</h2>
+        <div class="scroll-x">
+          <table class="list" id="feeds_table"></table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>DOYA Yem &middot; Besi Rasyon Hesaplayıcı</footer>
+</div>
+
+<!-- SAVE MODAL -->
+<div id="save-modal" class="modal-backdrop" hidden>
+  <div class="modal">
+    <h3>Rasyonu Kaydet</h3>
+    <label for="save_herd">Sürü Adı / Not (opsiyonel)</label>
+    <input type="text" id="save_herd" placeholder="örn. A Bölmesi 350 kg dönem" />
+    <div class="actions">
+      <button class="btn" id="save_cancel" type="button">İptal</button>
+      <button class="btn primary" id="save_confirm" type="button">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== State =====
+const MAX_ROWS = 15;
+const INITIAL_ROWS = 5;
+const TOKEN_KEY = "doya_token";
+
+let token = localStorage.getItem(TOKEN_KEY) || null;
+let currentUser = null;        // {username, is_admin}
+let feedsCache = [];           // [{id, name, ...}]
+let breedsCache = [];
+let lastResults = null;        // last calculation result (for save)
+let lastInputs = null;         // last calc inputs (for save)
+
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+
+// ===== Fetch helper (auth + 401 handling) =====
+async function api(path, opts = {}) {
+  const headers = Object.assign(
+    { "Content-Type": "application/json" },
+    opts.headers || {},
+  );
+  if (token) headers["Authorization"] = "Bearer " + token;
+  const res = await fetch(path, { ...opts, headers });
+  if (res.status === 401) {
+    token = null;
+    localStorage.removeItem(TOKEN_KEY);
+    showLogin();
+    throw new Error("Oturumunuzun süresi doldu.");
+  }
+  let body = null;
+  try { body = await res.json(); } catch (e) {}
+  if (!res.ok) {
+    const msg = (body && body.detail) || ("HTTP " + res.status);
+    throw new Error(msg);
+  }
+  return body;
+}
+
+// ===== Error / info bars =====
+function showError(msg) {
+  const el = $("#error");
+  el.textContent = msg || "";
+  el.style.display = msg ? "block" : "none";
+}
+function showInfo(msg) {
+  const el = $("#info");
+  el.textContent = msg || "";
+  el.style.display = msg ? "block" : "none";
+  if (msg) setTimeout(() => { el.style.display = "none"; }, 4000);
+}
+
+// ===== Login flow =====
+function showLogin() {
+  $("#login-view").hidden = false;
+  $("#app-view").hidden = true;
+}
+function showApp() {
+  $("#login-view").hidden = true;
+  $("#app-view").hidden = false;
+}
+
+$("#login-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const username = $("#login_username").value.trim();
+  const password = $("#login_password").value;
+  const errEl = $("#login-error");
+  errEl.style.display = "none";
+  const btn = $("#login_btn");
+  btn.disabled = true;
+  btn.textContent = "Giriş yapılıyor…";
+  try {
+    const res = await fetch("/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.detail || "Giriş başarısız.");
+    token = json.access_token;
+    localStorage.setItem(TOKEN_KEY, token);
+    currentUser = { username: json.username, is_admin: json.is_admin };
+    $("#login_password").value = "";
+    await bootstrapApp();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = "block";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Giriş Yap";
+  }
+});
+
+$("#logout_btn").addEventListener("click", () => {
+  token = null;
+  currentUser = null;
+  localStorage.removeItem(TOKEN_KEY);
+  showLogin();
+});
+
+// ===== Tab switching =====
+function switchTab(name) {
+  $$("nav.tabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+  $("#tab-calc").hidden = name !== "calc";
+  $("#tab-history").hidden = name !== "history";
+  $("#tab-admin").hidden = name !== "admin";
+  showError("");
+  if (name === "history") loadHistory();
+  if (name === "admin") loadFeedsTable();
+}
+$$("nav.tabs button").forEach(b => {
+  b.addEventListener("click", () => switchTab(b.dataset.tab));
+});
+
+// ===== Calc tab =====
+const rationEl = $("#ration");
+
+function buildSelect(selectedValue) {
+  const sel = document.createElement("select");
+  sel.className = "feed-select";
+  const blank = document.createElement("option");
+  blank.value = ""; blank.textContent = "— Yem seçin —";
+  sel.appendChild(blank);
+  for (const f of feedsCache) {
+    const opt = document.createElement("option");
+    opt.value = f.name; opt.textContent = f.name;
+    if (f.name === selectedValue) opt.selected = true;
+    sel.appendChild(opt);
+  }
+  return sel;
+}
+
+function addRow(prefill) {
+  const rows = rationEl.querySelectorAll(".ration-row");
+  if (rows.length >= MAX_ROWS) return;
+  const wrap = document.createElement("div");
+  wrap.className = "ration-row";
+
+  const sel = buildSelect(prefill && prefill.feed_name);
+  wrap.appendChild(sel);
+
+  const kg = document.createElement("input");
+  kg.type = "number"; kg.min = "0"; kg.step = "0.1";
+  kg.inputMode = "decimal"; kg.placeholder = "kg/gün"; kg.className = "kg-input";
+  if (prefill && prefill.as_fed_kg) kg.value = prefill.as_fed_kg;
+  wrap.appendChild(kg);
+
+  const rm = document.createElement("button");
+  rm.type = "button"; rm.className = "remove-btn"; rm.textContent = "×"; rm.title = "Satırı sil";
+  rm.addEventListener("click", () => {
+    wrap.remove();
+    if (rationEl.children.length === 0) addRow();
+    updateAddButton();
+  });
+  wrap.appendChild(rm);
+
+  rationEl.appendChild(wrap);
+  updateAddButton();
+}
+
+function updateAddButton() {
+  $("#add_row").disabled = rationEl.querySelectorAll(".ration-row").length >= MAX_ROWS;
+}
+
+function resetRows(prefillRows) {
+  rationEl.innerHTML = "";
+  if (prefillRows && prefillRows.length) {
+    prefillRows.slice(0, MAX_ROWS).forEach(r => addRow(r));
+    while (rationEl.children.length < INITIAL_ROWS && rationEl.children.length < MAX_ROWS) addRow();
+  } else {
+    for (let i = 0; i < INITIAL_ROWS; i++) addRow();
+  }
+}
+
+function gatherRation() {
+  const items = [];
+  rationEl.querySelectorAll(".ration-row").forEach(row => {
+    const name = row.querySelector(".feed-select").value;
+    const kg = parseFloat(row.querySelector(".kg-input").value);
+    if (name && !isNaN(kg) && kg > 0) items.push({ feed_name: name, as_fed_kg: kg });
+  });
+  return items;
+}
+
+function fmt(n, decimals) {
+  if (n === null || n === undefined || isNaN(n)) return "–";
+  return Number(n).toLocaleString("tr-TR", {
+    minimumFractionDigits: decimals, maximumFractionDigits: decimals,
+  });
+}
+function statBox(label, value, unit) {
+  return `<div class="stat">
+    <div class="label">${label}</div>
+    <div class="value">${value} <span class="unit">${unit || ""}</span></div>
+  </div>`;
+}
+
+function renderResults(data) {
+  $("#results").classList.add("visible");
+  const t = data.tmr_summary;
+  $("#tmr_summary").innerHTML =
+    statBox("Toplam Yaş Madde", fmt(t.total_as_fed_kg, 2), "kg/gün") +
+    statBox("Toplam Kuru Madde", fmt(t.total_dm_kg, 2), "kg/gün") +
+    statBox("Rasyon KM%", fmt(t.ration_dm_pct, 1), "%") +
+    statBox("UFV / kg KM", fmt(t.ufv_per_kg_dm, 2), "") +
+    statBox("Protein (KM)", fmt(t.protein_pct_dm, 1), "%") +
+    statBox("Nişasta (KM)", fmt(t.starch_pct_dm, 1), "%");
+
+  const p = data.expected_performance;
+  $("#performance_summary").innerHTML =
+    statBox("Beklenen KMT (DMI)", fmt(p.expected_dmi_kg, 2), "kg/gün") +
+    statBox("DMI / Canlı Ağırlık", fmt(p.dmi_pct_bw, 1), "%") +
+    statBox("Toplam UFV (rasyon)", fmt(p.ration_ufv_total_at_dmi, 2), "") +
+    statBox("Toplam PDI (rasyon)", fmt(p.ration_pdie_total_at_dmi_g, 0), "g/gün") +
+    statBox("UFV-bazlı tahmin", fmt(p.gain_ufv_limited_g, 0), "g/gün") +
+    statBox("PDI-bazlı tahmin", fmt(p.gain_pdi_limited_g, 0), "g/gün");
+
+  $("#estimated_gain").textContent = fmt(p.estimated_gain_g, 0);
+  $("#bottleneck_note").innerHTML =
+    `Sınırlayıcı besin ögesi: <strong>${p.bottleneck}</strong> ` +
+    `(UFV ${fmt(p.gain_ufv_limited_g, 0)} g/gün, PDI ${fmt(p.gain_pdi_limited_g, 0)} g/gün)`;
+
+  if (data.inra_comparison) {
+    const c = data.inra_comparison;
+    $("#inra_card").style.display = "block";
+    const ufvOk = c.ufv_met
+      ? '<span class="pill ok">✅ Yeterli</span>' : '<span class="pill warn">⚠️ Yetersiz</span>';
+    const pdiOk = c.pdi_met
+      ? '<span class="pill ok">✅ Yeterli</span>' : '<span class="pill warn">⚠️ Yetersiz</span>';
+    $("#inra_compare").innerHTML = `
+      <div class="head">Besin Ögesi</div><div class="head">Gerekli</div>
+      <div class="head">Sağlanan</div><div class="head">Durum</div>
+      <div>UFV</div><div>${fmt(c.ufv_required, 2)}</div>
+      <div>${fmt(c.ufv_provided, 2)}</div><div>${ufvOk}</div>
+      <div>PDI (g/gün)</div><div>${fmt(c.pdi_required_g, 0)}</div>
+      <div>${fmt(c.pdi_provided_g, 0)}</div><div>${pdiOk}</div>`;
+  } else {
+    $("#inra_card").style.display = "none";
+  }
+
+  const head = `<thead><tr>
+    <th>Yem</th><th>Yaş (kg)</th><th>KM (kg)</th>
+    <th>UFV</th><th>PDIE</th><th>Protein (kg)</th></tr></thead>`;
+  const body = data.rows.map(r => `<tr>
+    <td>${r.name}</td><td>${fmt(r.as_fed_kg, 2)}</td>
+    <td>${fmt(r.dm_kg, 2)}</td><td>${fmt(r.ufv, 2)}</td>
+    <td>${fmt(r.pdie, 0)}</td><td>${fmt(r.protein_kg, 2)}</td></tr>`).join("");
+  $("#detail_table").innerHTML = head + "<tbody>" + body + "</tbody>";
+
+  $("#results").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function calculate() {
+  showError("");
+  const liveWeight = parseFloat($("#live_weight").value);
+  if (isNaN(liveWeight) || liveWeight <= 0) {
+    showError("Lütfen geçerli bir canlı ağırlık girin."); return;
+  }
+  const targetGainRaw = $("#target_gain").value;
+  const targetGain = targetGainRaw ? parseFloat(targetGainRaw) : null;
+  const breed = $("#breed").value || null;
+  const ration = gatherRation();
+  if (ration.length === 0) {
+    showError("Rasyona en az bir yem ve kg değeri girin."); return;
+  }
+
+  const btn = $("#calc_btn");
+  btn.disabled = true; btn.textContent = "Hesaplanıyor…";
+  try {
+    const json = await api("/calculate", {
+      method: "POST",
+      body: JSON.stringify({ live_weight: liveWeight, target_gain: targetGain, breed, ration }),
+    });
+    lastResults = json;
+    lastInputs = { live_weight: liveWeight, target_gain: targetGain, breed, ration };
+    renderResults(json);
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "Hesapla";
+  }
+}
+
+$("#calc_btn").addEventListener("click", calculate);
+$("#add_row").addEventListener("click", () => addRow());
+$("#reset_btn").addEventListener("click", () => {
+  resetRows();
+  $("#results").classList.remove("visible");
+  showError("");
+});
+
+// ===== Save modal =====
+$("#save_btn").addEventListener("click", () => {
+  if (!lastResults) return;
+  $("#save_herd").value = "";
+  $("#save-modal").hidden = false;
+});
+$("#save_cancel").addEventListener("click", () => { $("#save-modal").hidden = true; });
+$("#save_confirm").addEventListener("click", async () => {
+  if (!lastResults || !lastInputs) return;
+  const herd = $("#save_herd").value.trim();
+  const btn = $("#save_confirm");
+  btn.disabled = true; btn.textContent = "Kaydediliyor…";
+  try {
+    await api("/rations", {
+      method: "POST",
+      body: JSON.stringify({
+        herd_name: herd || null,
+        live_weight: lastInputs.live_weight,
+        target_gain: lastInputs.target_gain,
+        breed: lastInputs.breed,
+        ration: lastInputs.ration,
+        results: lastResults,
+      }),
+    });
+    $("#save-modal").hidden = true;
+    showInfo("Rasyon kaydedildi.");
+  } catch (err) {
+    alert("Kaydedilemedi: " + err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "Kaydet";
+  }
+});
+
+// ===== History tab =====
+function fmtDate(iso) {
+  if (!iso) return "–";
+  const d = new Date(iso);
+  return d.toLocaleString("tr-TR", { dateStyle: "short", timeStyle: "short" });
+}
+async function loadHistory() {
+  try {
+    const json = await api("/rations");
+    renderHistory(json.rations);
+  } catch (err) {
+    showError(err.message);
+  }
+}
+function renderHistory(rations) {
+  const tbl = $("#history_table");
+  if (!rations.length) {
+    tbl.innerHTML = "";
+    tbl.outerHTML = '<table class="list" id="history_table"></table>';
+    $("#tab-history .scroll-x").innerHTML = '<div class="empty">Henüz kayıtlı rasyon yok.</div>';
+    return;
+  }
+  // Restore scroll-x table if it was replaced
+  if (!$("#history_table")) {
+    $("#tab-history .scroll-x").innerHTML = '<table class="list" id="history_table"></table>';
+  }
+  const showUser = currentUser.is_admin;
+  const head = `<thead><tr>
+    <th>Tarih</th><th>Sürü Adı</th><th>CA (kg)</th>
+    <th>Hedef Artış</th><th>Tahmini Artış</th><th>Irk</th>
+    ${showUser ? "<th>Hesaplayan</th>" : ""}<th></th></tr></thead>`;
+  const body = rations.map(r => {
+    const estGain = r.results && r.results.expected_performance
+      ? r.results.expected_performance.estimated_gain_g : null;
+    const canDelete = r.owned || currentUser.is_admin;
+    return `<tr data-id="${r.id}">
+      <td>${fmtDate(r.created_at)}</td>
+      <td>${r.herd_name || "—"}</td>
+      <td>${fmt(r.live_weight, 0)}</td>
+      <td>${r.target_gain ? fmt(r.target_gain, 0) + " g" : "—"}</td>
+      <td>${estGain != null ? fmt(estGain, 0) + " g" : "—"}</td>
+      <td>${r.breed || "—"}</td>
+      ${showUser ? `<td>${r.username}</td>` : ""}
+      <td>${canDelete ? '<button class="btn danger del-btn" data-id="' + r.id + '" type="button">Sil</button>' : ""}</td>
+    </tr>`;
+  }).join("");
+  $("#history_table").innerHTML = head + "<tbody>" + body + "</tbody>";
+
+  // Wire row click → load
+  $("#history_table tbody").addEventListener("click", (e) => {
+    if (e.target.classList.contains("del-btn")) return;
+    const tr = e.target.closest("tr");
+    if (!tr) return;
+    const id = parseInt(tr.dataset.id, 10);
+    const r = rations.find(x => x.id === id);
+    if (r) loadRationIntoForm(r);
+  });
+  // Wire delete
+  $$("#history_table .del-btn").forEach(b => {
+    b.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      if (!confirm("Bu rasyonu silmek istediğinize emin misiniz?")) return;
+      try {
+        await api("/rations/" + b.dataset.id, { method: "DELETE" });
+        await loadHistory();
+      } catch (err) { alert(err.message); }
+    });
+  });
+}
+
+function loadRationIntoForm(r) {
+  switchTab("calc");
+  $("#live_weight").value = r.live_weight || "";
+  $("#target_gain").value = r.target_gain || "";
+  $("#breed").value = r.breed || "";
+  resetRows(r.ration);
+  if (r.results) {
+    lastResults = r.results;
+    lastInputs = {
+      live_weight: r.live_weight, target_gain: r.target_gain, breed: r.breed, ration: r.ration,
+    };
+    renderResults(r.results);
+  } else {
+    $("#results").classList.remove("visible");
+  }
+  showInfo("Rasyon yüklendi. Düzenleyip yeniden hesaplayabilirsiniz.");
+}
+
+// ===== Admin tab =====
+function clearFeedForm() {
+  ["f_name","f_dm_pct","f_ufv","f_protein","f_pdie","f_pdin","f_starch","f_cf","f_fat","f_ash"]
+    .forEach(id => { $("#" + id).value = ""; });
+}
+$("#clear_feed_btn").addEventListener("click", clearFeedForm);
+
+$("#add_feed_btn").addEventListener("click", async () => {
+  const num = (id) => {
+    const v = $("#" + id).value;
+    return v === "" ? 0 : parseFloat(v);
+  };
+  const name = $("#f_name").value.trim();
+  if (!name) { alert("Yem adı zorunlu."); return; }
+  try {
+    await api("/feeds", {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        dm_pct: num("f_dm_pct"), ufv: num("f_ufv"), protein: num("f_protein"),
+        pdie: num("f_pdie"), pdin: num("f_pdin"),
+        cf: num("f_cf"), fat: num("f_fat"), ash: num("f_ash"), starch: num("f_starch"),
+      }),
+    });
+    clearFeedForm();
+    showInfo("Yem eklendi.");
+    await refreshFeeds();
+    loadFeedsTable();
+  } catch (err) { alert(err.message); }
+});
+
+async function loadFeedsTable() {
+  await refreshFeeds();
+  const head = `<thead><tr>
+    <th>Yem</th><th>KM%</th><th>UFV</th><th>Prot%</th>
+    <th>PDIE</th><th>PDIN</th><th>Nişasta%</th><th>Tip</th><th></th></tr></thead>`;
+  const body = feedsCache.map(f => `<tr>
+    <td>${f.name}</td>
+    <td>${fmt(f.dm_pct, 1)}</td>
+    <td>${fmt(f.ufv, 3)}</td>
+    <td>${fmt(f.protein, 1)}</td>
+    <td>${fmt(f.pdie, 1)}</td>
+    <td>${fmt(f.pdin, 1)}</td>
+    <td>${fmt(f.starch, 1)}</td>
+    <td>${f.is_custom
+      ? '<span class="pill warn">Özel</span>'
+      : '<span class="pill muted">Sistem</span>'}</td>
+    <td>${f.is_custom
+      ? '<button class="btn danger del-feed-btn" data-id="' + f.id + '" type="button">Sil</button>'
+      : ""}</td>
+  </tr>`).join("");
+  $("#feeds_table").innerHTML = head + "<tbody>" + body + "</tbody>";
+  $$("#feeds_table .del-feed-btn").forEach(b => {
+    b.addEventListener("click", async () => {
+      if (!confirm("Bu özel yemi silmek istediğinize emin misiniz?")) return;
+      try {
+        await api("/feeds/" + b.dataset.id, { method: "DELETE" });
+        await refreshFeeds();
+        loadFeedsTable();
+        // Refresh dropdowns in calc tab
+        rebuildRationDropdowns();
+      } catch (err) { alert(err.message); }
+    });
+  });
+}
+
+function rebuildRationDropdowns() {
+  rationEl.querySelectorAll(".ration-row").forEach(row => {
+    const oldSel = row.querySelector(".feed-select");
+    const oldVal = oldSel.value;
+    const newSel = buildSelect(oldVal);
+    oldSel.replaceWith(newSel);
+  });
+}
+
+// ===== Bootstrap =====
+async function refreshFeeds() {
+  const json = await api("/feeds");
+  feedsCache = json.feeds;
+  breedsCache = json.breeds;
+}
+
+async function bootstrapApp() {
+  showApp();
+  showError("");
+  // If we already have currentUser from login response, skip /auth/me; otherwise fetch.
+  if (!currentUser) {
+    currentUser = await api("/auth/me");
+  }
+  $("#who_name").textContent = currentUser.username;
+  $("#who_admin_badge").hidden = !currentUser.is_admin;
+  $("#admin_tab_btn").hidden = !currentUser.is_admin;
+
+  await refreshFeeds();
+  const breedSel = $("#breed");
+  breedSel.innerHTML = '<option value="">— Seçin —</option>' +
+    breedsCache.map(b => `<option value="${b}">${b}</option>`).join("");
+  resetRows();
+}
+
+(async function init() {
+  if (!token) { showLogin(); return; }
+  try {
+    await bootstrapApp();
+  } catch (err) {
+    // Token rejected → showLogin already called by api()
+  }
+})();
+</script>
+</body>
+</html>
