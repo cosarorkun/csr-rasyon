@@ -11,9 +11,10 @@ from sqlalchemy.orm import Session
 
 from database import User, get_db
 
+# Env var name preserved as DOYA_SECRET_KEY so existing Railway deploys keep working.
 SECRET_KEY = os.environ.get(
     "DOYA_SECRET_KEY",
-    "doya-besi-rasyon-default-secret-change-me-in-production",
+    "csr-besi-rasyon-default-secret-change-me-in-production",
 )
 ALGORITHM = "HS256"
 TOKEN_EXPIRE_HOURS = 8

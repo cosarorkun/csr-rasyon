@@ -31,7 +31,6 @@ def _interp(x: float, x0: float, x1: float, y0: float, y1: float) -> float:
 
 
 def _bracket(value: float, sorted_keys: list[int]) -> tuple[int, int]:
-    """Return the two adjacent keys bracketing `value`, clamped to the ends."""
     if value <= sorted_keys[0]:
         return sorted_keys[0], sorted_keys[0]
     if value >= sorted_keys[-1]:
@@ -43,7 +42,6 @@ def _bracket(value: float, sorted_keys: list[int]) -> tuple[int, int]:
 
 
 def _row_at_weight(matrix: dict, live_weight: float) -> dict[int, float]:
-    """Linearly interpolate the matrix rows to produce a row at the given weight."""
     w0, w1 = _bracket(live_weight, WEIGHT_ROWS)
     if w0 == w1:
         return dict(matrix[w0])
@@ -56,17 +54,10 @@ def _row_at_weight(matrix: dict, live_weight: float) -> dict[int, float]:
 def estimate_gain_from_provided(
     matrix: dict, live_weight: float, provided: float
 ) -> float:
-    """Given a provided UFV (or PDI) total and live weight, return the gain (g/day).
-
-    Uses bilinear interpolation: first interpolate the matrix row to the user's
-    live weight, then invert that monotonically-increasing row to find the gain
-    that matches the provided requirement value.
-    """
     row = _row_at_weight(matrix, live_weight)
     gains = GAIN_COLS
     values = [row[g] for g in gains]
 
-    # Clamp at boundaries.
     if provided <= values[0]:
         return float(gains[0])
     if provided >= values[-1]:
@@ -80,7 +71,6 @@ def estimate_gain_from_provided(
 
 
 def required_at(matrix: dict, live_weight: float, target_gain: float) -> float:
-    """Bilinearly interpolate the matrix at (live_weight, target_gain)."""
     w0, w1 = _bracket(live_weight, WEIGHT_ROWS)
     g0, g1 = _bracket(target_gain, GAIN_COLS)
 
@@ -89,7 +79,6 @@ def required_at(matrix: dict, live_weight: float, target_gain: float) -> float:
     v10 = matrix[w1][g0]
     v11 = matrix[w1][g1]
 
-    # Interpolate along gain axis at each weight, then between weights.
     a = _interp(target_gain, g0, g1, v00, v01) if g0 != g1 else v00
     b = _interp(target_gain, g0, g1, v10, v11) if g0 != g1 else v10
     return _interp(live_weight, w0, w1, a, b) if w0 != w1 else a
@@ -127,7 +116,7 @@ def calculate(
 
         dm_kg = as_fed * (feed["dm_pct"] / 100.0)
         ufv = dm_kg * feed["ufv"]
-        pdie = dm_kg * feed["pdie"]  # pdie in DB is g/kg DM
+        pdie = dm_kg * feed["pdie"]
         pdin = dm_kg * feed["pdin"]
         protein_kg = dm_kg * (feed["protein"] / 100.0)
         starch_kg = dm_kg * (feed["starch"] / 100.0)

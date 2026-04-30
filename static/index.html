@@ -3,21 +3,26 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>DOYA Besi Rasyon Hesaplayıcı</title>
+<title>CSR Rasyon Hesaplayıcı</title>
+<link rel="icon" type="image/png" href="/static/csr-logo.png" />
 <style>
   :root {
-    --bg: #f5f6f8;
+    --navy: #1e3a73;
+    --navy-dark: #15294f;
+    --navy-light: #2c4d8a;
+    --green: #14803c;
+    --green-dark: #0e6531;
+    --bg: #f4f6fa;
     --card: #ffffff;
-    --border: #e2e5ea;
-    --text: #1a1f2b;
+    --border: #d8dee8;
+    --border-strong: #c2cad8;
+    --text: #0f1830;
+    --text-soft: #2d3550;
     --muted: #5b6473;
-    --primary: #1f7a4d;
-    --primary-dark: #155a37;
-    --accent: #f4a300;
-    --ok: #1f7a4d;
+    --ok: #14803c;
     --warn: #c0392b;
     --warn-bg: #fdecea;
-    --ok-bg: #e8f5ee;
+    --ok-bg: #e6f3ec;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -26,146 +31,210 @@
     background: var(--bg);
     color: var(--text);
     -webkit-text-size-adjust: 100%;
+    line-height: 1.45;
   }
-  header.app-header {
-    background: var(--primary);
+
+  /* ===== App header ===== */
+  header.topbar {
+    background: var(--navy);
     color: white;
-    padding: 14px 16px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 12px 18px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     flex-wrap: wrap;
+    box-shadow: 0 2px 8px rgba(15, 24, 48, 0.18);
   }
-  header.app-header h1 { margin: 0; font-size: 18px; font-weight: 600; }
-  header.app-header .who {
-    display: flex; align-items: center; gap: 10px; font-size: 13px;
+  .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .brand-logo {
+    height: 40px; width: 40px; background: white;
+    border-radius: 8px; padding: 4px; object-fit: contain;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
   }
-  header.app-header .who .badge {
-    background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px;
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+  .brand-text { display: flex; flex-direction: column; min-width: 0; }
+  .brand-title {
+    font-size: 16px; font-weight: 700; letter-spacing: 0.2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  header.app-header button.logout {
-    background: rgba(255,255,255,0.15);
+  .brand-sub {
+    font-size: 11px; opacity: 0.75; letter-spacing: 1.4px;
+    text-transform: uppercase; font-weight: 500;
+  }
+  .who { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .who .name { font-weight: 500; }
+  .badge {
+    background: var(--green);
+    padding: 3px 9px; border-radius: 999px;
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.6px;
+  }
+  button.logout {
+    background: rgba(255,255,255,0.12);
     border: 1px solid rgba(255,255,255,0.4);
     color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer;
     font-size: 13px;
   }
-  header.app-header button.logout:hover { background: rgba(255,255,255,0.25); }
+  button.logout:hover { background: rgba(255,255,255,0.22); }
 
+  /* ===== Tabs ===== */
   nav.tabs {
     background: white;
     border-bottom: 1px solid var(--border);
     display: flex; overflow-x: auto;
+    position: sticky; top: 0; z-index: 4;
   }
   nav.tabs button {
-    flex: 1; min-width: 100px;
-    padding: 12px 14px;
+    flex: 1; min-width: 120px;
+    padding: 13px 14px;
     background: white; border: 0; border-bottom: 3px solid transparent;
     font-size: 14px; cursor: pointer; color: var(--muted);
-    white-space: nowrap;
+    white-space: nowrap; font-weight: 500;
   }
   nav.tabs button.active {
-    color: var(--primary-dark); border-bottom-color: var(--primary);
+    color: var(--navy-dark); border-bottom-color: var(--navy);
     font-weight: 600;
   }
 
-  main { max-width: 960px; margin: 0 auto; padding: 16px; }
+  main { max-width: 1200px; margin: 0 auto; padding: 16px; }
 
+  /* ===== Cards ===== */
   .card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 10px; padding: 16px; margin-bottom: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 14px;
   }
   .card h2 {
-    margin: 0 0 12px 0; font-size: 16px; color: var(--primary-dark); font-weight: 600;
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: var(--navy-dark);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
   }
 
-  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
-  input[type="number"], input[type="text"], input[type="password"], select {
+  /* ===== Form fields ===== */
+  label {
+    display: block; font-size: 12px; color: var(--muted);
+    margin-bottom: 4px; font-weight: 500;
+  }
+  input[type="number"], input[type="text"], input[type="password"], select, textarea {
     width: 100%; padding: 10px 12px;
-    border: 1px solid var(--border); border-radius: 8px;
+    border: 1px solid var(--border-strong); border-radius: 7px;
     font-size: 15px; background: white; color: var(--text);
     -webkit-appearance: none; appearance: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
   }
-  input:focus, select:focus {
-    outline: 2px solid var(--primary); outline-offset: -1px; border-color: var(--primary);
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(30, 58, 115, 0.15);
   }
 
-  .row { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .row { display: grid; grid-template-columns: 1fr; gap: 10px; }
   @media (min-width: 600px) {
-    .row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
     .row.cols-2 { grid-template-columns: 1fr 1fr; }
+    .row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
     .row.cols-5 { grid-template-columns: repeat(5, 1fr); }
   }
 
+  /* ===== Ration rows ===== */
   .ration-table { display: flex; flex-direction: column; gap: 8px; }
   .ration-row {
-    display: grid; grid-template-columns: 1fr 110px 36px;
+    display: grid;
+    grid-template-columns: 1fr 100px 36px;
     gap: 8px; align-items: center;
   }
   .ration-row .remove-btn {
-    background: transparent; border: 1px solid var(--border);
-    border-radius: 8px; height: 40px; color: var(--warn);
+    background: transparent; border: 1px solid var(--border-strong);
+    border-radius: 7px; height: 40px; color: var(--warn);
     font-size: 18px; cursor: pointer;
   }
   .ration-row .remove-btn:hover { background: var(--warn-bg); }
 
+  /* ===== Buttons ===== */
   .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   button.btn {
-    padding: 11px 16px; border-radius: 8px; border: 1px solid var(--border);
-    background: white; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text);
+    padding: 11px 16px; border-radius: 7px;
+    border: 1px solid var(--border-strong);
+    background: white; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--text);
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
   }
   button.btn:hover { background: #f0f2f5; }
-  button.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.btn:disabled { opacity: 0.55; cursor: not-allowed; }
   button.btn.primary {
-    background: var(--primary); color: white; border-color: var(--primary);
+    background: var(--navy); color: white; border-color: var(--navy);
   }
-  button.btn.primary:hover { background: var(--primary-dark); }
-  button.btn.primary:disabled { background: #8aa999; border-color: #8aa999; }
+  button.btn.primary:hover { background: var(--navy-dark); }
+  button.btn.primary:disabled { background: #6c7fa3; border-color: #6c7fa3; }
+  button.btn.success {
+    background: var(--green); color: white; border-color: var(--green);
+  }
+  button.btn.success:hover { background: var(--green-dark); }
+  button.btn.success:disabled { background: #6c9d80; border-color: #6c9d80; }
   button.btn.danger { color: var(--warn); border-color: #f1bdb6; }
   button.btn.danger:hover { background: var(--warn-bg); }
+  button.btn.small { padding: 6px 10px; font-size: 12px; }
 
-  .calc-bar {
-    position: sticky; bottom: 0;
-    background: var(--bg); padding: 12px 0; margin: -12px 0 12px 0; z-index: 5;
+  .btn-row { display: flex; gap: 8px; margin-top: 12px; }
+  .btn-row .btn { flex: 1; }
+
+  /* ===== Two-column desktop layout ===== */
+  .calc-grid { display: block; }
+  @media (min-width: 1024px) {
+    .calc-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .calc-grid .right-col { position: sticky; top: 60px; }
   }
-  .calc-bar button { width: 100%; padding: 14px; font-size: 16px; }
-  .save-bar { margin-top: 12px; display: flex; gap: 8px; }
-  .save-bar button { flex: 1; }
 
-  .results { display: none; }
-  .results.visible { display: block; }
-  .results .grid {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 16px;
+  /* ===== Result stat boxes ===== */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px 14px;
   }
   @media (min-width: 600px) {
-    .results .grid { grid-template-columns: repeat(3, 1fr); }
+    .stat-grid { grid-template-columns: repeat(3, 1fr); }
   }
-  .stat { border-bottom: 1px solid var(--border); padding: 8px 0; }
-  .stat .label { font-size: 12px; color: var(--muted); }
-  .stat .value { font-size: 17px; font-weight: 600; margin-top: 2px; }
-  .stat .unit { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .stat { border-bottom: 1px solid var(--border); padding: 7px 0; }
+  .stat .label { font-size: 11px; color: var(--muted); letter-spacing: 0.2px; }
+  .stat .value {
+    font-size: 17px; font-weight: 700; margin-top: 2px; color: var(--text);
+  }
+  .stat .unit { font-size: 12px; color: var(--muted); font-weight: 500; }
 
   .pill {
-    display: inline-block; padding: 2px 8px; border-radius: 12px;
-    font-size: 11px; font-weight: 600; margin-left: 6px;
+    display: inline-block; padding: 2px 9px; border-radius: 999px;
+    font-size: 11px; font-weight: 600;
   }
   .pill.ok { background: var(--ok-bg); color: var(--ok); }
   .pill.warn { background: var(--warn-bg); color: var(--warn); }
   .pill.muted { background: #eef0f3; color: var(--muted); }
 
   .gain-highlight {
-    background: linear-gradient(135deg, #f4f9f5 0%, #e8f5ee 100%);
-    border: 1px solid #cfe6d8; border-radius: 10px;
-    padding: 14px; margin-top: 12px; text-align: center;
+    background: linear-gradient(135deg, #f0f4fa 0%, #e3ecf8 100%);
+    border: 1px solid #c8d3e8; border-radius: 10px;
+    padding: 16px; margin-top: 4px; text-align: center;
   }
   .gain-highlight .big {
-    font-size: 32px; font-weight: 700; color: var(--primary-dark);
+    font-size: 36px; font-weight: 700; color: var(--navy-dark);
+    letter-spacing: -0.5px;
   }
-  .gain-highlight .label { font-size: 13px; color: var(--muted); }
-  .gain-highlight .bottleneck { margin-top: 8px; font-size: 12px; color: var(--muted); }
+  .gain-highlight .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .gain-highlight .bottleneck {
+    margin-top: 10px; font-size: 12px; color: var(--text-soft);
+  }
+  .gain-highlight .bottleneck strong { color: var(--green-dark); }
 
+  /* ===== Tables ===== */
   table.detail, table.list { width: 100%; border-collapse: collapse; font-size: 13px; }
   table.detail th, table.detail td,
   table.list th, table.list td {
@@ -174,10 +243,11 @@
   table.detail th:first-child, table.detail td:first-child,
   table.list th:first-child, table.list td:first-child { text-align: left; }
   table.detail th, table.list th {
-    font-weight: 600; color: var(--muted); background: #f9fafb;
+    font-weight: 600; color: var(--muted); background: #f8fafd;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;
   }
   table.list tbody tr { cursor: pointer; }
-  table.list tbody tr:hover { background: #f6faf7; }
+  table.list tbody tr:hover { background: #f6f9ff; }
 
   .scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
@@ -186,52 +256,93 @@
   }
   .compare > div { padding: 8px 6px; border-bottom: 1px solid var(--border); }
   .compare .head {
-    font-weight: 600; color: var(--muted); background: #f9fafb; font-size: 12px;
+    font-weight: 600; color: var(--muted); background: #f8fafd; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.4px;
   }
 
   .error {
     background: var(--warn-bg); color: var(--warn);
     padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; font-size: 14px;
+    border: 1px solid #f1bdb6;
   }
   .info {
-    background: #eef6ee; color: var(--primary-dark);
+    background: var(--ok-bg); color: var(--green-dark);
     padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; font-size: 14px;
+    border: 1px solid #b9dec8;
+  }
+  .empty {
+    text-align: center; padding: 32px 12px;
+    color: var(--muted); font-size: 14px;
+  }
+  .results-empty {
+    text-align: center; padding: 40px 16px;
+    color: var(--muted); font-size: 14px;
+    background: white; border: 1px dashed var(--border-strong);
+    border-radius: 10px;
   }
 
-  .empty { text-align: center; padding: 24px 8px; color: var(--muted); font-size: 14px; }
-
-  /* Login screen */
+  /* ===== Login ===== */
   #login-view {
     min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    padding: 16px; background: linear-gradient(135deg, #1f7a4d 0%, #155a37 100%);
+    padding: 16px;
+    background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, var(--navy-light) 100%);
   }
   #login-view .login-card {
     background: white; border-radius: 14px;
-    padding: 28px 24px; width: 100%; max-width: 380px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    padding: 32px 26px 26px; width: 100%; max-width: 400px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.28);
+  }
+  #login-view .login-brand {
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; margin-bottom: 22px;
+  }
+  #login-view .login-brand img {
+    height: 76px; width: 76px; margin-bottom: 10px;
+    object-fit: contain;
   }
   #login-view h2 {
-    margin: 0 0 4px; color: var(--primary-dark); font-size: 22px;
+    margin: 0; color: var(--navy-dark); font-size: 22px; font-weight: 700;
   }
-  #login-view .sub { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  #login-view .sub {
+    color: var(--muted); font-size: 11px;
+    margin-top: 4px; letter-spacing: 1.5px; text-transform: uppercase;
+  }
   #login-view .field { margin-bottom: 14px; }
   #login-view button { width: 100%; padding: 13px; font-size: 15px; }
+  #login-view .login-foot {
+    margin-top: 18px; font-size: 11px; color: var(--muted); text-align: center;
+    letter-spacing: 0.5px;
+  }
 
-  /* Modal */
+  /* ===== Modal ===== */
   .modal-backdrop {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-    display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50;
+    position: fixed; inset: 0; background: rgba(15, 24, 48, 0.55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px; z-index: 50;
   }
   .modal {
-    background: white; border-radius: 12px; padding: 20px;
-    width: 100%; max-width: 420px;
+    background: white; border-radius: 12px; padding: 22px;
+    width: 100%; max-width: 520px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
   }
-  .modal h3 { margin: 0 0 12px; color: var(--primary-dark); }
+  .modal h3 {
+    margin: 0 0 14px; color: var(--navy-dark);
+    font-size: 16px; font-weight: 700;
+  }
   .modal .actions { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+  .modal .note {
+    font-size: 12px; color: var(--muted); margin-bottom: 10px;
+  }
 
-  footer {
+  /* ===== Footer ===== */
+  footer.app-footer {
     text-align: center; color: var(--muted); font-size: 12px;
-    padding: 24px 16px 32px;
+    padding: 22px 16px 32px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  footer.app-footer img { height: 26px; width: 26px; opacity: 0.85; }
+  footer.app-footer .foot-line {
+    letter-spacing: 0.8px; font-size: 11px; text-transform: uppercase;
   }
 
   [hidden] { display: none !important; }
@@ -239,11 +350,14 @@
 </head>
 <body>
 
-<!-- LOGIN VIEW -->
+<!-- ============== LOGIN VIEW ============== -->
 <div id="login-view">
   <form class="login-card" id="login-form">
-    <h2>DOYA Besi Rasyon</h2>
-    <div class="sub">Hesaplayıcıya giriş yapın</div>
+    <div class="login-brand">
+      <img src="/static/csr-logo.png" alt="CSR" onerror="this.style.display='none'" />
+      <h2>CSR Rasyon Hesaplayıcı</h2>
+      <div class="sub">Concentrated Smart Ration</div>
+    </div>
     <div id="login-error" class="error" style="display:none;"></div>
     <div class="field">
       <label for="login_username">Kullanıcı Adı</label>
@@ -254,16 +368,23 @@
       <input id="login_password" type="password" autocomplete="current-password" required />
     </div>
     <button class="btn primary" type="submit" id="login_btn">Giriş Yap</button>
+    <div class="login-foot">CSR &middot; Saha Hesaplama Aracı</div>
   </form>
 </div>
 
-<!-- MAIN APP VIEW -->
+<!-- ============== MAIN APP VIEW ============== -->
 <div id="app-view" hidden>
-  <header class="app-header">
-    <h1>DOYA Besi Rasyon Hesaplayıcı</h1>
+  <header class="topbar">
+    <div class="brand">
+      <img class="brand-logo" src="/static/csr-logo.png" alt="CSR" onerror="this.style.display='none'" />
+      <div class="brand-text">
+        <div class="brand-title">CSR Rasyon Hesaplayıcı</div>
+        <div class="brand-sub">Concentrated Smart Ration</div>
+      </div>
+    </div>
     <div class="who">
-      <span id="who_name">—</span>
-      <span id="who_admin_badge" class="badge" hidden>Yönetici</span>
+      <span class="name" id="who_name">—</span>
+      <span class="badge" id="who_admin_badge" hidden>Yönetici</span>
       <button class="logout" type="button" id="logout_btn">Çıkış</button>
     </div>
   </header>
@@ -278,80 +399,111 @@
     <div id="error" class="error" style="display:none;"></div>
     <div id="info" class="info" style="display:none;"></div>
 
-    <!-- CALC TAB -->
+    <!-- ============ CALC TAB ============ -->
     <div id="tab-calc">
-      <section class="card">
-        <h2>1. Sürü Bilgileri</h2>
-        <div class="row cols-3">
-          <div>
-            <label for="live_weight">Ortalama Canlı Ağırlık (kg)</label>
-            <input id="live_weight" type="number" min="100" max="900" step="1" inputmode="numeric" placeholder="örn. 450" />
-          </div>
-          <div>
-            <label for="target_gain">Hedef Günlük CA Artışı (g/gün)</label>
-            <input id="target_gain" type="number" min="0" max="3000" step="50" inputmode="numeric" placeholder="opsiyonel, örn. 1400" />
-          </div>
-          <div>
-            <label for="breed">Irk</label>
-            <select id="breed"></select>
+      <div class="calc-grid">
+        <!-- LEFT: input -->
+        <div class="left-col">
+          <section class="card">
+            <h2>Müşteri Bilgileri</h2>
+            <div class="row">
+              <div>
+                <label for="customer_name">Rasyon Kimin İçin Yapıldı?</label>
+                <input id="customer_name" type="text" placeholder="örn. Mehmet Yılmaz / X İşletmesi" />
+              </div>
+              <div>
+                <label for="herd_name">Sürü Adı / Not (opsiyonel)</label>
+                <input id="herd_name" type="text" placeholder="örn. A bölmesi 350 kg dönem" />
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Sürü Bilgileri</h2>
+            <div class="row cols-3">
+              <div>
+                <label for="live_weight">Canlı Ağırlık (kg)</label>
+                <input id="live_weight" type="number" min="100" max="900" step="1" inputmode="numeric" placeholder="örn. 450" />
+              </div>
+              <div>
+                <label for="target_gain">Hedef CA Artışı (g/gün)</label>
+                <input id="target_gain" type="number" min="0" max="3000" step="50" inputmode="numeric" placeholder="opsiyonel" />
+              </div>
+              <div>
+                <label for="breed">Irk</label>
+                <select id="breed"></select>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Rasyon Girişi</h2>
+            <div id="ration" class="ration-table"></div>
+            <div class="actions">
+              <button class="btn" id="add_row" type="button">+ Satır Ekle</button>
+              <button class="btn" id="reset_btn" type="button">Sıfırla</button>
+            </div>
+          </section>
+
+          <div class="btn-row">
+            <button class="btn primary" id="calc_btn" type="button">Hesapla</button>
+            <button class="btn success" id="save_btn" type="button" disabled>Kaydet</button>
           </div>
         </div>
-      </section>
 
-      <section class="card">
-        <h2>2. Rasyon Girişi</h2>
-        <div id="ration" class="ration-table"></div>
-        <div class="actions">
-          <button class="btn" id="add_row" type="button">+ Satır Ekle</button>
-          <button class="btn" id="reset_btn" type="button">Sıfırla</button>
+        <!-- RIGHT: results -->
+        <div class="right-col">
+          <div id="results-empty" class="results-empty">
+            Hesaplamayı başlatmak için soldaki formu doldurup <strong>Hesapla</strong>'ya basın.
+          </div>
+
+          <div id="results" hidden>
+            <div class="card">
+              <h2>TMR Özeti</h2>
+              <div class="stat-grid" id="tmr_summary"></div>
+            </div>
+
+            <div class="card">
+              <h2>Beklenen Performans</h2>
+              <div class="gain-highlight">
+                <div class="label">Tahmini Günlük CA Artışı</div>
+                <div class="big">
+                  <span id="estimated_gain">–</span>
+                  <span style="font-size:18px;color:var(--muted);font-weight:500;">g/gün</span>
+                </div>
+                <div class="bottleneck" id="bottleneck_note"></div>
+              </div>
+              <div class="stat-grid" id="performance_summary" style="margin-top:14px;"></div>
+            </div>
+
+            <div class="card" id="inra_card" hidden>
+              <h2>INRA Karşılaştırması</h2>
+              <div class="compare" id="inra_compare"></div>
+            </div>
+
+            <!-- Admin-only detail table -->
+            <div class="card" id="detail_card" hidden>
+              <h2>Rasyon Detay Tablosu (Yönetici)</h2>
+              <div class="scroll-x">
+                <table class="detail" id="detail_table"></table>
+              </div>
+            </div>
+          </div>
         </div>
-      </section>
-
-      <div class="calc-bar">
-        <button class="btn primary" id="calc_btn" type="button">Hesapla</button>
       </div>
-
-      <section id="results" class="results">
-        <div class="card">
-          <h2>TMR Özeti</h2>
-          <div class="grid" id="tmr_summary"></div>
-        </div>
-        <div class="card">
-          <h2>Beklenen Performans</h2>
-          <div class="grid" id="performance_summary"></div>
-          <div class="gain-highlight">
-            <div class="label">Tahmini Günlük CA Artışı</div>
-            <div class="big"><span id="estimated_gain">–</span> <span style="font-size:18px;color:var(--muted);">g/gün</span></div>
-            <div class="bottleneck" id="bottleneck_note"></div>
-          </div>
-        </div>
-        <div class="card" id="inra_card" style="display:none;">
-          <h2>INRA Karşılaştırması</h2>
-          <div class="compare" id="inra_compare"></div>
-        </div>
-        <div class="card">
-          <h2>Rasyon Detay Tablosu</h2>
-          <div class="scroll-x">
-            <table class="detail" id="detail_table"></table>
-          </div>
-          <div class="save-bar">
-            <button class="btn primary" id="save_btn" type="button">Kaydet</button>
-          </div>
-        </div>
-      </section>
     </div>
 
-    <!-- HISTORY TAB -->
+    <!-- ============ HISTORY TAB ============ -->
     <div id="tab-history" hidden>
       <section class="card">
         <h2>Geçmiş Rasyonlar</h2>
-        <div class="scroll-x">
-          <table class="list" id="history_table"></table>
+        <div id="history_container">
+          <div class="empty">Yükleniyor…</div>
         </div>
       </section>
     </div>
 
-    <!-- ADMIN TAB -->
+    <!-- ============ ADMIN TAB ============ -->
     <div id="tab-admin" hidden>
       <section class="card">
         <h2>Yem Ekle</h2>
@@ -379,6 +531,9 @@
 
       <section class="card">
         <h2>Yem Listesi</h2>
+        <p class="note" style="font-size:12px;color:var(--muted);margin:0 0 10px;">
+          Sistem yemleri yalnızca okunabilir. Yalnızca özel yemler düzenlenebilir veya silinebilir.
+        </p>
         <div class="scroll-x">
           <table class="list" id="feeds_table"></table>
         </div>
@@ -386,18 +541,36 @@
     </div>
   </main>
 
-  <footer>DOYA Yem &middot; Besi Rasyon Hesaplayıcı</footer>
+  <footer class="app-footer">
+    <img src="/static/csr-logo.png" alt="CSR" onerror="this.style.display='none'" />
+    <div class="foot-line">CSR &middot; Concentrated Smart Ration</div>
+  </footer>
 </div>
 
-<!-- SAVE MODAL -->
-<div id="save-modal" class="modal-backdrop" hidden>
+<!-- ============ EDIT FEED MODAL ============ -->
+<div id="edit-modal" class="modal-backdrop" hidden>
   <div class="modal">
-    <h3>Rasyonu Kaydet</h3>
-    <label for="save_herd">Sürü Adı / Not (opsiyonel)</label>
-    <input type="text" id="save_herd" placeholder="örn. A Bölmesi 350 kg dönem" />
+    <h3>Yem Düzenle</h3>
+    <div class="note">Sadece özel yemler düzenlenebilir. Sistem yemleri korumalıdır.</div>
+    <div class="row cols-2">
+      <div><label>Yem Adı</label><input type="text" id="e_name" /></div>
+      <div><label>KM%</label><input type="number" step="0.1" id="e_dm_pct" /></div>
+    </div>
+    <div class="row cols-5" style="margin-top:8px;">
+      <div><label>UFV</label><input type="number" step="0.001" id="e_ufv" /></div>
+      <div><label>Protein %</label><input type="number" step="0.1" id="e_protein" /></div>
+      <div><label>PDIE</label><input type="number" step="0.1" id="e_pdie" /></div>
+      <div><label>PDIN</label><input type="number" step="0.1" id="e_pdin" /></div>
+      <div><label>Nişasta %</label><input type="number" step="0.1" id="e_starch" /></div>
+    </div>
+    <div class="row cols-3" style="margin-top:8px;">
+      <div><label>HS %</label><input type="number" step="0.1" id="e_cf" /></div>
+      <div><label>Yağ %</label><input type="number" step="0.1" id="e_fat" /></div>
+      <div><label>Kül %</label><input type="number" step="0.1" id="e_ash" /></div>
+    </div>
     <div class="actions">
-      <button class="btn" id="save_cancel" type="button">İptal</button>
-      <button class="btn primary" id="save_confirm" type="button">Kaydet</button>
+      <button class="btn" id="edit_cancel" type="button">İptal</button>
+      <button class="btn primary" id="edit_save" type="button">Kaydet</button>
     </div>
   </div>
 </div>
@@ -406,19 +579,20 @@
 // ===== State =====
 const MAX_ROWS = 15;
 const INITIAL_ROWS = 5;
-const TOKEN_KEY = "doya_token";
+const TOKEN_KEY = "csr_token";
 
 let token = localStorage.getItem(TOKEN_KEY) || null;
-let currentUser = null;        // {username, is_admin}
-let feedsCache = [];           // [{id, name, ...}]
+let currentUser = null;       // {username, is_admin}
+let feedsCache = [];
 let breedsCache = [];
-let lastResults = null;        // last calculation result (for save)
-let lastInputs = null;         // last calc inputs (for save)
+let lastResults = null;
+let lastInputs = null;
+let editingFeedId = null;
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
-// ===== Fetch helper (auth + 401 handling) =====
+// ===== Auth-aware fetch =====
 async function api(path, opts = {}) {
   const headers = Object.assign(
     { "Content-Type": "application/json" },
@@ -430,22 +604,29 @@ async function api(path, opts = {}) {
     token = null;
     localStorage.removeItem(TOKEN_KEY);
     showLogin();
-    throw new Error("Oturumunuzun süresi doldu.");
+    throw new Error("Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.");
   }
   let body = null;
   try { body = await res.json(); } catch (e) {}
   if (!res.ok) {
-    const msg = (body && body.detail) || ("HTTP " + res.status);
+    const msg = (body && body.detail) || friendlyErrorForStatus(res.status);
     throw new Error(msg);
   }
   return body;
 }
 
-// ===== Error / info bars =====
+function friendlyErrorForStatus(s) {
+  if (s === 403) return "Bu işlem için yetkiniz yok.";
+  if (s === 404) return "Aranan kayıt bulunamadı.";
+  if (s >= 500) return "Sunucu hatası. Lütfen tekrar deneyin.";
+  return "İşlem başarısız oldu.";
+}
+
 function showError(msg) {
   const el = $("#error");
   el.textContent = msg || "";
   el.style.display = msg ? "block" : "none";
+  if (msg) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 function showInfo(msg) {
   const el = $("#info");
@@ -471,15 +652,14 @@ $("#login-form").addEventListener("submit", async (e) => {
   const errEl = $("#login-error");
   errEl.style.display = "none";
   const btn = $("#login_btn");
-  btn.disabled = true;
-  btn.textContent = "Giriş yapılıyor…";
+  btn.disabled = true; btn.textContent = "Giriş yapılıyor…";
   try {
     const res = await fetch("/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
-    const json = await res.json();
+    const json = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(json.detail || "Giriş başarısız.");
     token = json.access_token;
     localStorage.setItem(TOKEN_KEY, token);
@@ -490,20 +670,19 @@ $("#login-form").addEventListener("submit", async (e) => {
     errEl.textContent = err.message;
     errEl.style.display = "block";
   } finally {
-    btn.disabled = false;
-    btn.textContent = "Giriş Yap";
+    btn.disabled = false; btn.textContent = "Giriş Yap";
   }
 });
 
 $("#logout_btn").addEventListener("click", () => {
-  token = null;
-  currentUser = null;
+  token = null; currentUser = null;
   localStorage.removeItem(TOKEN_KEY);
   showLogin();
 });
 
 // ===== Tab switching =====
 function switchTab(name) {
+  if (name === "admin" && (!currentUser || !currentUser.is_admin)) name = "calc";
   $$("nav.tabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
   $("#tab-calc").hidden = name !== "calc";
   $("#tab-history").hidden = name !== "history";
@@ -600,7 +779,10 @@ function statBox(label, value, unit) {
 }
 
 function renderResults(data) {
-  $("#results").classList.add("visible");
+  $("#results-empty").hidden = true;
+  $("#results").hidden = false;
+  $("#save_btn").disabled = false;
+
   const t = data.tmr_summary;
   $("#tmr_summary").innerHTML =
     statBox("Toplam Yaş Madde", fmt(t.total_as_fed_kg, 2), "kg/gün") +
@@ -614,8 +796,8 @@ function renderResults(data) {
   $("#performance_summary").innerHTML =
     statBox("Beklenen KMT (DMI)", fmt(p.expected_dmi_kg, 2), "kg/gün") +
     statBox("DMI / Canlı Ağırlık", fmt(p.dmi_pct_bw, 1), "%") +
-    statBox("Toplam UFV (rasyon)", fmt(p.ration_ufv_total_at_dmi, 2), "") +
-    statBox("Toplam PDI (rasyon)", fmt(p.ration_pdie_total_at_dmi_g, 0), "g/gün") +
+    statBox("Toplam UFV", fmt(p.ration_ufv_total_at_dmi, 2), "") +
+    statBox("Toplam PDI", fmt(p.ration_pdie_total_at_dmi_g, 0), "g/gün") +
     statBox("UFV-bazlı tahmin", fmt(p.gain_ufv_limited_g, 0), "g/gün") +
     statBox("PDI-bazlı tahmin", fmt(p.gain_pdi_limited_g, 0), "g/gün");
 
@@ -626,11 +808,11 @@ function renderResults(data) {
 
   if (data.inra_comparison) {
     const c = data.inra_comparison;
-    $("#inra_card").style.display = "block";
+    $("#inra_card").hidden = false;
     const ufvOk = c.ufv_met
-      ? '<span class="pill ok">✅ Yeterli</span>' : '<span class="pill warn">⚠️ Yetersiz</span>';
+      ? '<span class="pill ok">Yeterli</span>' : '<span class="pill warn">Yetersiz</span>';
     const pdiOk = c.pdi_met
-      ? '<span class="pill ok">✅ Yeterli</span>' : '<span class="pill warn">⚠️ Yetersiz</span>';
+      ? '<span class="pill ok">Yeterli</span>' : '<span class="pill warn">Yetersiz</span>';
     $("#inra_compare").innerHTML = `
       <div class="head">Besin Ögesi</div><div class="head">Gerekli</div>
       <div class="head">Sağlanan</div><div class="head">Durum</div>
@@ -639,19 +821,28 @@ function renderResults(data) {
       <div>PDI (g/gün)</div><div>${fmt(c.pdi_required_g, 0)}</div>
       <div>${fmt(c.pdi_provided_g, 0)}</div><div>${pdiOk}</div>`;
   } else {
-    $("#inra_card").style.display = "none";
+    $("#inra_card").hidden = true;
   }
 
-  const head = `<thead><tr>
-    <th>Yem</th><th>Yaş (kg)</th><th>KM (kg)</th>
-    <th>UFV</th><th>PDIE</th><th>Protein (kg)</th></tr></thead>`;
-  const body = data.rows.map(r => `<tr>
-    <td>${r.name}</td><td>${fmt(r.as_fed_kg, 2)}</td>
-    <td>${fmt(r.dm_kg, 2)}</td><td>${fmt(r.ufv, 2)}</td>
-    <td>${fmt(r.pdie, 0)}</td><td>${fmt(r.protein_kg, 2)}</td></tr>`).join("");
-  $("#detail_table").innerHTML = head + "<tbody>" + body + "</tbody>";
+  // Admin-only ration detail table
+  if (currentUser && currentUser.is_admin && Array.isArray(data.rows)) {
+    $("#detail_card").hidden = false;
+    const head = `<thead><tr>
+      <th>Yem</th><th>Yaş (kg)</th><th>KM (kg)</th>
+      <th>UFV</th><th>PDIE</th><th>Protein (kg)</th></tr></thead>`;
+    const body = data.rows.map(r => `<tr>
+      <td>${r.name}</td><td>${fmt(r.as_fed_kg, 2)}</td>
+      <td>${fmt(r.dm_kg, 2)}</td><td>${fmt(r.ufv, 2)}</td>
+      <td>${fmt(r.pdie, 0)}</td><td>${fmt(r.protein_kg, 2)}</td></tr>`).join("");
+    $("#detail_table").innerHTML = head + "<tbody>" + body + "</tbody>";
+  } else {
+    $("#detail_card").hidden = true;
+  }
 
-  $("#results").scrollIntoView({ behavior: "smooth", block: "start" });
+  // On mobile, scroll into the result area; on desktop, the sticky panel is already visible.
+  if (window.innerWidth < 1024) {
+    $("#results").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
 async function calculate() {
@@ -689,26 +880,32 @@ $("#calc_btn").addEventListener("click", calculate);
 $("#add_row").addEventListener("click", () => addRow());
 $("#reset_btn").addEventListener("click", () => {
   resetRows();
-  $("#results").classList.remove("visible");
+  $("#results").hidden = true;
+  $("#results-empty").hidden = false;
+  $("#save_btn").disabled = true;
+  lastResults = null; lastInputs = null;
   showError("");
 });
 
-// ===== Save modal =====
-$("#save_btn").addEventListener("click", () => {
-  if (!lastResults) return;
-  $("#save_herd").value = "";
-  $("#save-modal").hidden = false;
-});
-$("#save_cancel").addEventListener("click", () => { $("#save-modal").hidden = true; });
-$("#save_confirm").addEventListener("click", async () => {
-  if (!lastResults || !lastInputs) return;
-  const herd = $("#save_herd").value.trim();
-  const btn = $("#save_confirm");
+// ===== Save ration =====
+$("#save_btn").addEventListener("click", async () => {
+  if (!lastResults || !lastInputs) {
+    showError("Önce bir hesaplama yapın."); return;
+  }
+  const customer = $("#customer_name").value.trim();
+  if (!customer) {
+    showError("Önce 'Rasyon Kimin İçin Yapıldı?' alanını doldurun.");
+    $("#customer_name").focus();
+    return;
+  }
+  const herd = $("#herd_name").value.trim();
+  const btn = $("#save_btn");
   btn.disabled = true; btn.textContent = "Kaydediliyor…";
   try {
     await api("/rations", {
       method: "POST",
       body: JSON.stringify({
+        customer_name: customer,
         herd_name: herd || null,
         live_weight: lastInputs.live_weight,
         target_gain: lastInputs.target_gain,
@@ -717,10 +914,9 @@ $("#save_confirm").addEventListener("click", async () => {
         results: lastResults,
       }),
     });
-    $("#save-modal").hidden = true;
-    showInfo("Rasyon kaydedildi.");
+    showInfo("Rasyon başarıyla kaydedildi.");
   } catch (err) {
-    alert("Kaydedilemedi: " + err.message);
+    showError("Kaydedilemedi: " + err.message);
   } finally {
     btn.disabled = false; btn.textContent = "Kaydet";
   }
@@ -732,49 +928,54 @@ function fmtDate(iso) {
   const d = new Date(iso);
   return d.toLocaleString("tr-TR", { dateStyle: "short", timeStyle: "short" });
 }
+
 async function loadHistory() {
+  const wrap = $("#history_container");
+  wrap.innerHTML = '<div class="empty">Yükleniyor…</div>';
   try {
     const json = await api("/rations");
     renderHistory(json.rations);
   } catch (err) {
-    showError(err.message);
+    wrap.innerHTML = `<div class="error">${err.message}</div>`;
   }
 }
+
 function renderHistory(rations) {
-  const tbl = $("#history_table");
+  const wrap = $("#history_container");
   if (!rations.length) {
-    tbl.innerHTML = "";
-    tbl.outerHTML = '<table class="list" id="history_table"></table>';
-    $("#tab-history .scroll-x").innerHTML = '<div class="empty">Henüz kayıtlı rasyon yok.</div>';
+    wrap.innerHTML = '<div class="empty">Henüz kayıtlı rasyon yok.</div>';
     return;
-  }
-  // Restore scroll-x table if it was replaced
-  if (!$("#history_table")) {
-    $("#tab-history .scroll-x").innerHTML = '<table class="list" id="history_table"></table>';
   }
   const showUser = currentUser.is_admin;
   const head = `<thead><tr>
-    <th>Tarih</th><th>Sürü Adı</th><th>CA (kg)</th>
-    <th>Hedef Artış</th><th>Tahmini Artış</th><th>Irk</th>
-    ${showUser ? "<th>Hesaplayan</th>" : ""}<th></th></tr></thead>`;
+    <th>Tarih</th>
+    ${showUser ? "<th>Hesaplayan</th>" : ""}
+    <th>Müşteri</th>
+    <th>Sürü/Not</th>
+    <th>CA (kg)</th>
+    <th>Hedef</th>
+    <th>Tahmini</th>
+    <th>Irk</th>
+    <th></th>
+  </tr></thead>`;
   const body = rations.map(r => {
     const estGain = r.results && r.results.expected_performance
       ? r.results.expected_performance.estimated_gain_g : null;
     const canDelete = r.owned || currentUser.is_admin;
     return `<tr data-id="${r.id}">
       <td>${fmtDate(r.created_at)}</td>
-      <td>${r.herd_name || "—"}</td>
+      ${showUser ? `<td>${escapeHtml(r.username)}</td>` : ""}
+      <td>${escapeHtml(r.customer_name) || "—"}</td>
+      <td>${escapeHtml(r.herd_name) || "—"}</td>
       <td>${fmt(r.live_weight, 0)}</td>
       <td>${r.target_gain ? fmt(r.target_gain, 0) + " g" : "—"}</td>
       <td>${estGain != null ? fmt(estGain, 0) + " g" : "—"}</td>
-      <td>${r.breed || "—"}</td>
-      ${showUser ? `<td>${r.username}</td>` : ""}
-      <td>${canDelete ? '<button class="btn danger del-btn" data-id="' + r.id + '" type="button">Sil</button>' : ""}</td>
+      <td>${escapeHtml(r.breed) || "—"}</td>
+      <td>${canDelete ? '<button class="btn danger small del-btn" data-id="' + r.id + '" type="button">Sil</button>' : ""}</td>
     </tr>`;
   }).join("");
-  $("#history_table").innerHTML = head + "<tbody>" + body + "</tbody>";
+  wrap.innerHTML = `<div class="scroll-x"><table class="list" id="history_table">${head}<tbody>${body}</tbody></table></div>`;
 
-  // Wire row click → load
   $("#history_table tbody").addEventListener("click", (e) => {
     if (e.target.classList.contains("del-btn")) return;
     const tr = e.target.closest("tr");
@@ -783,7 +984,6 @@ function renderHistory(rations) {
     const r = rations.find(x => x.id === id);
     if (r) loadRationIntoForm(r);
   });
-  // Wire delete
   $$("#history_table .del-btn").forEach(b => {
     b.addEventListener("click", async (e) => {
       e.stopPropagation();
@@ -791,13 +991,22 @@ function renderHistory(rations) {
       try {
         await api("/rations/" + b.dataset.id, { method: "DELETE" });
         await loadHistory();
-      } catch (err) { alert(err.message); }
+      } catch (err) { showError(err.message); }
     });
   });
 }
 
+function escapeHtml(s) {
+  if (!s) return "";
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
+
 function loadRationIntoForm(r) {
   switchTab("calc");
+  $("#customer_name").value = r.customer_name || "";
+  $("#herd_name").value = r.herd_name || "";
   $("#live_weight").value = r.live_weight || "";
   $("#target_gain").value = r.target_gain || "";
   $("#breed").value = r.breed || "";
@@ -809,7 +1018,9 @@ function loadRationIntoForm(r) {
     };
     renderResults(r.results);
   } else {
-    $("#results").classList.remove("visible");
+    $("#results").hidden = true;
+    $("#results-empty").hidden = false;
+    $("#save_btn").disabled = true;
   }
   showInfo("Rasyon yüklendi. Düzenleyip yeniden hesaplayabilirsiniz.");
 }
@@ -822,12 +1033,15 @@ function clearFeedForm() {
 $("#clear_feed_btn").addEventListener("click", clearFeedForm);
 
 $("#add_feed_btn").addEventListener("click", async () => {
+  if (!currentUser || !currentUser.is_admin) return;
   const num = (id) => {
     const v = $("#" + id).value;
     return v === "" ? 0 : parseFloat(v);
   };
   const name = $("#f_name").value.trim();
-  if (!name) { alert("Yem adı zorunlu."); return; }
+  if (!name) { showError("Yem adı zorunlu."); return; }
+  const btn = $("#add_feed_btn");
+  btn.disabled = true; btn.textContent = "Ekleniyor…";
   try {
     await api("/feeds", {
       method: "POST",
@@ -842,16 +1056,19 @@ $("#add_feed_btn").addEventListener("click", async () => {
     showInfo("Yem eklendi.");
     await refreshFeeds();
     loadFeedsTable();
-  } catch (err) { alert(err.message); }
+    rebuildRationDropdowns();
+  } catch (err) { showError(err.message); }
+  finally { btn.disabled = false; btn.textContent = "Ekle"; }
 });
 
 async function loadFeedsTable() {
+  if (!currentUser || !currentUser.is_admin) return;
   await refreshFeeds();
   const head = `<thead><tr>
     <th>Yem</th><th>KM%</th><th>UFV</th><th>Prot%</th>
     <th>PDIE</th><th>PDIN</th><th>Nişasta%</th><th>Tip</th><th></th></tr></thead>`;
   const body = feedsCache.map(f => `<tr>
-    <td>${f.name}</td>
+    <td>${escapeHtml(f.name)}</td>
     <td>${fmt(f.dm_pct, 1)}</td>
     <td>${fmt(f.ufv, 3)}</td>
     <td>${fmt(f.protein, 1)}</td>
@@ -862,10 +1079,12 @@ async function loadFeedsTable() {
       ? '<span class="pill warn">Özel</span>'
       : '<span class="pill muted">Sistem</span>'}</td>
     <td>${f.is_custom
-      ? '<button class="btn danger del-feed-btn" data-id="' + f.id + '" type="button">Sil</button>'
+      ? '<button class="btn small edit-feed-btn" data-id="' + f.id + '" type="button">Düzenle</button> ' +
+        '<button class="btn danger small del-feed-btn" data-id="' + f.id + '" type="button">Sil</button>'
       : ""}</td>
   </tr>`).join("");
   $("#feeds_table").innerHTML = head + "<tbody>" + body + "</tbody>";
+
   $$("#feeds_table .del-feed-btn").forEach(b => {
     b.addEventListener("click", async () => {
       if (!confirm("Bu özel yemi silmek istediğinize emin misiniz?")) return;
@@ -873,12 +1092,66 @@ async function loadFeedsTable() {
         await api("/feeds/" + b.dataset.id, { method: "DELETE" });
         await refreshFeeds();
         loadFeedsTable();
-        // Refresh dropdowns in calc tab
         rebuildRationDropdowns();
-      } catch (err) { alert(err.message); }
+      } catch (err) { showError(err.message); }
     });
   });
+  $$("#feeds_table .edit-feed-btn").forEach(b => {
+    b.addEventListener("click", () => openEditFeed(parseInt(b.dataset.id, 10)));
+  });
 }
+
+function openEditFeed(feedId) {
+  const feed = feedsCache.find(f => f.id === feedId);
+  if (!feed || !feed.is_custom) return;
+  editingFeedId = feedId;
+  $("#e_name").value = feed.name;
+  $("#e_dm_pct").value = feed.dm_pct;
+  $("#e_ufv").value = feed.ufv;
+  $("#e_protein").value = feed.protein;
+  $("#e_pdie").value = feed.pdie;
+  $("#e_pdin").value = feed.pdin;
+  $("#e_starch").value = feed.starch;
+  $("#e_cf").value = feed.cf;
+  $("#e_fat").value = feed.fat;
+  $("#e_ash").value = feed.ash;
+  $("#edit-modal").hidden = false;
+}
+
+$("#edit_cancel").addEventListener("click", () => {
+  $("#edit-modal").hidden = true;
+  editingFeedId = null;
+});
+
+$("#edit_save").addEventListener("click", async () => {
+  if (editingFeedId == null) return;
+  const num = (id) => {
+    const v = $("#" + id).value;
+    return v === "" ? 0 : parseFloat(v);
+  };
+  const name = $("#e_name").value.trim();
+  if (!name) { alert("Yem adı zorunlu."); return; }
+  const btn = $("#edit_save");
+  btn.disabled = true; btn.textContent = "Kaydediliyor…";
+  try {
+    await api("/feeds/" + editingFeedId, {
+      method: "PUT",
+      body: JSON.stringify({
+        name,
+        dm_pct: num("e_dm_pct"), ufv: num("e_ufv"), protein: num("e_protein"),
+        pdie: num("e_pdie"), pdin: num("e_pdin"),
+        cf: num("e_cf"), fat: num("e_fat"), ash: num("e_ash"), starch: num("e_starch"),
+      }),
+    });
+    $("#edit-modal").hidden = true;
+    editingFeedId = null;
+    showInfo("Yem güncellendi.");
+    await refreshFeeds();
+    loadFeedsTable();
+    rebuildRationDropdowns();
+  } catch (err) { alert(err.message); }
+  finally { btn.disabled = false; btn.textContent = "Kaydet"; }
+});
 
 function rebuildRationDropdowns() {
   rationEl.querySelectorAll(".ration-row").forEach(row => {
@@ -899,7 +1172,6 @@ async function refreshFeeds() {
 async function bootstrapApp() {
   showApp();
   showError("");
-  // If we already have currentUser from login response, skip /auth/me; otherwise fetch.
   if (!currentUser) {
     currentUser = await api("/auth/me");
   }
@@ -910,8 +1182,15 @@ async function bootstrapApp() {
   await refreshFeeds();
   const breedSel = $("#breed");
   breedSel.innerHTML = '<option value="">— Seçin —</option>' +
-    breedsCache.map(b => `<option value="${b}">${b}</option>`).join("");
+    breedsCache.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join("");
   resetRows();
+
+  // Reset results state
+  $("#results").hidden = true;
+  $("#results-empty").hidden = false;
+  $("#save_btn").disabled = true;
+  lastResults = null; lastInputs = null;
+  switchTab("calc");
 }
 
 (async function init() {
@@ -919,7 +1198,10 @@ async function bootstrapApp() {
   try {
     await bootstrapApp();
   } catch (err) {
-    // Token rejected → showLogin already called by api()
+    // 401 already handled by api(); other errors here mean offline/etc.
+    if (token) {
+      showError("Bağlantı hatası: " + err.message);
+    }
   }
 })();
 </script>

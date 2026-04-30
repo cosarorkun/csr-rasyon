@@ -1,4 +1,4 @@
-"""SQLite + SQLAlchemy models, engine, and seeding."""
+"""SQLite + SQLAlchemy models, engine, idempotent migrations, and seeding."""
 
 import os
 from datetime import datetime
@@ -17,6 +17,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Session, declarative_base, relationship, sessionmaker
 
+# Env var name preserved as DOYA_DB_PATH so existing Railway deploys keep working.
 DB_PATH = os.environ.get("DOYA_DB_PATH", "./rasyon.db")
 DATABASE_URL = f"sqlite:///{DB_PATH}"
 
@@ -45,6 +46,7 @@ class SavedRation(Base):
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    customer_name = Column(String, nullable=True)
     herd_name = Column(String, nullable=True)
     live_weight = Column(Float, nullable=False)
     target_gain = Column(Float, nullable=True)
@@ -99,13 +101,38 @@ def feed_to_dict(feed: Feed) -> dict:
     }
 
 
+def _table_columns(conn, table: str) -> set[str]:
+    rows = conn.exec_driver_sql(f"PRAGMA table_info({table})").fetchall()
+    return {row[1] for row in rows}
+
+
+def _run_migrations() -> None:
+    """Idempotent schema migrations. Safe to run on every startup.
+
+    Each block checks the live schema before applying changes so existing
+    Railway-persisted databases are untouched if already up-to-date.
+    """
+    with engine.begin() as conn:
+        existing_tables = set(
+            r[0] for r in conn.exec_driver_sql(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            ).fetchall()
+        )
+        if "saved_rations" in existing_tables:
+            cols = _table_columns(conn, "saved_rations")
+            if "customer_name" not in cols:
+                conn.exec_driver_sql(
+                    "ALTER TABLE saved_rations ADD COLUMN customer_name VARCHAR"
+                )
+
+
 def init_db() -> None:
-    """Create tables and seed initial users + feeds on first run."""
-    # Local imports avoid circular dependency at module load.
+    """Create tables, run idempotent migrations, and seed initial data."""
     from auth import hash_password
     from data import FEEDS as SEED_FEEDS
 
     Base.metadata.create_all(bind=engine)
+    _run_migrations()
 
     seed_users = [
         ("sezer.karabulut", "SezerCsrRasyon2026.", False),

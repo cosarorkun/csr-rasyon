@@ -1,4 +1,4 @@
-"""Hardcoded reference data for the DOYA Besi Rasyon Hesaplayıcı.
+"""Hardcoded reference data for the CSR Rasyon Hesaplayıcı.
 
 All values are pulled directly from the Excel reference tool.
 """
@@ -53,8 +53,6 @@ FEEDS = [
 
 FEEDS_BY_NAME = {f["name"]: f for f in FEEDS}
 
-# INRA UFV requirement matrix.
-# Rows: live weight (kg). Columns: target gain (g/day). Values: required UFV total / day.
 UFV_MATRIX = {
     250: {800: 4.1, 1000: 4.5, 1200: 4.9, 1400: 5.3, 1600: 5.7, 1800: 6.1, 2000: 6.5},
     300: {800: 4.6, 1000: 5.0, 1200: 5.4, 1400: 5.8, 1600: 6.3, 1800: 6.8, 2000: 7.3},
@@ -69,7 +67,6 @@ UFV_MATRIX = {
     750: {800: 8.9, 1000: 9.8, 1200: 10.8, 1400: 11.8, 1600: 12.8, 1800: 13.8, 2000: 14.8},
 }
 
-# INRA PDI requirement matrix (g/day).
 PDI_MATRIX = {
     250: {800: 425, 1000: 473, 1200: 521, 1400: 568, 1600: 615, 1800: 662, 2000: 709},
     300: {800: 462, 1000: 512, 1200: 562, 1400: 609, 1600: 654, 1800: 699, 2000: 744},
@@ -87,9 +84,6 @@ PDI_MATRIX = {
 WEIGHT_ROWS = sorted(UFV_MATRIX.keys())
 GAIN_COLS = sorted(UFV_MATRIX[WEIGHT_ROWS[0]].keys())
 
-# DMI as % of body weight. Each tuple is (max_weight_kg, dmi_pct).
-# Brackets are evaluated in order: first row whose max_weight >= live_weight wins.
-# For weight > 543.6 kg we fall through to DMI_FALLBACK_PCT.
 DMI_TABLE = [
     (181.2, 3.0),
     (249.15, 2.8),

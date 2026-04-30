@@ -1,4 +1,4 @@
-"""FastAPI app for the DOYA Besi Rasyon Hesaplayıcı."""
+"""FastAPI app for the CSR Rasyon Hesaplayıcı."""
 
 import json
 from contextlib import asynccontextmanager
@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="DOYA Besi Rasyon Hesaplayıcı", lifespan=lifespan)
+app = FastAPI(title="CSR Rasyon Hesaplayıcı", lifespan=lifespan)
 
 STATIC_DIR = Path(__file__).parent / "static"
 
@@ -65,6 +65,7 @@ class CalculateRequest(BaseModel):
 
 
 class SaveRationRequest(BaseModel):
+    customer_name: Optional[str] = None
     herd_name: Optional[str] = None
     live_weight: float = Field(gt=0)
     target_gain: Optional[float] = Field(default=None, ge=0)
@@ -118,6 +119,7 @@ def list_feeds(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    """All feeds visible to all authenticated users (needed for the dropdown)."""
     feeds = db.query(Feed).order_by(Feed.name).all()
     return {
         "feeds": [feed_to_dict(f) for f in feeds],
@@ -137,6 +139,35 @@ def add_feed(
         )
     feed = Feed(**req.model_dump(), is_custom=True, created_by=admin.id)
     db.add(feed)
+    db.commit()
+    db.refresh(feed)
+    return feed_to_dict(feed)
+
+
+@app.put("/feeds/{feed_id}")
+def update_feed(
+    feed_id: int,
+    req: FeedCreateRequest,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    """Update a custom feed's values. System feeds are read-only by policy."""
+    feed = db.query(Feed).filter(Feed.id == feed_id).first()
+    if feed is None:
+        raise HTTPException(status_code=404, detail="Yem bulunamadı.")
+    if not feed.is_custom:
+        raise HTTPException(
+            status_code=400,
+            detail="Sistem yemleri düzenlenemez. Yalnızca özel yemler güncellenebilir.",
+        )
+    if req.name != feed.name:
+        clash = db.query(Feed).filter(Feed.name == req.name, Feed.id != feed_id).first()
+        if clash:
+            raise HTTPException(
+                status_code=400, detail=f"'{req.name}' adlı yem zaten mevcut."
+            )
+    for k, v in req.model_dump().items():
+        setattr(feed, k, v)
     db.commit()
     db.refresh(feed)
     return feed_to_dict(feed)
@@ -189,6 +220,7 @@ def save_ration(
 ):
     saved = SavedRation(
         user_id=user.id,
+        customer_name=(req.customer_name or "").strip() or None,
         herd_name=(req.herd_name or "").strip() or None,
         live_weight=req.live_weight,
         target_gain=req.target_gain,
@@ -218,6 +250,7 @@ def list_rations(
         out.append({
             "id": r.id,
             "created_at": r.created_at.isoformat(),
+            "customer_name": r.customer_name,
             "herd_name": r.herd_name,
             "live_weight": r.live_weight,
             "target_gain": r.target_gain,
