@@ -1,6 +1,9 @@
 """Hardcoded reference data for the CSR Rasyon Hesaplayıcı.
 
-All values are pulled directly from the Excel reference tool.
+NOTE: ``FEEDS`` is used only as the **initial** seed for the database when the
+``feeds`` table is empty. After that, admin edits live in SQLite and are NOT
+overwritten by these values. Targeted one-time data fixes are handled via the
+versioned migration system in ``database.py``.
 """
 
 FEEDS = [
@@ -32,26 +35,30 @@ FEEDS = [
     {"name": "Razmol", "dm_pct": 88, "ufv": 0.98, "protein": 17.6, "pdie": 99, "pdin": 115, "cf": 8, "fat": 4, "ash": 4.9, "starch": 31.4},
     {"name": "Bonkalit", "dm_pct": 88, "ufv": 1.26, "protein": 14.4, "pdie": 107.9, "pdin": 95.5, "cf": 1.7, "fat": 2.7, "ash": 1.6, "starch": 67.8},
     {"name": "Pamuk Tohumu (çiğit)", "dm_pct": 90.6, "ufv": 0.944, "protein": 23.6, "pdie": 85.6, "pdin": 145.6, "cf": 26, "fat": 21.2, "ash": 4.3, "starch": 0},
-    {"name": "Çevik", "dm_pct": 89, "ufv": 0.692, "protein": 31.2, "pdie": 125, "pdin": 196, "cf": 17.4, "fat": 2.95, "ash": 15.6, "starch": 1},
-    {"name": "Buzağı Büyütme", "dm_pct": 88.6, "ufv": 0.925, "protein": 20.87, "pdie": 114, "pdin": 140, "cf": 8.5, "fat": 3.8, "ash": 10.15, "starch": 21.4},
     {"name": "Arpamiks", "dm_pct": 89, "ufv": 0.757, "protein": 22.4, "pdie": 87, "pdin": 120, "cf": 12.3, "fat": 3.4, "ash": 15.6, "starch": 12.3},
-    {"name": "Pehlivan", "dm_pct": 88.5, "ufv": 0.926, "protein": 16.4, "pdie": 89, "pdin": 97, "cf": 7.3, "fat": 3.3, "ash": 11.3, "starch": 33.9},
-    {"name": "Pehlivan Toz", "dm_pct": 88, "ufv": 0.932, "protein": 16.48, "pdie": 101, "pdin": 113, "cf": 6.84, "fat": 3.75, "ash": 11.8, "starch": 34},
-    {"name": "Efe Toz", "dm_pct": 88, "ufv": 0.89, "protein": 15.3, "pdie": 92, "pdin": 103, "cf": 8.3, "fat": 3.58, "ash": 12.2, "starch": 34.3},
-    {"name": "Efect Besi Başlangıç", "dm_pct": 87.54, "ufv": 0.902, "protein": 18.28, "pdie": 91.6, "pdin": 109.5, "cf": 9, "fat": 3.15, "ash": 9.14, "starch": 25.13},
-    {"name": "Yiğit", "dm_pct": 88.7, "ufv": 0.82, "protein": 14.65, "pdie": 75.7, "pdin": 80.3, "cf": 14.5, "fat": 3.2, "ash": 12.4, "starch": 24.6},
-    {"name": "Grand", "dm_pct": 88.6, "ufv": 0.97, "protein": 15.8, "pdie": 93.8, "pdin": 96.3, "cf": 6.86, "fat": 2.97, "ash": 11.3, "starch": 36.2},
     {"name": "Ayçiçek Küspesi 26 prot", "dm_pct": 87, "ufv": 0.38, "protein": 27.5, "pdie": 94, "pdin": 179, "cf": 31, "fat": 1.3, "ash": 7, "starch": 0},
     {"name": "Ayçiçek Küspesi 35 prot", "dm_pct": 88, "ufv": 0.726, "protein": 38.6, "pdie": 135, "pdin": 251, "cf": 20, "fat": 1, "ash": 7, "starch": 0},
     {"name": "Pamuk Küspesi Exp 25 prot", "dm_pct": 86, "ufv": 0.63, "protein": 28.5, "pdie": 135, "pdin": 199, "cf": 27.9, "fat": 10.4, "ash": 5.8, "starch": 0},
     {"name": "Pamuk Küspesi 30 prot", "dm_pct": 89, "ufv": 0.80, "protein": 35.4, "pdie": 177, "pdin": 247, "cf": 17.9, "fat": 2.47, "ash": 7.4, "starch": 0},
-    {"name": "CSR CD BESİ", "dm_pct": 91.07, "ufv": 1.043, "protein": 35.97, "pdie": 17.94, "pdin": 17.94, "cf": 14.01, "fat": 6.94, "ash": 13.94, "starch": 1.72},
-    {"name": "SDF H", "dm_pct": 91.16, "ufv": 1.176, "protein": 43.36, "pdie": 19.26, "pdin": 19.26, "cf": 12.41, "fat": 3.44, "ash": 6.63, "starch": 3.13},
+    {"name": "CSR CD BESİ", "dm_pct": 91.07, "ufv": 1.043, "protein": 35.97, "pdie": 108, "pdin": 108, "cf": 14.01, "fat": 6.94, "ash": 13.94, "starch": 1.72},
+    {"name": "SDF H", "dm_pct": 91.16, "ufv": 1.176, "protein": 43.36, "pdie": 114.73, "pdin": 114.73, "cf": 12.41, "fat": 3.44, "ash": 6.63, "starch": 3.13},
     {"name": "Soya küspesi", "dm_pct": 89, "ufv": 1.209, "protein": 50.8, "pdie": 261, "pdin": 373, "cf": 4.34, "fat": 2.3, "ash": 6.8, "starch": 0},
     {"name": "Üre", "dm_pct": 99, "ufv": 0, "protein": 287, "pdie": 0, "pdin": 0, "cf": 0, "fat": 0, "ash": 0.7, "starch": 0},
 ]
 
 FEEDS_BY_NAME = {f["name"]: f for f in FEEDS}
+
+# Names removed from the seed list (also enforced in the live DB by migration 002).
+OBSOLETE_FEED_NAMES = [
+    "Buzağı Büyütme",
+    "Efe Toz",
+    "Efect Besi Başlangıç",
+    "Grand",
+    "Pehlivan",
+    "Pehlivan Toz",
+    "Yiğit",
+    "Çevik",
+]
 
 UFV_MATRIX = {
     250: {800: 4.1, 1000: 4.5, 1200: 4.9, 1400: 5.3, 1600: 5.7, 1800: 6.1, 2000: 6.5},
@@ -96,3 +103,126 @@ DMI_TABLE = [
 DMI_FALLBACK_PCT = 1.6
 
 BREEDS = ["Holstein", "Simmental", "Charolais/Limousin"]
+
+# ─── Dairy feed seeds (category sut/common) ──────────────────────────────────
+# Used on fresh DB (seeded via init_db) AND on existing DBs (inserted by
+# migration 004 if the feed name is not already present).
+
+DAIRY_FEEDS = [
+    # ── Common (3 feeds) – appear in BOTH besi and sut dropdowns ──
+    {
+        "name": "Mısır silajı sütçü 35 KM",
+        "dm_pct": 35, "ufv": 0.87, "protein": 7.5,
+        "pdie": 70, "pdin": 52, "cf": 20, "fat": 3.2, "ash": 5.0, "starch": 28,
+        "category": "common",
+        "rdp_pct_of_cp": 72.0, "rup_pct_of_cp": 28.0,
+        "pdi_g_per_kg_dm": 70.0, "ufl_per_kg_dm": 0.87,
+        "ndf_pct": 48.0, "ca_pct": 0.22, "p_pct": 0.21,
+    },
+    {
+        "name": "Arpa (ortak)",
+        "dm_pct": 89.5, "ufv": 1.00, "protein": 12.3,
+        "pdie": 100, "pdin": 84, "cf": 6.7, "fat": 2.0, "ash": 3.0, "starch": 56.4,
+        "category": "common",
+        "rdp_pct_of_cp": 75.0, "rup_pct_of_cp": 25.0,
+        "pdi_g_per_kg_dm": 100.0, "ufl_per_kg_dm": 1.00,
+        "ndf_pct": 20.0, "ca_pct": 0.06, "p_pct": 0.36,
+    },
+    {
+        "name": "Melas",
+        "dm_pct": 76, "ufv": 0.90, "protein": 10.0,
+        "pdie": 55, "pdin": 60, "cf": 0, "fat": 0.3, "ash": 10.0, "starch": 0,
+        "category": "common",
+        "rdp_pct_of_cp": 95.0, "rup_pct_of_cp": 5.0,
+        "pdi_g_per_kg_dm": 55.0, "ufl_per_kg_dm": 0.90,
+        "ndf_pct": 0.0, "ca_pct": 0.80, "p_pct": 0.10,
+        "note": "Şeker pancarı melası",
+    },
+    # ── Süt (9 feeds) ─────────────────────────────────────────────
+    {
+        "name": "Yonca silajı 1. biçim",
+        "dm_pct": 35, "ufv": 0.72, "protein": 19.0,
+        "pdie": 110, "pdin": 130, "cf": 28, "fat": 3.0, "ash": 11.0, "starch": 0,
+        "category": "sut",
+        "rdp_pct_of_cp": 70.0, "rup_pct_of_cp": 30.0,
+        "pdi_g_per_kg_dm": 110.0, "ufl_per_kg_dm": 0.72,
+        "ndf_pct": 40.0, "ca_pct": 1.50, "p_pct": 0.28,
+    },
+    {
+        "name": "Buğday silajı",
+        "dm_pct": 30, "ufv": 0.80, "protein": 10.5,
+        "pdie": 72, "pdin": 71, "cf": 31, "fat": 2.5, "ash": 8.0, "starch": 12,
+        "category": "sut",
+        "rdp_pct_of_cp": 68.0, "rup_pct_of_cp": 32.0,
+        "pdi_g_per_kg_dm": 72.0, "ufl_per_kg_dm": 0.80,
+        "ndf_pct": 55.0, "ca_pct": 0.50, "p_pct": 0.22,
+    },
+    {
+        "name": "Korunan soya küspesi",
+        "dm_pct": 89, "ufv": 1.18, "protein": 50.8,
+        "pdie": 310, "pdin": 290, "cf": 4.3, "fat": 3.2, "ash": 6.8, "starch": 0,
+        "category": "sut",
+        "rdp_pct_of_cp": 35.0, "rup_pct_of_cp": 65.0,
+        "pdi_g_per_kg_dm": 310.0, "ufl_per_kg_dm": 1.18,
+        "ndf_pct": 8.0, "ca_pct": 0.32, "p_pct": 0.68,
+        "note": "Isı işlemli bypass soya",
+    },
+    {
+        "name": "Rumen bypass yağ",
+        "dm_pct": 99, "ufv": 3.00, "protein": 0,
+        "pdie": 0, "pdin": 0, "cf": 0, "fat": 99, "ash": 0.5, "starch": 0,
+        "category": "sut",
+        "rdp_pct_of_cp": 0.0, "rup_pct_of_cp": 0.0,
+        "pdi_g_per_kg_dm": 0.0, "ufl_per_kg_dm": 3.00,
+        "ndf_pct": 0.0, "ca_pct": 0.0, "p_pct": 0.0,
+        "note": "Rumen korumalı yağ asidi; saf enerji kaynağı",
+    },
+    {
+        "name": "CSR SÜT konsantresi",
+        "dm_pct": 90, "ufv": 1.15, "protein": 22.0,
+        "pdie": 138, "pdin": 140, "cf": 8.0, "fat": 5.5, "ash": 12.0, "starch": 15.0,
+        "category": "sut",
+        "rdp_pct_of_cp": 55.0, "rup_pct_of_cp": 45.0,
+        "pdi_g_per_kg_dm": 138.0, "ufl_per_kg_dm": 1.15,
+        "ndf_pct": 18.0, "ca_pct": 1.80, "p_pct": 0.70,
+        "note": "CSR süt sığırı konsantresi",
+    },
+    {
+        "name": "Sodyum bikarbonat",
+        "dm_pct": 99, "ufv": 0, "protein": 0,
+        "pdie": 0, "pdin": 0, "cf": 0, "fat": 0, "ash": 99, "starch": 0,
+        "category": "sut",
+        "rdp_pct_of_cp": 0.0, "rup_pct_of_cp": 0.0,
+        "pdi_g_per_kg_dm": 0.0, "ufl_per_kg_dm": 0.0,
+        "ndf_pct": 0.0, "ca_pct": 0.0, "p_pct": 0.0,
+        "note": "Tampon ajan; rumen pH koruma",
+    },
+    {
+        "name": "Kalsiyum karbonat",
+        "dm_pct": 99, "ufv": 0, "protein": 0,
+        "pdie": 0, "pdin": 0, "cf": 0, "fat": 0, "ash": 99, "starch": 0,
+        "category": "sut",
+        "rdp_pct_of_cp": 0.0, "rup_pct_of_cp": 0.0,
+        "pdi_g_per_kg_dm": 0.0, "ufl_per_kg_dm": 0.0,
+        "ndf_pct": 0.0, "ca_pct": 38.0, "p_pct": 0.0,
+        "note": "Kalsiyum kaynağı; mineral desteği",
+    },
+    {
+        "name": "Pancar posası kuru",
+        "dm_pct": 88, "ufv": 0.85, "protein": 9.2,
+        "pdie": 100, "pdin": 63, "cf": 19, "fat": 0.5, "ash": 6.0, "starch": 0,
+        "category": "sut",
+        "rdp_pct_of_cp": 72.0, "rup_pct_of_cp": 28.0,
+        "pdi_g_per_kg_dm": 100.0, "ufl_per_kg_dm": 0.85,
+        "ndf_pct": 42.0, "ca_pct": 0.60, "p_pct": 0.10,
+    },
+    {
+        "name": "Tritikale silajı",
+        "dm_pct": 32, "ufv": 0.82, "protein": 11.0,
+        "pdie": 74, "pdin": 73, "cf": 29, "fat": 2.6, "ash": 7.5, "starch": 14,
+        "category": "sut",
+        "rdp_pct_of_cp": 68.0, "rup_pct_of_cp": 32.0,
+        "pdi_g_per_kg_dm": 74.0, "ufl_per_kg_dm": 0.82,
+        "ndf_pct": 52.0, "ca_pct": 0.45, "p_pct": 0.20,
+    },
+]

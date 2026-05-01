@@ -12,6 +12,10 @@
     --navy-light: #2c4d8a;
     --green: #14803c;
     --green-dark: #0e6531;
+    --blue: #1a7fc2;
+    --blue-dark: #135f94;
+    --blue-bg: #e8f4fd;
+    --blue-border: #b3d4f0;
     --bg: #f4f6fa;
     --card: #ffffff;
     --border: #d8dee8;
@@ -34,94 +38,72 @@
     line-height: 1.45;
   }
 
-  /* ===== App header ===== */
   header.topbar {
     background: var(--navy);
     color: white;
-    padding: 12px 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 14px;
-    flex-wrap: wrap;
-    box-shadow: 0 2px 8px rgba(15, 24, 48, 0.18);
+    padding: 10px 18px;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 10px; flex-wrap: wrap;
+    box-shadow: 0 2px 8px rgba(15,24,48,0.18);
   }
   .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
   .brand-logo {
-    height: 40px; width: 40px; background: white;
+    height: 38px; width: 38px; background: white;
     border-radius: 8px; padding: 4px; object-fit: contain;
     box-shadow: 0 1px 2px rgba(0,0,0,0.15);
   }
   .brand-text { display: flex; flex-direction: column; min-width: 0; }
-  .brand-title {
-    font-size: 16px; font-weight: 700; letter-spacing: 0.2px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .brand-sub {
-    font-size: 11px; opacity: 0.75; letter-spacing: 1.4px;
-    text-transform: uppercase; font-weight: 500;
-  }
-  .who { display: flex; align-items: center; gap: 10px; font-size: 13px; }
-  .who .name { font-weight: 500; }
+  .brand-title { font-size: 15px; font-weight: 700; letter-spacing: 0.2px; white-space: nowrap; }
+  .brand-sub { font-size: 10px; opacity: 0.7; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 500; }
+  .topbar-right { display: flex; align-items: center; gap: 8px; font-size: 13px; flex-wrap: wrap; }
+  .who-name { font-weight: 500; }
   .badge {
-    background: var(--green);
-    padding: 3px 9px; border-radius: 999px;
-    font-size: 11px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.6px;
+    background: var(--green); padding: 3px 9px; border-radius: 999px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px;
   }
+  .mode-badge {
+    padding: 3px 9px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+  }
+  .mode-badge.besi { background: rgba(20,128,60,0.25); color: #7dffb0; }
+  .mode-badge.sut  { background: rgba(26,127,194,0.3); color: #a8d8f8; }
   button.logout {
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.4);
-    color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer;
-    font-size: 13px;
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.35);
+    color: white; padding: 5px 11px; border-radius: 6px; cursor: pointer; font-size: 12px;
   }
   button.logout:hover { background: rgba(255,255,255,0.22); }
+  button.mode-change-btn {
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.35);
+    color: white; padding: 5px 11px; border-radius: 6px; cursor: pointer; font-size: 12px;
+  }
+  button.mode-change-btn:hover { background: rgba(255,255,255,0.22); }
 
-  /* ===== Tabs ===== */
   nav.tabs {
-    background: white;
-    border-bottom: 1px solid var(--border);
+    background: white; border-bottom: 1px solid var(--border);
     display: flex; overflow-x: auto;
     position: sticky; top: 0; z-index: 4;
   }
   nav.tabs button {
-    flex: 1; min-width: 120px;
-    padding: 13px 14px;
+    flex: 1; min-width: 130px; padding: 13px 14px;
     background: white; border: 0; border-bottom: 3px solid transparent;
-    font-size: 14px; cursor: pointer; color: var(--muted);
+    font-size: 13px; cursor: pointer; color: var(--muted);
     white-space: nowrap; font-weight: 500;
   }
-  nav.tabs button.active {
-    color: var(--navy-dark); border-bottom-color: var(--navy);
-    font-weight: 600;
-  }
+  nav.tabs button.active { color: var(--navy-dark); border-bottom-color: var(--navy); font-weight: 600; }
 
   main { max-width: 1200px; margin: 0 auto; padding: 16px; }
 
-  /* ===== Cards ===== */
   .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 14px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px; margin-bottom: 14px;
   }
   .card h2 {
-    margin: 0 0 12px 0;
-    font-size: 14px;
-    color: var(--navy-dark);
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 8px;
+    margin: 0 0 12px 0; font-size: 13px; color: var(--navy-dark);
+    font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase;
+    border-bottom: 1px solid var(--border); padding-bottom: 8px;
   }
 
-  /* ===== Form fields ===== */
-  label {
-    display: block; font-size: 12px; color: var(--muted);
-    margin-bottom: 4px; font-weight: 500;
-  }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; font-weight: 500; }
   input[type="number"], input[type="text"], input[type="password"], select, textarea {
     width: 100%; padding: 10px 12px;
     border: 1px solid var(--border-strong); border-radius: 7px;
@@ -130,23 +112,23 @@
     transition: border-color 0.15s, box-shadow 0.15s;
   }
   input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: var(--navy);
-    box-shadow: 0 0 0 3px rgba(30, 58, 115, 0.15);
+    outline: none; border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(30,58,115,0.15);
   }
+  textarea { resize: vertical; min-height: 60px; }
 
   .row { display: grid; grid-template-columns: 1fr; gap: 10px; }
   @media (min-width: 600px) {
     .row.cols-2 { grid-template-columns: 1fr 1fr; }
     .row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .row.cols-4 { grid-template-columns: repeat(4, 1fr); }
     .row.cols-5 { grid-template-columns: repeat(5, 1fr); }
   }
 
-  /* ===== Ration rows ===== */
+  /* Besi ration rows */
   .ration-table { display: flex; flex-direction: column; gap: 8px; }
   .ration-row {
-    display: grid;
-    grid-template-columns: 1fr 100px 36px;
+    display: grid; grid-template-columns: 1fr 100px 36px;
     gap: 8px; align-items: center;
   }
   .ration-row .remove-btn {
@@ -156,7 +138,33 @@
   }
   .ration-row .remove-btn:hover { background: var(--warn-bg); }
 
-  /* ===== Buttons ===== */
+  /* Dairy ration rows */
+  .dairy-ration-table { display: flex; flex-direction: column; gap: 6px; }
+  .dairy-row-wrap {
+    background: #fafbfd; border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px;
+  }
+  .dairy-row-top {
+    display: grid; grid-template-columns: 1fr 100px 36px;
+    gap: 8px; align-items: center;
+  }
+  .dairy-row-top .remove-btn {
+    background: transparent; border: 1px solid var(--border-strong);
+    border-radius: 7px; height: 40px; color: var(--warn);
+    font-size: 18px; cursor: pointer;
+  }
+  .dairy-row-top .remove-btn:hover { background: var(--warn-bg); }
+  .dairy-row-stats {
+    display: flex; flex-wrap: wrap; gap: 6px 14px;
+    margin-top: 6px; padding-top: 6px;
+    border-top: 1px solid var(--border); font-size: 11px;
+  }
+  .dairy-row-stats .sr { display: flex; flex-direction: column; }
+  .dairy-row-stats .sr-lbl {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted);
+  }
+  .dairy-row-stats .sr-val { font-size: 13px; font-weight: 600; color: var(--text-soft); }
+
   .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   button.btn {
     padding: 11px 16px; border-radius: 7px;
@@ -166,14 +174,10 @@
   }
   button.btn:hover { background: #f0f2f5; }
   button.btn:disabled { opacity: 0.55; cursor: not-allowed; }
-  button.btn.primary {
-    background: var(--navy); color: white; border-color: var(--navy);
-  }
+  button.btn.primary { background: var(--navy); color: white; border-color: var(--navy); }
   button.btn.primary:hover { background: var(--navy-dark); }
   button.btn.primary:disabled { background: #6c7fa3; border-color: #6c7fa3; }
-  button.btn.success {
-    background: var(--green); color: white; border-color: var(--green);
-  }
+  button.btn.success { background: var(--green); color: white; border-color: var(--green); }
   button.btn.success:hover { background: var(--green-dark); }
   button.btn.success:disabled { background: #6c9d80; border-color: #6c9d80; }
   button.btn.danger { color: var(--warn); border-color: #f1bdb6; }
@@ -183,65 +187,73 @@
   .btn-row { display: flex; gap: 8px; margin-top: 12px; }
   .btn-row .btn { flex: 1; }
 
-  /* ===== Two-column desktop layout ===== */
   .calc-grid { display: block; }
   @media (min-width: 1024px) {
     .calc-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 18px;
-      align-items: start;
+      grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+      gap: 18px; align-items: start;
     }
-    .calc-grid .right-col { position: sticky; top: 60px; }
+    .calc-grid .right-col { position: sticky; top: 58px; }
   }
 
-  /* ===== Result stat boxes ===== */
-  .stat-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 4px 14px;
-  }
-  @media (min-width: 600px) {
-    .stat-grid { grid-template-columns: repeat(3, 1fr); }
-  }
+  .stat-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 4px 14px; }
+  @media (min-width: 600px) { .stat-grid { grid-template-columns: repeat(3,1fr); } }
   .stat { border-bottom: 1px solid var(--border); padding: 7px 0; }
   .stat .label { font-size: 11px; color: var(--muted); letter-spacing: 0.2px; }
-  .stat .value {
-    font-size: 17px; font-weight: 700; margin-top: 2px; color: var(--text);
-  }
+  .stat .value { font-size: 17px; font-weight: 700; margin-top: 2px; color: var(--text); }
   .stat .unit { font-size: 12px; color: var(--muted); font-weight: 500; }
 
   .pill {
     display: inline-block; padding: 2px 9px; border-radius: 999px;
     font-size: 11px; font-weight: 600;
   }
-  .pill.ok { background: var(--ok-bg); color: var(--ok); }
-  .pill.warn { background: var(--warn-bg); color: var(--warn); }
+  .pill.ok    { background: var(--ok-bg);   color: var(--ok); }
+  .pill.warn  { background: var(--warn-bg); color: var(--warn); }
   .pill.muted { background: #eef0f3; color: var(--muted); }
+  .pill.blue  { background: var(--blue-bg); color: var(--blue-dark); }
+  .pill.green { background: var(--ok-bg);   color: var(--green-dark); }
 
+  /* Beef gain highlight */
   .gain-highlight {
-    background: linear-gradient(135deg, #f0f4fa 0%, #e3ecf8 100%);
+    background: linear-gradient(135deg,#f0f4fa 0%,#e3ecf8 100%);
     border: 1px solid #c8d3e8; border-radius: 10px;
     padding: 16px; margin-top: 4px; text-align: center;
   }
-  .gain-highlight .big {
-    font-size: 36px; font-weight: 700; color: var(--navy-dark);
-    letter-spacing: -0.5px;
-  }
+  .gain-highlight .big { font-size: 36px; font-weight: 700; color: var(--navy-dark); letter-spacing: -0.5px; }
   .gain-highlight .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-  .gain-highlight .bottleneck {
-    margin-top: 10px; font-size: 12px; color: var(--text-soft);
-  }
+  .gain-highlight .bottleneck { margin-top: 10px; font-size: 12px; color: var(--text-soft); }
   .gain-highlight .bottleneck strong { color: var(--green-dark); }
 
-  /* ===== Tables ===== */
+  /* Dairy milk highlight */
+  .milk-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .milk-card {
+    background: var(--blue-bg); border: 1px solid var(--blue-border);
+    border-radius: 10px; padding: 14px; text-align: center;
+  }
+  .milk-card.predicted {
+    background: linear-gradient(135deg,#f0f8f4 0%,#dcf0e7 100%);
+    border-color: #9ed4b4; grid-column: 1 / -1;
+  }
+  .milk-card .milk-big { font-size: 34px; font-weight: 700; color: var(--navy-dark); letter-spacing: -0.5px; }
+  .milk-card .milk-unit { font-size: 16px; color: var(--muted); font-weight: 500; }
+  .milk-card .milk-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+  .milk-card .limit-badge { margin-top: 8px; font-size: 12px; color: var(--text-soft); }
+  .milk-card .limit-badge strong { color: var(--green-dark); }
+
+  .dairy-footer-notes {
+    background: #f8fafd; border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; font-size: 12px; color: var(--muted); line-height: 1.6;
+  }
+  .dairy-footer-notes p { margin: 3px 0; }
+
   table.detail, table.list { width: 100%; border-collapse: collapse; font-size: 13px; }
   table.detail th, table.detail td,
-  table.list th, table.list td {
+  table.list  th, table.list  td {
     border-bottom: 1px solid var(--border); padding: 8px 6px; text-align: right;
   }
   table.detail th:first-child, table.detail td:first-child,
-  table.list th:first-child, table.list td:first-child { text-align: left; }
+  table.list  th:first-child, table.list  td:first-child { text-align: left; }
   table.detail th, table.list th {
     font-weight: 600; color: var(--muted); background: #f8fafd;
     font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;
@@ -251,13 +263,11 @@
 
   .scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-  .compare {
-    display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; font-size: 13px;
-  }
+  .compare { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; font-size: 13px; }
   .compare > div { padding: 8px 6px; border-bottom: 1px solid var(--border); }
   .compare .head {
-    font-weight: 600; color: var(--muted); background: #f8fafd; font-size: 11px;
-    text-transform: uppercase; letter-spacing: 0.4px;
+    font-weight: 600; color: var(--muted); background: #f8fafd;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;
   }
 
   .error {
@@ -270,22 +280,36 @@
     padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; font-size: 14px;
     border: 1px solid #b9dec8;
   }
-  .empty {
-    text-align: center; padding: 32px 12px;
-    color: var(--muted); font-size: 14px;
-  }
+  .empty { text-align: center; padding: 32px 12px; color: var(--muted); font-size: 14px; }
   .results-empty {
-    text-align: center; padding: 40px 16px;
-    color: var(--muted); font-size: 14px;
-    background: white; border: 1px dashed var(--border-strong);
-    border-radius: 10px;
+    text-align: center; padding: 40px 16px; color: var(--muted); font-size: 14px;
+    background: white; border: 1px dashed var(--border-strong); border-radius: 10px;
+  }
+  .admin-note {
+    font-size: 12px; color: var(--muted); margin: 0 0 10px;
+    background: #f0f4fa; padding: 8px 10px; border-radius: 6px;
+    border-left: 3px solid var(--navy);
+  }
+  .dairy-fields-section {
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px dashed var(--border-strong);
+  }
+  .dairy-fields-section .section-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--blue-dark); font-weight: 600; margin-bottom: 8px;
   }
 
-  /* ===== Login ===== */
+  /* History filter bar */
+  .history-filter-bar {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .history-filter-bar label { margin: 0; white-space: nowrap; }
+  .history-filter-bar select { width: auto; padding: 6px 10px; font-size: 13px; }
+
+  /* Login view */
   #login-view {
-    min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    padding: 16px;
-    background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, var(--navy-light) 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px;
+    background: linear-gradient(135deg,var(--navy-dark) 0%,var(--navy) 60%,var(--navy-light) 100%);
   }
   #login-view .login-card {
     background: white; border-radius: 14px;
@@ -296,61 +320,79 @@
     display: flex; flex-direction: column; align-items: center;
     text-align: center; margin-bottom: 22px;
   }
-  #login-view .login-brand img {
-    height: 76px; width: 76px; margin-bottom: 10px;
-    object-fit: contain;
-  }
-  #login-view h2 {
-    margin: 0; color: var(--navy-dark); font-size: 22px; font-weight: 700;
-  }
-  #login-view .sub {
-    color: var(--muted); font-size: 11px;
-    margin-top: 4px; letter-spacing: 1.5px; text-transform: uppercase;
-  }
+  #login-view .login-brand img { height: 76px; width: 76px; margin-bottom: 10px; object-fit: contain; }
+  #login-view h2 { margin: 0; color: var(--navy-dark); font-size: 22px; font-weight: 700; }
+  #login-view .sub { color: var(--muted); font-size: 11px; margin-top: 4px; letter-spacing: 1.5px; text-transform: uppercase; }
   #login-view .field { margin-bottom: 14px; }
   #login-view button { width: 100%; padding: 13px; font-size: 15px; }
-  #login-view .login-foot {
-    margin-top: 18px; font-size: 11px; color: var(--muted); text-align: center;
-    letter-spacing: 0.5px;
-  }
+  #login-view .login-foot { margin-top: 18px; font-size: 11px; color: var(--muted); text-align: center; letter-spacing: 0.5px; }
 
-  /* ===== Modal ===== */
+  /* Landing view */
+  #landing-view {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px;
+    background: linear-gradient(135deg,var(--navy-dark) 0%,var(--navy) 60%,var(--navy-light) 100%);
+  }
+  .landing-card {
+    background: white; border-radius: 16px;
+    padding: 36px 28px 28px; width: 100%; max-width: 600px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center;
+  }
+  .landing-brand { display: flex; flex-direction: column; align-items: center; margin-bottom: 28px; }
+  .landing-brand img { height: 68px; width: 68px; margin-bottom: 10px; object-fit: contain; }
+  .landing-brand h2 { margin: 0; color: var(--navy-dark); font-size: 20px; font-weight: 700; }
+  .landing-brand .sub { color: var(--muted); font-size: 11px; margin-top: 4px; letter-spacing: 1.5px; text-transform: uppercase; }
+  .landing-title { font-size: 16px; font-weight: 600; color: var(--text-soft); margin-bottom: 20px; }
+  .mode-cards { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .mode-card {
+    flex: 1 1 200px; max-width: 240px;
+    background: #f8fafd; border: 2px solid var(--border);
+    border-radius: 14px; padding: 28px 20px;
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    user-select: none;
+  }
+  .mode-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.13); }
+  .mode-card:active { transform: translateY(0); }
+  .mode-card.besi:hover { border-color: var(--green); }
+  .mode-card.sut:hover  { border-color: var(--blue); }
+  .mode-card .mode-icon { font-size: 52px; margin-bottom: 10px; }
+  .mode-card .mode-title { font-size: 17px; font-weight: 700; color: var(--navy-dark); }
+  .mode-card .mode-desc { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  .landing-user { margin-top: 20px; font-size: 12px; color: var(--muted); }
+  .landing-user a { color: var(--warn); cursor: pointer; text-decoration: underline; font-size: 12px; }
+
+  /* Modal */
   .modal-backdrop {
-    position: fixed; inset: 0; background: rgba(15, 24, 48, 0.55);
+    position: fixed; inset: 0; background: rgba(15,24,48,0.55);
     display: flex; align-items: center; justify-content: center;
     padding: 16px; z-index: 50;
   }
   .modal {
     background: white; border-radius: 12px; padding: 22px;
-    width: 100%; max-width: 520px;
+    width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
   }
-  .modal h3 {
-    margin: 0 0 14px; color: var(--navy-dark);
-    font-size: 16px; font-weight: 700;
-  }
+  .modal h3 { margin: 0 0 14px; color: var(--navy-dark); font-size: 16px; font-weight: 700; }
   .modal .actions { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
-  .modal .note {
-    font-size: 12px; color: var(--muted); margin-bottom: 10px;
+  .modal .note { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .modal-error {
+    background: var(--warn-bg); color: var(--warn);
+    padding: 8px 10px; border-radius: 6px; margin-bottom: 10px; font-size: 13px;
   }
 
-  /* ===== Footer ===== */
   footer.app-footer {
     text-align: center; color: var(--muted); font-size: 12px;
     padding: 22px 16px 32px;
     display: flex; flex-direction: column; align-items: center; gap: 8px;
   }
   footer.app-footer img { height: 26px; width: 26px; opacity: 0.85; }
-  footer.app-footer .foot-line {
-    letter-spacing: 0.8px; font-size: 11px; text-transform: uppercase;
-  }
+  footer.app-footer .foot-line { letter-spacing: 0.8px; font-size: 11px; text-transform: uppercase; }
 
   [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 
-<!-- ============== LOGIN VIEW ============== -->
+<!-- ========== LOGIN VIEW ========== -->
 <div id="login-view">
   <form class="login-card" id="login-form">
     <div class="login-brand">
@@ -372,7 +414,32 @@
   </form>
 </div>
 
-<!-- ============== MAIN APP VIEW ============== -->
+<!-- ========== LANDING VIEW (mode selector) ========== -->
+<div id="landing-view" hidden>
+  <div class="landing-card">
+    <div class="landing-brand">
+      <img src="/static/csr-logo.png" alt="CSR" onerror="this.style.display='none'" />
+      <h2>CSR Rasyon Hesaplayıcı</h2>
+      <div class="sub">Concentrated Smart Ration</div>
+    </div>
+    <div class="landing-title">Hesaplama Modu Seçin</div>
+    <div class="mode-cards">
+      <div class="mode-card besi" id="mode_besi_btn">
+        <div class="mode-icon">&#x1F402;</div>
+        <div class="mode-title">Besi Rasyonu</div>
+        <div class="mode-desc">TMR rasyon değerlendirmesi, UFV/PDI bazlı canlı ağırlık artışı tahmini</div>
+      </div>
+      <div class="mode-card sut" id="mode_sut_btn">
+        <div class="mode-icon">&#x1F404;</div>
+        <div class="mode-title">Süt Rasyonu</div>
+        <div class="mode-desc">UFL/PDI bazlı günlük süt miktarı tahmini, bakım + üretim hesabı</div>
+      </div>
+    </div>
+    <div class="landing-user" id="landing_user_line"></div>
+  </div>
+</div>
+
+<!-- ========== MAIN APP VIEW ========== -->
 <div id="app-view" hidden>
   <header class="topbar">
     <div class="brand">
@@ -382,31 +449,33 @@
         <div class="brand-sub">Concentrated Smart Ration</div>
       </div>
     </div>
-    <div class="who">
-      <span class="name" id="who_name">—</span>
+    <div class="topbar-right">
+      <span class="mode-badge besi" id="mode_badge">BESİ</span>
+      <span class="who-name" id="who_name">&#x2014;</span>
       <span class="badge" id="who_admin_badge" hidden>Yönetici</span>
+      <button class="mode-change-btn" type="button" id="mode_change_btn">Mod Değiştir</button>
       <button class="logout" type="button" id="logout_btn">Çıkış</button>
     </div>
   </header>
 
   <nav class="tabs">
-    <button data-tab="calc" class="active" type="button">Hesaplayıcı</button>
+    <button data-tab="calc"    id="besi_tab_btn" type="button" class="active">&#x1F402; Besi Hesaplayıcı</button>
+    <button data-tab="sut"     id="sut_tab_btn"  type="button" hidden>&#x1F404; Süt Hesaplayıcı</button>
     <button data-tab="history" type="button">Geçmiş Rasyonlar</button>
-    <button data-tab="admin" type="button" id="admin_tab_btn" hidden>Yönetim</button>
+    <button data-tab="admin"   type="button" id="admin_tab_btn" hidden>Yönetim</button>
   </nav>
 
   <main>
     <div id="error" class="error" style="display:none;"></div>
-    <div id="info" class="info" style="display:none;"></div>
+    <div id="info"  class="info"  style="display:none;"></div>
 
-    <!-- ============ CALC TAB ============ -->
+    <!-- ============ BESİ CALC TAB ============ -->
     <div id="tab-calc">
       <div class="calc-grid">
-        <!-- LEFT: input -->
         <div class="left-col">
           <section class="card">
             <h2>Müşteri Bilgileri</h2>
-            <div class="row">
+            <div class="row cols-2">
               <div>
                 <label for="customer_name">Rasyon Kimin İçin Yapıldı?</label>
                 <input id="customer_name" type="text" placeholder="örn. Mehmet Yılmaz / X İşletmesi" />
@@ -451,37 +520,33 @@
           </div>
         </div>
 
-        <!-- RIGHT: results -->
         <div class="right-col">
           <div id="results-empty" class="results-empty">
             Hesaplamayı başlatmak için soldaki formu doldurup <strong>Hesapla</strong>'ya basın.
           </div>
-
           <div id="results" hidden>
             <div class="card">
               <h2>TMR Özeti</h2>
               <div class="stat-grid" id="tmr_summary"></div>
             </div>
-
             <div class="card">
               <h2>Beklenen Performans</h2>
               <div class="gain-highlight">
                 <div class="label">Tahmini Günlük CA Artışı</div>
                 <div class="big">
-                  <span id="estimated_gain">–</span>
-                  <span style="font-size:18px;color:var(--muted);font-weight:500;">g/gün</span>
+                  <span id="estimated_gain">&#x2013;</span>
+                  <span style="font-size:18px;color:var(--muted);font-weight:500;"> g/gün</span>
                 </div>
                 <div class="bottleneck" id="bottleneck_note"></div>
               </div>
               <div class="stat-grid" id="performance_summary" style="margin-top:14px;"></div>
             </div>
-
+            <!-- INRA comparison: shown to admin only -->
             <div class="card" id="inra_card" hidden>
               <h2>INRA Karşılaştırması</h2>
               <div class="compare" id="inra_compare"></div>
             </div>
-
-            <!-- Admin-only detail table -->
+            <!-- Detail table: admin only -->
             <div class="card" id="detail_card" hidden>
               <h2>Rasyon Detay Tablosu (Yönetici)</h2>
               <div class="scroll-x">
@@ -493,12 +558,102 @@
       </div>
     </div>
 
+    <!-- ============ SÜT CALC TAB ============ -->
+    <div id="tab-sut" hidden>
+      <div class="calc-grid">
+        <div class="left-col">
+          <section class="card">
+            <h2>İşletme Bilgileri</h2>
+            <div class="row cols-2">
+              <div>
+                <label for="d_customer_name">Rasyon Kimin İçin Yapıldı?</label>
+                <input id="d_customer_name" type="text" placeholder="örn. Ahmet Kaya / Y İşletmesi" />
+              </div>
+              <div>
+                <label for="d_herd_name">Sürü Adı / Not (opsiyonel)</label>
+                <input id="d_herd_name" type="text" placeholder="örn. Yüksek verimli inek grubu" />
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Sürü Bilgileri</h2>
+            <div class="row cols-2">
+              <div>
+                <label for="d_live_weight">Canlı Ağırlık (kg)</label>
+                <input id="d_live_weight" type="number" min="300" max="1000" step="1" inputmode="numeric" placeholder="örn. 600" />
+              </div>
+              <div>
+                <label for="d_breed">Irk</label>
+                <select id="d_breed"></select>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Süt Rasyonu Girişi</h2>
+            <div id="dairy_ration" class="dairy-ration-table"></div>
+            <div class="actions">
+              <button class="btn" id="dairy_add_row" type="button">+ Satır Ekle</button>
+              <button class="btn" id="dairy_reset_btn" type="button">Sıfırla</button>
+            </div>
+          </section>
+
+          <div class="btn-row">
+            <button class="btn primary" id="dairy_calc_btn" type="button">Hesapla</button>
+            <button class="btn success" id="dairy_save_btn" type="button" disabled>Kaydet</button>
+          </div>
+        </div>
+
+        <div class="right-col">
+          <div id="dairy-results-empty" class="results-empty">
+            Hesaplamayı başlatmak için soldaki formu doldurup <strong>Hesapla</strong>'ya basın.
+          </div>
+          <div id="dairy-results" hidden>
+            <div class="card">
+              <h2>&#x1F95B; Süt Miktarı Tahmini</h2>
+              <div class="milk-cards" id="milk_cards"></div>
+            </div>
+            <div class="card">
+              <h2>TMR Özeti</h2>
+              <div class="stat-grid" id="dairy_tmr_summary"></div>
+            </div>
+            <div class="card">
+              <h2>Bakım Gereksinimleri</h2>
+              <div class="stat-grid" id="dairy_maintenance"></div>
+            </div>
+            <!-- Detail table: admin only -->
+            <div class="card" id="dairy_detail_card" hidden>
+              <h2>Rasyon Detay Tablosu (Yönetici)</h2>
+              <div class="scroll-x">
+                <table class="detail" id="dairy_detail_table"></table>
+              </div>
+            </div>
+            <div class="dairy-footer-notes">
+              <p>&#x2699;&#xFE0F; UFL ve PDI hesaplamaları INRA 2018 sistemine dayalıdır; yem değerlerine göre değişir.</p>
+              <p>&#x1F95B; Tahmin yalnızca enerji (UFL) ve protein (PDI) kısıtlarını içerir; sağlık, laktasyon dönemi ve silaj kalitesi sonucu etkiler.</p>
+              <p>&#x1F4CA; Rumen sağlığı için NDF oranının %30&#x2013;45 KM düzeyinde tutulması önerilir.</p>
+              <p>&#x1F52C; Bakım UFL = 0,041 &times; BW<sup>0,75</sup> &nbsp;|&nbsp; Bakım PDI = 3,25 &times; BW<sup>0,75</sup> g/gün</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ============ HISTORY TAB ============ -->
     <div id="tab-history" hidden>
       <section class="card">
         <h2>Geçmiş Rasyonlar</h2>
+        <div class="history-filter-bar">
+          <label>Filtre:</label>
+          <select id="history_filter">
+            <option value="all">Tümü</option>
+            <option value="besi">Besi Rasyonları</option>
+            <option value="sut">Süt Rasyonları</option>
+          </select>
+        </div>
         <div id="history_container">
-          <div class="empty">Yükleniyor…</div>
+          <div class="empty">Yükleniyor&#x2026;</div>
         </div>
       </section>
     </div>
@@ -507,9 +662,17 @@
     <div id="tab-admin" hidden>
       <section class="card">
         <h2>Yem Ekle</h2>
-        <div class="row cols-2">
+        <div class="row cols-3">
           <div><label>Yem Adı</label><input type="text" id="f_name" /></div>
           <div><label>KM% (dm_pct)</label><input type="number" step="0.1" id="f_dm_pct" /></div>
+          <div>
+            <label>Kategori</label>
+            <select id="f_category">
+              <option value="besi">Besi</option>
+              <option value="common">Ortak (Besi + Süt)</option>
+              <option value="sut">Süt</option>
+            </select>
+          </div>
         </div>
         <div class="row cols-5" style="margin-top:8px;">
           <div><label>UFV/kg KM</label><input type="number" step="0.001" id="f_ufv" /></div>
@@ -523,6 +686,21 @@
           <div><label>Yağ %</label><input type="number" step="0.1" id="f_fat" /></div>
           <div><label>Kül %</label><input type="number" step="0.1" id="f_ash" /></div>
         </div>
+        <div class="dairy-fields-section">
+          <div class="section-label">Süt / Ortak Yem Değerleri</div>
+          <div class="row cols-4" style="margin-bottom:8px;">
+            <div><label>UFL/kg KM</label><input type="number" step="0.001" id="f_ufl_per_kg_dm" placeholder="opsiyonel" /></div>
+            <div><label>PDI g/kg KM</label><input type="number" step="0.1" id="f_pdi_g_per_kg_dm" placeholder="opsiyonel" /></div>
+            <div><label>NDF %</label><input type="number" step="0.1" id="f_ndf_pct" placeholder="opsiyonel" /></div>
+            <div><label>Ca %</label><input type="number" step="0.01" id="f_ca_pct" placeholder="opsiyonel" /></div>
+          </div>
+          <div class="row cols-3" style="margin-bottom:8px;">
+            <div><label>P %</label><input type="number" step="0.01" id="f_p_pct" placeholder="opsiyonel" /></div>
+            <div><label>RDP % (HP'nin)</label><input type="number" step="0.1" id="f_rdp_pct_of_cp" placeholder="opsiyonel" /></div>
+            <div><label>RUP % (HP'nin)</label><input type="number" step="0.1" id="f_rup_pct_of_cp" placeholder="opsiyonel" /></div>
+          </div>
+          <div><label>Not</label><textarea id="f_note" rows="2" placeholder="opsiyonel"></textarea></div>
+        </div>
         <div class="actions">
           <button class="btn primary" id="add_feed_btn" type="button">Ekle</button>
           <button class="btn" id="clear_feed_btn" type="button">Temizle</button>
@@ -531,8 +709,9 @@
 
       <section class="card">
         <h2>Yem Listesi</h2>
-        <p class="note" style="font-size:12px;color:var(--muted);margin:0 0 10px;">
-          Sistem yemleri yalnızca okunabilir. Yalnızca özel yemler düzenlenebilir veya silinebilir.
+        <p class="admin-note">
+          Yönetici tüm yemleri ekleyebilir, düzenleyebilir veya silebilir.
+          "Sistem" / "Özel" etiketi yalnızca bilgi amaçlıdır; tüm yemler aynı yönetici yetkisi altındadır.
         </p>
         <div class="scroll-x">
           <table class="list" id="feeds_table"></table>
@@ -547,26 +726,50 @@
   </footer>
 </div>
 
-<!-- ============ EDIT FEED MODAL ============ -->
+<!-- ========== EDIT FEED MODAL ========== -->
 <div id="edit-modal" class="modal-backdrop" hidden>
   <div class="modal">
     <h3>Yem Düzenle</h3>
-    <div class="note">Sadece özel yemler düzenlenebilir. Sistem yemleri korumalıdır.</div>
-    <div class="row cols-2">
+    <div class="note" id="edit_modal_note">Yönetici tüm yem kayıtlarını düzenleyebilir.</div>
+    <div id="edit_modal_error" class="modal-error" style="display:none;"></div>
+    <div class="row cols-3" style="margin-bottom:8px;">
       <div><label>Yem Adı</label><input type="text" id="e_name" /></div>
       <div><label>KM%</label><input type="number" step="0.1" id="e_dm_pct" /></div>
+      <div>
+        <label>Kategori</label>
+        <select id="e_category">
+          <option value="besi">Besi</option>
+          <option value="common">Ortak (Besi + Süt)</option>
+          <option value="sut">Süt</option>
+        </select>
+      </div>
     </div>
-    <div class="row cols-5" style="margin-top:8px;">
+    <div class="row cols-5" style="margin-bottom:8px;">
       <div><label>UFV</label><input type="number" step="0.001" id="e_ufv" /></div>
       <div><label>Protein %</label><input type="number" step="0.1" id="e_protein" /></div>
       <div><label>PDIE</label><input type="number" step="0.1" id="e_pdie" /></div>
       <div><label>PDIN</label><input type="number" step="0.1" id="e_pdin" /></div>
       <div><label>Nişasta %</label><input type="number" step="0.1" id="e_starch" /></div>
     </div>
-    <div class="row cols-3" style="margin-top:8px;">
+    <div class="row cols-3" style="margin-bottom:8px;">
       <div><label>HS %</label><input type="number" step="0.1" id="e_cf" /></div>
       <div><label>Yağ %</label><input type="number" step="0.1" id="e_fat" /></div>
       <div><label>Kül %</label><input type="number" step="0.1" id="e_ash" /></div>
+    </div>
+    <div class="dairy-fields-section">
+      <div class="section-label">Süt / Ortak Yem Değerleri</div>
+      <div class="row cols-4" style="margin-bottom:8px;">
+        <div><label>UFL/kg KM</label><input type="number" step="0.001" id="e_ufl_per_kg_dm" placeholder="opsiyonel" /></div>
+        <div><label>PDI g/kg KM</label><input type="number" step="0.1" id="e_pdi_g_per_kg_dm" placeholder="opsiyonel" /></div>
+        <div><label>NDF %</label><input type="number" step="0.1" id="e_ndf_pct" placeholder="opsiyonel" /></div>
+        <div><label>Ca %</label><input type="number" step="0.01" id="e_ca_pct" placeholder="opsiyonel" /></div>
+      </div>
+      <div class="row cols-3" style="margin-bottom:8px;">
+        <div><label>P %</label><input type="number" step="0.01" id="e_p_pct" placeholder="opsiyonel" /></div>
+        <div><label>RDP % (HP'nin)</label><input type="number" step="0.1" id="e_rdp_pct_of_cp" placeholder="opsiyonel" /></div>
+        <div><label>RUP % (HP'nin)</label><input type="number" step="0.1" id="e_rup_pct_of_cp" placeholder="opsiyonel" /></div>
+      </div>
+      <div><label>Not</label><textarea id="e_note" rows="2" placeholder="opsiyonel"></textarea></div>
     </div>
     <div class="actions">
       <button class="btn" id="edit_cancel" type="button">İptal</button>
@@ -576,75 +779,98 @@
 </div>
 
 <script>
-// ===== State =====
-const MAX_ROWS = 15;
+// ===== Constants & State =====
+const MAX_ROWS   = 15;
 const INITIAL_ROWS = 5;
-const TOKEN_KEY = "csr_token";
+const TOKEN_KEY  = "csr_token";
+const MODE_KEY   = "csr_mode";
 
-let token = localStorage.getItem(TOKEN_KEY) || null;
-let currentUser = null;       // {username, is_admin}
-let feedsCache = [];
+let token       = localStorage.getItem(TOKEN_KEY) || null;
+let currentUser = null;
+let currentMode = null; // 'besi' | 'sut'
+
+let feedsCache  = [];  // all feeds (admin table)
+let besiFeeds   = [];  // category besi + common
+let dairyFeeds  = [];  // category sut  + common
 let breedsCache = [];
-let lastResults = null;
-let lastInputs = null;
-let editingFeedId = null;
 
-const $ = (sel) => document.querySelector(sel);
-const $$ = (sel) => document.querySelectorAll(sel);
+let lastResults      = null;
+let lastInputs       = null;
+let dairyLastResults = null;
+let dairyLastInputs  = null;
+let editingFeedId    = null;
+let allHistoryRations = [];
 
-// ===== Auth-aware fetch =====
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+
+// ===== API =====
 async function api(path, opts = {}) {
-  const headers = Object.assign(
-    { "Content-Type": "application/json" },
-    opts.headers || {},
-  );
+  const headers = Object.assign({ "Content-Type": "application/json" }, opts.headers || {});
   if (token) headers["Authorization"] = "Bearer " + token;
   const res = await fetch(path, { ...opts, headers });
   if (res.status === 401) {
-    token = null;
-    localStorage.removeItem(TOKEN_KEY);
+    token = null; localStorage.removeItem(TOKEN_KEY);
     showLogin();
     throw new Error("Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.");
   }
   let body = null;
-  try { body = await res.json(); } catch (e) {}
-  if (!res.ok) {
-    const msg = (body && body.detail) || friendlyErrorForStatus(res.status);
-    throw new Error(msg);
-  }
+  try { body = await res.json(); } catch (_) {}
+  if (!res.ok) throw new Error((body && body.detail) || friendlyErr(res.status));
   return body;
 }
-
-function friendlyErrorForStatus(s) {
+function friendlyErr(s) {
   if (s === 403) return "Bu işlem için yetkiniz yok.";
   if (s === 404) return "Aranan kayıt bulunamadı.";
-  if (s >= 500) return "Sunucu hatası. Lütfen tekrar deneyin.";
+  if (s >= 500)  return "Sunucu hatası. Lütfen tekrar deneyin.";
   return "İşlem başarısız oldu.";
 }
-
 function showError(msg) {
   const el = $("#error");
-  el.textContent = msg || "";
-  el.style.display = msg ? "block" : "none";
-  if (msg) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  el.textContent = msg || ""; el.style.display = msg ? "block" : "none";
+  if (msg) el.scrollIntoView({ behavior:"smooth", block:"nearest" });
 }
 function showInfo(msg) {
   const el = $("#info");
-  el.textContent = msg || "";
-  el.style.display = msg ? "block" : "none";
+  el.textContent = msg || ""; el.style.display = msg ? "block" : "none";
   if (msg) setTimeout(() => { el.style.display = "none"; }, 4000);
 }
 
-// ===== Login flow =====
-function showLogin() {
-  $("#login-view").hidden = false;
-  $("#app-view").hidden = true;
-}
-function showApp() {
-  $("#login-view").hidden = true;
-  $("#app-view").hidden = false;
+// ===== View routing =====
+function showLogin()   { $("#login-view").hidden=false; $("#landing-view").hidden=true;  $("#app-view").hidden=true; }
+function showLanding() { $("#login-view").hidden=true;  $("#landing-view").hidden=false; $("#app-view").hidden=true; }
+function showApp()     { $("#login-view").hidden=true;  $("#landing-view").hidden=true;  $("#app-view").hidden=false; }
+
+// ===== Mode =====
+function applyMode(mode) {
+  currentMode = mode;
+  localStorage.setItem(MODE_KEY, mode);
+  const url = new URL(window.location.href);
+  url.searchParams.set("mode", mode);
+  window.history.replaceState({}, "", url.toString());
+  const badge = $("#mode_badge");
+  badge.textContent = mode === "sut" ? "SÜT" : "BESİ";
+  badge.className = "mode-badge " + (mode === "sut" ? "sut" : "besi");
+  $("#besi_tab_btn").hidden = (mode === "sut");
+  $("#sut_tab_btn").hidden  = (mode === "besi");
+  switchTab(mode === "sut" ? "sut" : "calc");
 }
 
+// ===== Tabs =====
+function switchTab(name) {
+  if (name === "admin" && (!currentUser || !currentUser.is_admin)) name = "calc";
+  $$("nav.tabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+  $("#tab-calc").hidden    = (name !== "calc");
+  $("#tab-sut").hidden     = (name !== "sut");
+  $("#tab-history").hidden = (name !== "history");
+  $("#tab-admin").hidden   = (name !== "admin");
+  showError("");
+  if (name === "history") loadHistory();
+  if (name === "admin")   loadFeedsTable();
+}
+$$("nav.tabs button").forEach(b => b.addEventListener("click", () => switchTab(b.dataset.tab)));
+
+// ===== Login =====
 $("#login-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const username = $("#login_username").value.trim();
@@ -655,8 +881,7 @@ $("#login-form").addEventListener("submit", async (e) => {
   btn.disabled = true; btn.textContent = "Giriş yapılıyor…";
   try {
     const res = await fetch("/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ username, password }),
     });
     const json = await res.json().catch(() => ({}));
@@ -665,544 +890,622 @@ $("#login-form").addEventListener("submit", async (e) => {
     localStorage.setItem(TOKEN_KEY, token);
     currentUser = { username: json.username, is_admin: json.is_admin };
     $("#login_password").value = "";
-    await bootstrapApp();
+    await bootstrapApp(true);
   } catch (err) {
-    errEl.textContent = err.message;
-    errEl.style.display = "block";
+    errEl.textContent = err.message; errEl.style.display = "block";
   } finally {
     btn.disabled = false; btn.textContent = "Giriş Yap";
   }
 });
 
 $("#logout_btn").addEventListener("click", () => {
-  token = null; currentUser = null;
-  localStorage.removeItem(TOKEN_KEY);
+  token = null; currentUser = null; currentMode = null;
+  localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(MODE_KEY);
   showLogin();
 });
 
-// ===== Tab switching =====
-function switchTab(name) {
-  if (name === "admin" && (!currentUser || !currentUser.is_admin)) name = "calc";
-  $$("nav.tabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
-  $("#tab-calc").hidden = name !== "calc";
-  $("#tab-history").hidden = name !== "history";
-  $("#tab-admin").hidden = name !== "admin";
-  showError("");
-  if (name === "history") loadHistory();
-  if (name === "admin") loadFeedsTable();
-}
-$$("nav.tabs button").forEach(b => {
-  b.addEventListener("click", () => switchTab(b.dataset.tab));
+$("#mode_besi_btn").addEventListener("click", () => { showApp(); applyMode("besi"); });
+$("#mode_sut_btn").addEventListener("click",  () => { showApp(); applyMode("sut"); });
+
+$("#mode_change_btn").addEventListener("click", () => {
+  if (currentUser) {
+    $("#landing_user_line").innerHTML =
+      "Giriş yapıldı: <strong>" + escapeHtml(currentUser.username) + "</strong>";
+  }
+  showLanding();
 });
 
-// ===== Calc tab =====
-const rationEl = $("#ration");
+// ===== Helpers =====
+function fmt(n, d) {
+  if (n === null || n === undefined || isNaN(n)) return "–";
+  return Number(n).toLocaleString("tr-TR", { minimumFractionDigits:d, maximumFractionDigits:d });
+}
+function statBox(lbl, val, unit) {
+  return '<div class="stat"><div class="label">'+lbl+'</div>'
+       + '<div class="value">'+val+' <span class="unit">'+(unit||"")+'</span></div></div>';
+}
+function escapeHtml(s) {
+  if (s === null || s === undefined) return "";
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function fmtDate(iso) {
+  if (!iso) return "–";
+  return new Date(iso).toLocaleString("tr-TR", { dateStyle:"short", timeStyle:"short" });
+}
 
-function buildSelect(selectedValue) {
-  const sel = document.createElement("select");
-  sel.className = "feed-select";
+// ===== Feed selects =====
+function buildSelect(list, sel) {
+  const el = document.createElement("select");
+  el.className = "feed-select";
   const blank = document.createElement("option");
   blank.value = ""; blank.textContent = "— Yem seçin —";
-  sel.appendChild(blank);
-  for (const f of feedsCache) {
-    const opt = document.createElement("option");
-    opt.value = f.name; opt.textContent = f.name;
-    if (f.name === selectedValue) opt.selected = true;
-    sel.appendChild(opt);
+  el.appendChild(blank);
+  for (const f of list) {
+    const o = document.createElement("option");
+    o.value = f.name; o.textContent = f.name;
+    if (f.name === sel) o.selected = true;
+    el.appendChild(o);
   }
-  return sel;
+  return el;
 }
+
+// ===== BESI ration rows =====
+const rationEl = $("#ration");
 
 function addRow(prefill) {
-  const rows = rationEl.querySelectorAll(".ration-row");
-  if (rows.length >= MAX_ROWS) return;
-  const wrap = document.createElement("div");
-  wrap.className = "ration-row";
-
-  const sel = buildSelect(prefill && prefill.feed_name);
+  if (rationEl.querySelectorAll(".ration-row").length >= MAX_ROWS) return;
+  const wrap = document.createElement("div"); wrap.className = "ration-row";
+  const sel = buildSelect(besiFeeds, prefill && prefill.feed_name);
   wrap.appendChild(sel);
-
   const kg = document.createElement("input");
-  kg.type = "number"; kg.min = "0"; kg.step = "0.1";
-  kg.inputMode = "decimal"; kg.placeholder = "kg/gün"; kg.className = "kg-input";
+  kg.type="number"; kg.min="0"; kg.step="0.1"; kg.inputMode="decimal";
+  kg.placeholder="kg/gün"; kg.className="kg-input";
   if (prefill && prefill.as_fed_kg) kg.value = prefill.as_fed_kg;
   wrap.appendChild(kg);
-
   const rm = document.createElement("button");
-  rm.type = "button"; rm.className = "remove-btn"; rm.textContent = "×"; rm.title = "Satırı sil";
-  rm.addEventListener("click", () => {
-    wrap.remove();
-    if (rationEl.children.length === 0) addRow();
-    updateAddButton();
-  });
+  rm.type="button"; rm.className="remove-btn"; rm.textContent="\xD7";
+  rm.addEventListener("click", () => { wrap.remove(); if(!rationEl.children.length) addRow(); updateAddBtn(); });
   wrap.appendChild(rm);
-
-  rationEl.appendChild(wrap);
-  updateAddButton();
+  rationEl.appendChild(wrap); updateAddBtn();
 }
-
-function updateAddButton() {
-  $("#add_row").disabled = rationEl.querySelectorAll(".ration-row").length >= MAX_ROWS;
-}
-
-function resetRows(prefillRows) {
+function updateAddBtn() { $("#add_row").disabled = rationEl.querySelectorAll(".ration-row").length >= MAX_ROWS; }
+function resetRows(pre) {
   rationEl.innerHTML = "";
-  if (prefillRows && prefillRows.length) {
-    prefillRows.slice(0, MAX_ROWS).forEach(r => addRow(r));
-    while (rationEl.children.length < INITIAL_ROWS && rationEl.children.length < MAX_ROWS) addRow();
-  } else {
-    for (let i = 0; i < INITIAL_ROWS; i++) addRow();
-  }
+  if (pre && pre.length) { pre.slice(0,MAX_ROWS).forEach(r=>addRow(r)); while(rationEl.children.length<INITIAL_ROWS&&rationEl.children.length<MAX_ROWS) addRow(); }
+  else { for(let i=0;i<INITIAL_ROWS;i++) addRow(); }
 }
-
 function gatherRation() {
   const items = [];
   rationEl.querySelectorAll(".ration-row").forEach(row => {
-    const name = row.querySelector(".feed-select").value;
-    const kg = parseFloat(row.querySelector(".kg-input").value);
-    if (name && !isNaN(kg) && kg > 0) items.push({ feed_name: name, as_fed_kg: kg });
+    const n = row.querySelector(".feed-select").value;
+    const k = parseFloat(row.querySelector(".kg-input").value);
+    if (n && !isNaN(k) && k>0) items.push({ feed_name:n, as_fed_kg:k });
   });
   return items;
 }
-
-function fmt(n, decimals) {
-  if (n === null || n === undefined || isNaN(n)) return "–";
-  return Number(n).toLocaleString("tr-TR", {
-    minimumFractionDigits: decimals, maximumFractionDigits: decimals,
+function rebuildRationDropdowns() {
+  rationEl.querySelectorAll(".ration-row").forEach(row => {
+    const old = row.querySelector(".feed-select");
+    old.replaceWith(buildSelect(besiFeeds, old.value));
   });
 }
-function statBox(label, value, unit) {
-  return `<div class="stat">
-    <div class="label">${label}</div>
-    <div class="value">${value} <span class="unit">${unit || ""}</span></div>
-  </div>`;
+
+// ===== DAIRY ration rows =====
+const dairyRationEl = $("#dairy_ration");
+
+function updateDairyRowStats(rowWrap) {
+  const feedName = rowWrap.querySelector(".feed-select").value;
+  const kg = parseFloat(rowWrap.querySelector(".kg-input").value) || 0;
+  const statsEl = rowWrap.querySelector(".dairy-row-stats");
+  if (!feedName || kg <= 0) { statsEl.hidden = true; return; }
+  const feed = dairyFeeds.find(f => f.name === feedName);
+  if (!feed) { statsEl.hidden = true; return; }
+  const dmKg = kg * (feed.dm_pct / 100);
+  const ufl  = feed.ufl_per_kg_dm  != null ? dmKg * feed.ufl_per_kg_dm : null;
+  const pdi  = feed.pdi_g_per_kg_dm != null ? dmKg * feed.pdi_g_per_kg_dm : dmKg * (feed.pdie || 0);
+  const hp   = dmKg * (feed.protein / 100) * 1000;
+  const ndf  = feed.ndf_pct != null ? dmKg * (feed.ndf_pct / 100) * 1000 : null;
+  statsEl.querySelector(".sr-dm").textContent  = dmKg.toFixed(2) + " kg";
+  statsEl.querySelector(".sr-ufl").textContent = ufl != null ? ufl.toFixed(2) : "–";
+  statsEl.querySelector(".sr-pdi").textContent = Math.round(pdi) + " g";
+  statsEl.querySelector(".sr-hp").textContent  = Math.round(hp)  + " g";
+  statsEl.querySelector(".sr-ndf").textContent = ndf != null ? Math.round(ndf) + " g" : "–";
+  statsEl.hidden = false;
 }
 
-function renderResults(data) {
-  $("#results-empty").hidden = true;
-  $("#results").hidden = false;
-  $("#save_btn").disabled = false;
+function addDairyRow(prefill) {
+  if (dairyRationEl.querySelectorAll(".dairy-row-wrap").length >= MAX_ROWS) return;
+  const wrap = document.createElement("div"); wrap.className = "dairy-row-wrap";
+  const top = document.createElement("div"); top.className = "dairy-row-top";
+  const sel = buildSelect(dairyFeeds, prefill && prefill.feed_name);
+  top.appendChild(sel);
+  const kg = document.createElement("input");
+  kg.type="number"; kg.min="0"; kg.step="0.1"; kg.inputMode="decimal";
+  kg.placeholder="kg/gün"; kg.className="kg-input";
+  if (prefill && prefill.as_fed_kg) kg.value = prefill.as_fed_kg;
+  top.appendChild(kg);
+  const rm = document.createElement("button");
+  rm.type="button"; rm.className="remove-btn"; rm.textContent="\xD7";
+  rm.addEventListener("click", () => { wrap.remove(); if(!dairyRationEl.children.length) addDairyRow(); updateDairyAddBtn(); });
+  top.appendChild(rm);
+  wrap.appendChild(top);
+  const stats = document.createElement("div");
+  stats.className = "dairy-row-stats"; stats.hidden = true;
+  stats.innerHTML =
+    '<div class="sr"><div class="sr-lbl">KM</div><div class="sr-val sr-dm">–</div></div>'+
+    '<div class="sr"><div class="sr-lbl">UFL</div><div class="sr-val sr-ufl">–</div></div>'+
+    '<div class="sr"><div class="sr-lbl">PDI</div><div class="sr-val sr-pdi">–</div></div>'+
+    '<div class="sr"><div class="sr-lbl">HP</div><div class="sr-val sr-hp">–</div></div>'+
+    '<div class="sr"><div class="sr-lbl">NDF</div><div class="sr-val sr-ndf">–</div></div>';
+  wrap.appendChild(stats);
+  sel.addEventListener("change", () => updateDairyRowStats(wrap));
+  kg.addEventListener("input",   () => updateDairyRowStats(wrap));
+  dairyRationEl.appendChild(wrap); updateDairyAddBtn();
+  if (prefill && prefill.as_fed_kg && prefill.feed_name) updateDairyRowStats(wrap);
+}
+function updateDairyAddBtn() { $("#dairy_add_row").disabled = dairyRationEl.querySelectorAll(".dairy-row-wrap").length >= MAX_ROWS; }
+function resetDairyRows(pre) {
+  dairyRationEl.innerHTML = "";
+  if (pre && pre.length) { pre.slice(0,MAX_ROWS).forEach(r=>addDairyRow(r)); while(dairyRationEl.children.length<INITIAL_ROWS&&dairyRationEl.children.length<MAX_ROWS) addDairyRow(); }
+  else { for(let i=0;i<INITIAL_ROWS;i++) addDairyRow(); }
+}
+function gatherDairyRation() {
+  const items = [];
+  dairyRationEl.querySelectorAll(".dairy-row-wrap").forEach(row => {
+    const n = row.querySelector(".feed-select").value;
+    const k = parseFloat(row.querySelector(".kg-input").value);
+    if (n && !isNaN(k) && k>0) items.push({ feed_name:n, as_fed_kg:k });
+  });
+  return items;
+}
+function rebuildDairyDropdowns() {
+  dairyRationEl.querySelectorAll(".dairy-row-wrap").forEach(row => {
+    const old = row.querySelector(".feed-select");
+    const newSel = buildSelect(dairyFeeds, old.value);
+    newSel.addEventListener("change", () => updateDairyRowStats(row));
+    old.replaceWith(newSel);
+    updateDairyRowStats(row);
+  });
+}
 
+// ===== BESI renderResults =====
+function renderResults(data) {
+  $("#results-empty").hidden = true; $("#results").hidden = false; $("#save_btn").disabled = false;
   const t = data.tmr_summary;
   $("#tmr_summary").innerHTML =
-    statBox("Toplam Yaş Madde", fmt(t.total_as_fed_kg, 2), "kg/gün") +
-    statBox("Toplam Kuru Madde", fmt(t.total_dm_kg, 2), "kg/gün") +
-    statBox("Rasyon KM%", fmt(t.ration_dm_pct, 1), "%") +
-    statBox("UFV / kg KM", fmt(t.ufv_per_kg_dm, 2), "") +
-    statBox("Protein (KM)", fmt(t.protein_pct_dm, 1), "%") +
-    statBox("Nişasta (KM)", fmt(t.starch_pct_dm, 1), "%");
-
+    statBox("Toplam Yaş Madde",  fmt(t.total_as_fed_kg,2), "kg/gün") +
+    statBox("Toplam Kuru Madde", fmt(t.total_dm_kg,2),     "kg/gün") +
+    statBox("Rasyon KM%",        fmt(t.ration_dm_pct,1),   "%") +
+    statBox("UFV / kg KM",       fmt(t.ufv_per_kg_dm,2),   "") +
+    statBox("Protein (KM)",      fmt(t.protein_pct_dm,1),  "%") +
+    statBox("Nişasta (KM)",      fmt(t.starch_pct_dm,1),   "%");
   const p = data.expected_performance;
   $("#performance_summary").innerHTML =
-    statBox("Beklenen KMT (DMI)", fmt(p.expected_dmi_kg, 2), "kg/gün") +
-    statBox("DMI / Canlı Ağırlık", fmt(p.dmi_pct_bw, 1), "%") +
-    statBox("Toplam UFV", fmt(p.ration_ufv_total_at_dmi, 2), "") +
-    statBox("Toplam PDI", fmt(p.ration_pdie_total_at_dmi_g, 0), "g/gün") +
-    statBox("UFV-bazlı tahmin", fmt(p.gain_ufv_limited_g, 0), "g/gün") +
-    statBox("PDI-bazlı tahmin", fmt(p.gain_pdi_limited_g, 0), "g/gün");
-
+    statBox("Beklenen KMT (DMI)",  fmt(p.expected_dmi_kg,2),            "kg/gün") +
+    statBox("DMI / Canlı Ağırlık", fmt(p.dmi_pct_bw,1),                 "%") +
+    statBox("Toplam UFV",           fmt(p.ration_ufv_total_at_dmi,2),    "") +
+    statBox("Toplam PDI",           fmt(p.ration_pdie_total_at_dmi_g,0), "g/gün") +
+    statBox("UFV-bazlı tahmin",     fmt(p.gain_ufv_limited_g,0),         "g/gün") +
+    statBox("PDI-bazlı tahmin",     fmt(p.gain_pdi_limited_g,0),         "g/gün");
   $("#estimated_gain").textContent = fmt(p.estimated_gain_g, 0);
   $("#bottleneck_note").innerHTML =
-    `Sınırlayıcı besin ögesi: <strong>${p.bottleneck}</strong> ` +
-    `(UFV ${fmt(p.gain_ufv_limited_g, 0)} g/gün, PDI ${fmt(p.gain_pdi_limited_g, 0)} g/gün)`;
+    "Sınırlayıcı besin ögesi: <strong>"+escapeHtml(p.bottleneck)+"</strong> " +
+    "(UFV "+fmt(p.gain_ufv_limited_g,0)+" g/gün, PDI "+fmt(p.gain_pdi_limited_g,0)+" g/gün)";
 
-  if (data.inra_comparison) {
+  // INRA — admin only
+  if (data.inra_comparison && currentUser && currentUser.is_admin) {
     const c = data.inra_comparison;
     $("#inra_card").hidden = false;
-    const ufvOk = c.ufv_met
-      ? '<span class="pill ok">Yeterli</span>' : '<span class="pill warn">Yetersiz</span>';
-    const pdiOk = c.pdi_met
-      ? '<span class="pill ok">Yeterli</span>' : '<span class="pill warn">Yetersiz</span>';
-    $("#inra_compare").innerHTML = `
-      <div class="head">Besin Ögesi</div><div class="head">Gerekli</div>
-      <div class="head">Sağlanan</div><div class="head">Durum</div>
-      <div>UFV</div><div>${fmt(c.ufv_required, 2)}</div>
-      <div>${fmt(c.ufv_provided, 2)}</div><div>${ufvOk}</div>
-      <div>PDI (g/gün)</div><div>${fmt(c.pdi_required_g, 0)}</div>
-      <div>${fmt(c.pdi_provided_g, 0)}</div><div>${pdiOk}</div>`;
-  } else {
-    $("#inra_card").hidden = true;
-  }
+    const ufvOk = c.ufv_met ? '<span class="pill ok">Yeterli</span>' : '<span class="pill warn">Yetersiz</span>';
+    const pdiOk = c.pdi_met ? '<span class="pill ok">Yeterli</span>' : '<span class="pill warn">Yetersiz</span>';
+    $("#inra_compare").innerHTML =
+      '<div class="head">Besin Ögesi</div><div class="head">Gerekli</div><div class="head">Sağlanan</div><div class="head">Durum</div>'+
+      '<div>UFV</div><div>'+fmt(c.ufv_required,2)+'</div><div>'+fmt(c.ufv_provided,2)+'</div><div>'+ufvOk+'</div>'+
+      '<div>PDI (g/gün)</div><div>'+fmt(c.pdi_required_g,0)+'</div><div>'+fmt(c.pdi_provided_g,0)+'</div><div>'+pdiOk+'</div>';
+  } else { $("#inra_card").hidden = true; }
 
-  // Admin-only ration detail table
+  // Detail — admin only
   if (currentUser && currentUser.is_admin && Array.isArray(data.rows)) {
     $("#detail_card").hidden = false;
-    const head = `<thead><tr>
-      <th>Yem</th><th>Yaş (kg)</th><th>KM (kg)</th>
-      <th>UFV</th><th>PDIE</th><th>Protein (kg)</th></tr></thead>`;
-    const body = data.rows.map(r => `<tr>
-      <td>${r.name}</td><td>${fmt(r.as_fed_kg, 2)}</td>
-      <td>${fmt(r.dm_kg, 2)}</td><td>${fmt(r.ufv, 2)}</td>
-      <td>${fmt(r.pdie, 0)}</td><td>${fmt(r.protein_kg, 2)}</td></tr>`).join("");
-    $("#detail_table").innerHTML = head + "<tbody>" + body + "</tbody>";
-  } else {
-    $("#detail_card").hidden = true;
-  }
+    const head = "<thead><tr><th>Yem</th><th>Yaş (kg)</th><th>KM (kg)</th><th>UFV</th><th>PDIE</th><th>Protein (kg)</th></tr></thead>";
+    const body = data.rows.map(r =>
+      "<tr><td>"+escapeHtml(r.name)+"</td><td>"+fmt(r.as_fed_kg,2)+"</td><td>"+fmt(r.dm_kg,2)+"</td>"+
+      "<td>"+fmt(r.ufv,2)+"</td><td>"+fmt(r.pdie,0)+"</td><td>"+fmt(r.protein_kg,2)+"</td></tr>"
+    ).join("");
+    $("#detail_table").innerHTML = head + "<tbody>"+body+"</tbody>";
+  } else { $("#detail_card").hidden = true; }
 
-  // On mobile, scroll into the result area; on desktop, the sticky panel is already visible.
-  if (window.innerWidth < 1024) {
-    $("#results").scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+  if (window.innerWidth < 1024) $("#results").scrollIntoView({ behavior:"smooth", block:"start" });
 }
 
+// ===== DAIRY renderDairyResults =====
+function renderDairyResults(data) {
+  $("#dairy-results-empty").hidden = true; $("#dairy-results").hidden = false; $("#dairy_save_btn").disabled = false;
+  const m = data.milk_estimate;
+  const limColor = m.limit_factor === "ENERJİ" ? "var(--blue-dark)" : "var(--warn)";
+  $("#milk_cards").innerHTML =
+    '<div class="milk-card"><div class="milk-lbl">Enerji Bazlı Tahmini Süt</div>'+
+    '<div class="milk-big">'+fmt(m.milk_by_energy_L,1)+'<span class="milk-unit"> L/gün</span></div></div>'+
+    '<div class="milk-card"><div class="milk-lbl">Protein Bazlı Tahmini Süt</div>'+
+    '<div class="milk-big">'+fmt(m.milk_by_pdi_L,1)+'<span class="milk-unit"> L/gün</span></div></div>'+
+    '<div class="milk-card predicted"><div class="milk-lbl">Tahmini Günlük Süt Üretimi</div>'+
+    '<div class="milk-big">'+fmt(m.predicted_milk_L,1)+'<span class="milk-unit"> L/gün</span></div>'+
+    '<div class="limit-badge">Sınırlayıcı faktör: <strong style="color:'+limColor+'">'+escapeHtml(m.limit_factor)+'</strong></div></div>';
+
+  const t = data.tmr_summary;
+  $("#dairy_tmr_summary").innerHTML =
+    statBox("Toplam Yaş Madde",  fmt(t.total_as_fed_kg,2), "kg/gün") +
+    statBox("Toplam Kuru Madde", fmt(t.total_dm_kg,2),     "kg/gün") +
+    statBox("Rasyon KM%",        fmt(t.ration_dm_pct,1),   "%") +
+    statBox("UFL / kg KM",       fmt(t.ufl_per_kg_dm,3),   "") +
+    statBox("HP (KM)",           fmt(t.hp_pct_dm,1),       "%") +
+    statBox("NDF (KM)",          fmt(t.ndf_pct_dm,1),      "%");
+
+  const maint = data.maintenance;
+  const netUfl = Math.max(0, t.total_ufl - maint.ufl);
+  const netPdi = Math.max(0, t.total_pdi_g - maint.pdi_g);
+  $("#dairy_maintenance").innerHTML =
+    statBox("Bakım UFV",     fmt(maint.ufl,2),   "UFL/gün") +
+    statBox("Bakım PDI",     fmt(maint.pdi_g,0), "g/gün") +
+    statBox("Toplam UFL",    fmt(t.total_ufl,2), "UFL/gün") +
+    statBox("Toplam PDI",    fmt(t.total_pdi_g,0),"g/gün") +
+    statBox("Net UFL (süt)", fmt(netUfl,2),       "UFL/gün") +
+    statBox("Net PDI (süt)", fmt(netPdi,0),        "g/gün");
+
+  if (currentUser && currentUser.is_admin && Array.isArray(data.rows)) {
+    $("#dairy_detail_card").hidden = false;
+    const head = "<thead><tr><th>Yem</th><th>Yaş (kg)</th><th>KM (kg)</th><th>UFL</th><th>PDI (g)</th><th>HP (g)</th><th>NDF (g)</th></tr></thead>";
+    const body = data.rows.map(r =>
+      "<tr><td>"+escapeHtml(r.name)+"</td><td>"+fmt(r.as_fed_kg,2)+"</td><td>"+fmt(r.dm_kg,2)+"</td>"+
+      "<td>"+fmt(r.ufl,2)+"</td><td>"+fmt(r.pdi_g,0)+"</td><td>"+fmt(r.hp_g,0)+"</td><td>"+fmt(r.ndf_g,0)+"</td></tr>"
+    ).join("");
+    $("#dairy_detail_table").innerHTML = head + "<tbody>"+body+"</tbody>";
+  } else { $("#dairy_detail_card").hidden = true; }
+
+  if (window.innerWidth < 1024) $("#dairy-results").scrollIntoView({ behavior:"smooth", block:"start" });
+}
+
+// ===== BESI Calculate =====
 async function calculate() {
   showError("");
-  const liveWeight = parseFloat($("#live_weight").value);
-  if (isNaN(liveWeight) || liveWeight <= 0) {
-    showError("Lütfen geçerli bir canlı ağırlık girin."); return;
-  }
-  const targetGainRaw = $("#target_gain").value;
-  const targetGain = targetGainRaw ? parseFloat(targetGainRaw) : null;
+  const lw = parseFloat($("#live_weight").value);
+  if (isNaN(lw) || lw <= 0) { showError("Lütfen geçerli bir canlı ağırlık girin."); return; }
+  const tgRaw = $("#target_gain").value;
+  const tg = tgRaw ? parseFloat(tgRaw) : null;
   const breed = $("#breed").value || null;
   const ration = gatherRation();
-  if (ration.length === 0) {
-    showError("Rasyona en az bir yem ve kg değeri girin."); return;
-  }
-
-  const btn = $("#calc_btn");
-  btn.disabled = true; btn.textContent = "Hesaplanıyor…";
+  if (!ration.length) { showError("Rasyona en az bir yem ve kg değeri girin."); return; }
+  const btn = $("#calc_btn"); btn.disabled=true; btn.textContent="Hesaplanıyor…";
   try {
-    const json = await api("/calculate", {
-      method: "POST",
-      body: JSON.stringify({ live_weight: liveWeight, target_gain: targetGain, breed, ration }),
-    });
-    lastResults = json;
-    lastInputs = { live_weight: liveWeight, target_gain: targetGain, breed, ration };
+    const json = await api("/calculate", { method:"POST",
+      body: JSON.stringify({ live_weight:lw, target_gain:tg, breed, ration }) });
+    lastResults=json; lastInputs={live_weight:lw,target_gain:tg,breed,ration};
     renderResults(json);
-  } catch (err) {
-    showError(err.message);
-  } finally {
-    btn.disabled = false; btn.textContent = "Hesapla";
-  }
+  } catch(err) { showError(err.message); }
+  finally { btn.disabled=false; btn.textContent="Hesapla"; }
 }
-
 $("#calc_btn").addEventListener("click", calculate);
 $("#add_row").addEventListener("click", () => addRow());
 $("#reset_btn").addEventListener("click", () => {
-  resetRows();
-  $("#results").hidden = true;
-  $("#results-empty").hidden = false;
-  $("#save_btn").disabled = true;
-  lastResults = null; lastInputs = null;
+  resetRows(); $("#results").hidden=true; $("#results-empty").hidden=false;
+  $("#save_btn").disabled=true; lastResults=null; lastInputs=null; showError("");
+});
+
+// ===== DAIRY Calculate =====
+async function dairyCalculate() {
   showError("");
-});
-
-// ===== Save ration =====
-$("#save_btn").addEventListener("click", async () => {
-  if (!lastResults || !lastInputs) {
-    showError("Önce bir hesaplama yapın."); return;
-  }
-  const customer = $("#customer_name").value.trim();
-  if (!customer) {
-    showError("Önce 'Rasyon Kimin İçin Yapıldı?' alanını doldurun.");
-    $("#customer_name").focus();
-    return;
-  }
-  const herd = $("#herd_name").value.trim();
-  const btn = $("#save_btn");
-  btn.disabled = true; btn.textContent = "Kaydediliyor…";
+  const lw = parseFloat($("#d_live_weight").value);
+  if (isNaN(lw) || lw <= 0) { showError("Lütfen geçerli bir canlı ağırlık girin."); return; }
+  const breed = $("#d_breed").value || null;
+  const ration = gatherDairyRation();
+  if (!ration.length) { showError("Rasyona en az bir yem ve kg değeri girin."); return; }
+  const btn = $("#dairy_calc_btn"); btn.disabled=true; btn.textContent="Hesaplanıyor…";
   try {
-    await api("/rations", {
-      method: "POST",
-      body: JSON.stringify({
-        customer_name: customer,
-        herd_name: herd || null,
-        live_weight: lastInputs.live_weight,
-        target_gain: lastInputs.target_gain,
-        breed: lastInputs.breed,
-        ration: lastInputs.ration,
-        results: lastResults,
-      }),
-    });
-    showInfo("Rasyon başarıyla kaydedildi.");
-  } catch (err) {
-    showError("Kaydedilemedi: " + err.message);
-  } finally {
-    btn.disabled = false; btn.textContent = "Kaydet";
-  }
+    const json = await api("/api/dairy/calculate", { method:"POST",
+      body: JSON.stringify({ live_weight:lw, breed, ration }) });
+    dairyLastResults=json; dairyLastInputs={live_weight:lw,breed,ration};
+    renderDairyResults(json);
+  } catch(err) { showError(err.message); }
+  finally { btn.disabled=false; btn.textContent="Hesapla"; }
+}
+$("#dairy_calc_btn").addEventListener("click", dairyCalculate);
+$("#dairy_add_row").addEventListener("click", () => addDairyRow());
+$("#dairy_reset_btn").addEventListener("click", () => {
+  resetDairyRows(); $("#dairy-results").hidden=true; $("#dairy-results-empty").hidden=false;
+  $("#dairy_save_btn").disabled=true; dairyLastResults=null; dairyLastInputs=null; showError("");
 });
 
-// ===== History tab =====
-function fmtDate(iso) {
-  if (!iso) return "–";
-  const d = new Date(iso);
-  return d.toLocaleString("tr-TR", { dateStyle: "short", timeStyle: "short" });
-}
+// ===== BESI Save =====
+$("#save_btn").addEventListener("click", async () => {
+  if (!lastResults||!lastInputs) { showError("Önce bir hesaplama yapın."); return; }
+  const customer = $("#customer_name").value.trim();
+  if (!customer) { showError("Önce 'Rasyon Kimin İçin Yapıldı?' alanını doldurun."); $("#customer_name").focus(); return; }
+  const btn = $("#save_btn"); btn.disabled=true; btn.textContent="Kaydediliyor…";
+  try {
+    await api("/rations", { method:"POST", body: JSON.stringify({
+      customer_name:customer, herd_name:$("#herd_name").value.trim()||null,
+      live_weight:lastInputs.live_weight, target_gain:lastInputs.target_gain,
+      breed:lastInputs.breed, ration:lastInputs.ration, results:lastResults, ration_type:"besi"
+    })});
+    showInfo("Rasyon başarıyla kaydedildi.");
+  } catch(err) { showError("Kaydedilemedi: "+err.message); }
+  finally { btn.disabled=false; btn.textContent="Kaydet"; }
+});
 
+// ===== DAIRY Save =====
+$("#dairy_save_btn").addEventListener("click", async () => {
+  if (!dairyLastResults||!dairyLastInputs) { showError("Önce bir hesaplama yapın."); return; }
+  const customer = $("#d_customer_name").value.trim();
+  if (!customer) { showError("Önce 'Rasyon Kimin İçin Yapıldı?' alanını doldurun."); $("#d_customer_name").focus(); return; }
+  const btn = $("#dairy_save_btn"); btn.disabled=true; btn.textContent="Kaydediliyor…";
+  try {
+    await api("/rations", { method:"POST", body: JSON.stringify({
+      customer_name:customer, herd_name:$("#d_herd_name").value.trim()||null,
+      live_weight:dairyLastInputs.live_weight, target_gain:null,
+      breed:dairyLastInputs.breed, ration:dairyLastInputs.ration,
+      results:dairyLastResults, ration_type:"sut"
+    })});
+    showInfo("Süt rasyonu başarıyla kaydedildi.");
+  } catch(err) { showError("Kaydedilemedi: "+err.message); }
+  finally { btn.disabled=false; btn.textContent="Kaydet"; }
+});
+
+// ===== History =====
 async function loadHistory() {
   const wrap = $("#history_container");
   wrap.innerHTML = '<div class="empty">Yükleniyor…</div>';
   try {
     const json = await api("/rations");
-    renderHistory(json.rations);
-  } catch (err) {
-    wrap.innerHTML = `<div class="error">${err.message}</div>`;
-  }
+    allHistoryRations = json.rations;
+    renderHistory(allHistoryRations);
+  } catch(err) { wrap.innerHTML = '<div class="error">'+escapeHtml(err.message)+'</div>'; }
 }
 
 function renderHistory(rations) {
+  const filter = $("#history_filter").value;
+  const filtered = filter === "all" ? rations : rations.filter(r => (r.ration_type||"besi") === filter);
   const wrap = $("#history_container");
-  if (!rations.length) {
-    wrap.innerHTML = '<div class="empty">Henüz kayıtlı rasyon yok.</div>';
-    return;
-  }
+  if (!filtered.length) { wrap.innerHTML='<div class="empty">Gösterilecek kayıt yok.</div>'; return; }
   const showUser = currentUser.is_admin;
-  const head = `<thead><tr>
-    <th>Tarih</th>
-    ${showUser ? "<th>Hesaplayan</th>" : ""}
-    <th>Müşteri</th>
-    <th>Sürü/Not</th>
-    <th>CA (kg)</th>
-    <th>Hedef</th>
-    <th>Tahmini</th>
-    <th>Irk</th>
-    <th></th>
-  </tr></thead>`;
-  const body = rations.map(r => {
-    const estGain = r.results && r.results.expected_performance
-      ? r.results.expected_performance.estimated_gain_g : null;
+  const head = "<thead><tr>" +
+    "<th>Tarih</th>" + (showUser?"<th>Hesaplayan</th>":"") +
+    "<th>Tür</th><th>Müşteri</th><th>Sürü/Not</th><th>CA (kg)</th><th>Sonuç</th><th>Irk</th><th></th>" +
+    "</tr></thead>";
+  const body = filtered.map(r => {
+    const type = r.ration_type || "besi";
+    const typeBadge = type === "sut"
+      ? '<span class="pill blue">SÜT</span>'
+      : '<span class="pill green">BESİ</span>';
+    let resultStr = "—";
+    if (type === "sut" && r.results && r.results.milk_estimate)
+      resultStr = fmt(r.results.milk_estimate.predicted_milk_L, 1) + " L/gün";
+    else if (r.results && r.results.expected_performance)
+      resultStr = fmt(r.results.expected_performance.estimated_gain_g, 0) + " g/gün";
     const canDelete = r.owned || currentUser.is_admin;
-    return `<tr data-id="${r.id}">
-      <td>${fmtDate(r.created_at)}</td>
-      ${showUser ? `<td>${escapeHtml(r.username)}</td>` : ""}
-      <td>${escapeHtml(r.customer_name) || "—"}</td>
-      <td>${escapeHtml(r.herd_name) || "—"}</td>
-      <td>${fmt(r.live_weight, 0)}</td>
-      <td>${r.target_gain ? fmt(r.target_gain, 0) + " g" : "—"}</td>
-      <td>${estGain != null ? fmt(estGain, 0) + " g" : "—"}</td>
-      <td>${escapeHtml(r.breed) || "—"}</td>
-      <td>${canDelete ? '<button class="btn danger small del-btn" data-id="' + r.id + '" type="button">Sil</button>' : ""}</td>
-    </tr>`;
+    return '<tr data-id="'+r.id+'" data-type="'+type+'">'+
+      "<td>"+fmtDate(r.created_at)+"</td>"+
+      (showUser?"<td>"+escapeHtml(r.username)+"</td>":"")+
+      "<td>"+typeBadge+"</td>"+
+      "<td>"+(escapeHtml(r.customer_name)||"—")+"</td>"+
+      "<td>"+(escapeHtml(r.herd_name)||"—")+"</td>"+
+      "<td>"+fmt(r.live_weight,0)+"</td>"+
+      "<td>"+resultStr+"</td>"+
+      "<td>"+(escapeHtml(r.breed)||"—")+"</td>"+
+      "<td>"+(canDelete?'<button class="btn danger small del-btn" data-id="'+r.id+'" type="button">Sil</button>':"")+
+      "</td></tr>";
   }).join("");
-  wrap.innerHTML = `<div class="scroll-x"><table class="list" id="history_table">${head}<tbody>${body}</tbody></table></div>`;
+  wrap.innerHTML = '<div class="scroll-x"><table class="list" id="history_table">'+head+'<tbody>'+body+'</tbody></table></div>';
 
   $("#history_table tbody").addEventListener("click", (e) => {
     if (e.target.classList.contains("del-btn")) return;
-    const tr = e.target.closest("tr");
-    if (!tr) return;
-    const id = parseInt(tr.dataset.id, 10);
-    const r = rations.find(x => x.id === id);
-    if (r) loadRationIntoForm(r);
+    const tr = e.target.closest("tr"); if (!tr) return;
+    const id = parseInt(tr.dataset.id,10);
+    const rType = tr.dataset.type;
+    const r = filtered.find(x => x.id === id);
+    if (r) { if(rType==="sut") loadDairyRationIntoForm(r); else loadRationIntoForm(r); }
   });
   $$("#history_table .del-btn").forEach(b => {
     b.addEventListener("click", async (e) => {
       e.stopPropagation();
       if (!confirm("Bu rasyonu silmek istediğinize emin misiniz?")) return;
-      try {
-        await api("/rations/" + b.dataset.id, { method: "DELETE" });
-        await loadHistory();
-      } catch (err) { showError(err.message); }
+      try { await api("/rations/"+b.dataset.id, {method:"DELETE"}); await loadHistory(); }
+      catch(err) { showError(err.message); }
     });
   });
 }
-
-function escapeHtml(s) {
-  if (!s) return "";
-  return String(s).replace(/[&<>"']/g, c => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  }[c]));
-}
+$("#history_filter").addEventListener("change", () => renderHistory(allHistoryRations));
 
 function loadRationIntoForm(r) {
-  switchTab("calc");
-  $("#customer_name").value = r.customer_name || "";
-  $("#herd_name").value = r.herd_name || "";
-  $("#live_weight").value = r.live_weight || "";
-  $("#target_gain").value = r.target_gain || "";
-  $("#breed").value = r.breed || "";
-  resetRows(r.ration);
+  applyMode("besi");
+  $("#customer_name").value = r.customer_name||""; $("#herd_name").value = r.herd_name||"";
+  $("#live_weight").value = r.live_weight||""; $("#target_gain").value = r.target_gain||"";
+  $("#breed").value = r.breed||""; resetRows(r.ration);
   if (r.results) {
-    lastResults = r.results;
-    lastInputs = {
-      live_weight: r.live_weight, target_gain: r.target_gain, breed: r.breed, ration: r.ration,
-    };
+    lastResults=r.results; lastInputs={live_weight:r.live_weight,target_gain:r.target_gain,breed:r.breed,ration:r.ration};
     renderResults(r.results);
-  } else {
-    $("#results").hidden = true;
-    $("#results-empty").hidden = false;
-    $("#save_btn").disabled = true;
-  }
-  showInfo("Rasyon yüklendi. Düzenleyip yeniden hesaplayabilirsiniz.");
+  } else { $("#results").hidden=true; $("#results-empty").hidden=false; $("#save_btn").disabled=true; }
+  showInfo("Besi rasyonu yüklendi. Düzenleyip yeniden hesaplayabilirsiniz.");
+}
+function loadDairyRationIntoForm(r) {
+  applyMode("sut");
+  $("#d_customer_name").value = r.customer_name||""; $("#d_herd_name").value = r.herd_name||"";
+  $("#d_live_weight").value = r.live_weight||""; $("#d_breed").value = r.breed||"";
+  resetDairyRows(r.ration);
+  if (r.results) {
+    dairyLastResults=r.results; dairyLastInputs={live_weight:r.live_weight,breed:r.breed,ration:r.ration};
+    renderDairyResults(r.results);
+  } else { $("#dairy-results").hidden=true; $("#dairy-results-empty").hidden=false; $("#dairy_save_btn").disabled=true; }
+  showInfo("Süt rasyonu yüklendi. Düzenleyip yeniden hesaplayabilirsiniz.");
 }
 
-// ===== Admin tab =====
+// ===== Admin =====
+function numOrNull(id) { const v=($("#"+id)||{}).value; if(v===""||v===null)return null; const n=parseFloat(v); return isNaN(n)?null:n; }
+function numOrZero(id) { const v=($("#"+id)||{}).value; return v===""?0:(parseFloat(v)||0); }
+
+function buildFeedPayload(p) {
+  return {
+    name:    ($("#"+p+"name").value||"").trim(),
+    dm_pct:  numOrZero(p+"dm_pct"), ufv:numOrZero(p+"ufv"),
+    protein: numOrZero(p+"protein"), pdie:numOrZero(p+"pdie"), pdin:numOrZero(p+"pdin"),
+    cf:numOrZero(p+"cf"), fat:numOrZero(p+"fat"), ash:numOrZero(p+"ash"), starch:numOrZero(p+"starch"),
+    category: $("#"+p+"category").value||"besi",
+    ufl_per_kg_dm:   numOrNull(p+"ufl_per_kg_dm"),
+    pdi_g_per_kg_dm: numOrNull(p+"pdi_g_per_kg_dm"),
+    ndf_pct:         numOrNull(p+"ndf_pct"),
+    ca_pct:          numOrNull(p+"ca_pct"),
+    p_pct:           numOrNull(p+"p_pct"),
+    rdp_pct_of_cp:   numOrNull(p+"rdp_pct_of_cp"),
+    rup_pct_of_cp:   numOrNull(p+"rup_pct_of_cp"),
+    note: ($("#"+p+"note").value||"").trim()||null,
+  };
+}
+function validateFeedPayload(pl) {
+  if (!pl.name) return "Yem adı zorunlu.";
+  if (pl.category==="sut"||pl.category==="common") {
+    if (pl.ufl_per_kg_dm==null) return "Süt/Ortak yemler için UFL/kg KM zorunlu.";
+    if (pl.pdi_g_per_kg_dm==null) return "Süt/Ortak yemler için PDI g/kg KM zorunlu.";
+    if (pl.ndf_pct==null) return "Süt/Ortak yemler için NDF% zorunlu.";
+  }
+  return null;
+}
+
 function clearFeedForm() {
-  ["f_name","f_dm_pct","f_ufv","f_protein","f_pdie","f_pdin","f_starch","f_cf","f_fat","f_ash"]
-    .forEach(id => { $("#" + id).value = ""; });
+  ["f_name","f_dm_pct","f_ufv","f_protein","f_pdie","f_pdin","f_starch","f_cf","f_fat","f_ash",
+   "f_ufl_per_kg_dm","f_pdi_g_per_kg_dm","f_ndf_pct","f_ca_pct","f_p_pct","f_rdp_pct_of_cp","f_rup_pct_of_cp","f_note"]
+  .forEach(id => { const el=$("#"+id); if(el) el.value=""; });
+  const cat = $("#f_category"); if(cat) cat.value="besi";
 }
 $("#clear_feed_btn").addEventListener("click", clearFeedForm);
 
 $("#add_feed_btn").addEventListener("click", async () => {
-  if (!currentUser || !currentUser.is_admin) return;
-  const num = (id) => {
-    const v = $("#" + id).value;
-    return v === "" ? 0 : parseFloat(v);
-  };
-  const name = $("#f_name").value.trim();
-  if (!name) { showError("Yem adı zorunlu."); return; }
-  const btn = $("#add_feed_btn");
-  btn.disabled = true; btn.textContent = "Ekleniyor…";
+  if (!currentUser||!currentUser.is_admin) return;
+  const pl = buildFeedPayload("f_");
+  const err = validateFeedPayload(pl);
+  if (err) { showError(err); return; }
+  const btn = $("#add_feed_btn"); btn.disabled=true; btn.textContent="Ekleniyor…";
   try {
-    await api("/feeds", {
-      method: "POST",
-      body: JSON.stringify({
-        name,
-        dm_pct: num("f_dm_pct"), ufv: num("f_ufv"), protein: num("f_protein"),
-        pdie: num("f_pdie"), pdin: num("f_pdin"),
-        cf: num("f_cf"), fat: num("f_fat"), ash: num("f_ash"), starch: num("f_starch"),
-      }),
-    });
-    clearFeedForm();
-    showInfo("Yem eklendi.");
-    await refreshFeeds();
-    loadFeedsTable();
-    rebuildRationDropdowns();
-  } catch (err) { showError(err.message); }
-  finally { btn.disabled = false; btn.textContent = "Ekle"; }
+    await api("/feeds", { method:"POST", body:JSON.stringify(pl) });
+    clearFeedForm(); showInfo("Yem eklendi.");
+    await refreshFeeds(); loadFeedsTable(); rebuildRationDropdowns(); rebuildDairyDropdowns();
+  } catch(err) { showError(err.message); }
+  finally { btn.disabled=false; btn.textContent="Ekle"; }
 });
 
 async function loadFeedsTable() {
-  if (!currentUser || !currentUser.is_admin) return;
+  if (!currentUser||!currentUser.is_admin) return;
   await refreshFeeds();
-  const head = `<thead><tr>
-    <th>Yem</th><th>KM%</th><th>UFV</th><th>Prot%</th>
-    <th>PDIE</th><th>PDIN</th><th>Nişasta%</th><th>Tip</th><th></th></tr></thead>`;
-  const body = feedsCache.map(f => `<tr>
-    <td>${escapeHtml(f.name)}</td>
-    <td>${fmt(f.dm_pct, 1)}</td>
-    <td>${fmt(f.ufv, 3)}</td>
-    <td>${fmt(f.protein, 1)}</td>
-    <td>${fmt(f.pdie, 1)}</td>
-    <td>${fmt(f.pdin, 1)}</td>
-    <td>${fmt(f.starch, 1)}</td>
-    <td>${f.is_custom
-      ? '<span class="pill warn">Özel</span>'
-      : '<span class="pill muted">Sistem</span>'}</td>
-    <td>${f.is_custom
-      ? '<button class="btn small edit-feed-btn" data-id="' + f.id + '" type="button">Düzenle</button> ' +
-        '<button class="btn danger small del-feed-btn" data-id="' + f.id + '" type="button">Sil</button>'
-      : ""}</td>
-  </tr>`).join("");
-  $("#feeds_table").innerHTML = head + "<tbody>" + body + "</tbody>";
-
+  const catLabel = {besi:'<span class="pill muted">Besi</span>',sut:'<span class="pill blue">Süt</span>',common:'<span class="pill ok">Ortak</span>'};
+  const head = "<thead><tr><th>Yem</th><th>KM%</th><th>UFV</th><th>Prot%</th><th>PDIE</th><th>PDIN</th><th>Nis%</th><th>Kat.</th><th>Tip</th><th></th></tr></thead>";
+  const body = feedsCache.map(f =>
+    "<tr><td>"+escapeHtml(f.name)+"</td>"+
+    "<td>"+fmt(f.dm_pct,1)+"</td><td>"+fmt(f.ufv,3)+"</td><td>"+fmt(f.protein,1)+"</td>"+
+    "<td>"+fmt(f.pdie,1)+"</td><td>"+fmt(f.pdin,1)+"</td><td>"+fmt(f.starch,1)+"</td>"+
+    "<td>"+(catLabel[f.category]||catLabel.besi)+"</td>"+
+    "<td>"+(f.is_custom?'<span class="pill warn">Özel</span>':'<span class="pill muted">Sistem</span>')+"</td>"+
+    "<td>"+
+      '<button class="btn small edit-feed-btn" data-id="'+f.id+'" type="button">Düzenle</button> '+
+      '<button class="btn danger small del-feed-btn" data-id="'+f.id+'" data-name="'+escapeHtml(f.name)+'" type="button">Sil</button>'+
+    "</td></tr>"
+  ).join("");
+  $("#feeds_table").innerHTML = head + "<tbody>"+body+"</tbody>";
   $$("#feeds_table .del-feed-btn").forEach(b => {
     b.addEventListener("click", async () => {
-      if (!confirm("Bu özel yemi silmek istediğinize emin misiniz?")) return;
+      const name = b.dataset.name||"bu yem";
+      if (!confirm('Bu yemi silmek istediğinizden emin misiniz?\n\n"'+name+'"\n\nSilinen yemler geri getirilemez.')) return;
       try {
-        await api("/feeds/" + b.dataset.id, { method: "DELETE" });
-        await refreshFeeds();
-        loadFeedsTable();
-        rebuildRationDropdowns();
-      } catch (err) { showError(err.message); }
+        await api("/feeds/"+b.dataset.id, {method:"DELETE"});
+        showInfo("Yem silindi."); await refreshFeeds(); loadFeedsTable(); rebuildRationDropdowns(); rebuildDairyDropdowns();
+      } catch(err) { showError(err.message); }
     });
   });
   $$("#feeds_table .edit-feed-btn").forEach(b => {
-    b.addEventListener("click", () => openEditFeed(parseInt(b.dataset.id, 10)));
+    b.addEventListener("click", () => openEditFeed(parseInt(b.dataset.id,10)));
   });
 }
 
 function openEditFeed(feedId) {
-  const feed = feedsCache.find(f => f.id === feedId);
-  if (!feed || !feed.is_custom) return;
+  const feed = feedsCache.find(f => f.id === feedId); if (!feed) return;
   editingFeedId = feedId;
-  $("#e_name").value = feed.name;
-  $("#e_dm_pct").value = feed.dm_pct;
-  $("#e_ufv").value = feed.ufv;
-  $("#e_protein").value = feed.protein;
-  $("#e_pdie").value = feed.pdie;
-  $("#e_pdin").value = feed.pdin;
-  $("#e_starch").value = feed.starch;
-  $("#e_cf").value = feed.cf;
-  $("#e_fat").value = feed.fat;
-  $("#e_ash").value = feed.ash;
+  $("#edit_modal_error").style.display = "none";
+  $("#edit_modal_note").textContent = feed.is_custom
+    ? "Özel yem düzenleniyor. Değişiklikler tüm gelecek hesaplamalarda geçerli olur."
+    : "Sistem yemi düzenleniyor. Değişiklikler kalıcıdır ve tüm gelecek hesaplamalarda geçerli olur.";
+  $("#e_name").value=feed.name; $("#e_dm_pct").value=feed.dm_pct;
+  $("#e_ufv").value=feed.ufv; $("#e_protein").value=feed.protein;
+  $("#e_pdie").value=feed.pdie; $("#e_pdin").value=feed.pdin;
+  $("#e_starch").value=feed.starch; $("#e_cf").value=feed.cf;
+  $("#e_fat").value=feed.fat; $("#e_ash").value=feed.ash;
+  $("#e_category").value = feed.category||"besi";
+  $("#e_ufl_per_kg_dm").value   = feed.ufl_per_kg_dm   != null ? feed.ufl_per_kg_dm   : "";
+  $("#e_pdi_g_per_kg_dm").value = feed.pdi_g_per_kg_dm != null ? feed.pdi_g_per_kg_dm : "";
+  $("#e_ndf_pct").value         = feed.ndf_pct         != null ? feed.ndf_pct         : "";
+  $("#e_ca_pct").value          = feed.ca_pct          != null ? feed.ca_pct          : "";
+  $("#e_p_pct").value           = feed.p_pct           != null ? feed.p_pct           : "";
+  $("#e_rdp_pct_of_cp").value   = feed.rdp_pct_of_cp   != null ? feed.rdp_pct_of_cp   : "";
+  $("#e_rup_pct_of_cp").value   = feed.rup_pct_of_cp   != null ? feed.rup_pct_of_cp   : "";
+  $("#e_note").value = feed.note||"";
   $("#edit-modal").hidden = false;
 }
-
-$("#edit_cancel").addEventListener("click", () => {
-  $("#edit-modal").hidden = true;
-  editingFeedId = null;
-});
-
+$("#edit_cancel").addEventListener("click", () => { $("#edit-modal").hidden=true; editingFeedId=null; });
 $("#edit_save").addEventListener("click", async () => {
-  if (editingFeedId == null) return;
-  const num = (id) => {
-    const v = $("#" + id).value;
-    return v === "" ? 0 : parseFloat(v);
-  };
-  const name = $("#e_name").value.trim();
-  if (!name) { alert("Yem adı zorunlu."); return; }
-  const btn = $("#edit_save");
-  btn.disabled = true; btn.textContent = "Kaydediliyor…";
+  if (editingFeedId==null) return;
+  const pl = buildFeedPayload("e_");
+  const errEl = $("#edit_modal_error"); errEl.style.display="none";
+  const err = validateFeedPayload(pl);
+  if (err) { errEl.textContent=err; errEl.style.display="block"; return; }
+  const btn = $("#edit_save"); btn.disabled=true; btn.textContent="Kaydediliyor…";
   try {
-    await api("/feeds/" + editingFeedId, {
-      method: "PUT",
-      body: JSON.stringify({
-        name,
-        dm_pct: num("e_dm_pct"), ufv: num("e_ufv"), protein: num("e_protein"),
-        pdie: num("e_pdie"), pdin: num("e_pdin"),
-        cf: num("e_cf"), fat: num("e_fat"), ash: num("e_ash"), starch: num("e_starch"),
-      }),
-    });
-    $("#edit-modal").hidden = true;
-    editingFeedId = null;
-    showInfo("Yem güncellendi.");
-    await refreshFeeds();
-    loadFeedsTable();
-    rebuildRationDropdowns();
-  } catch (err) { alert(err.message); }
-  finally { btn.disabled = false; btn.textContent = "Kaydet"; }
+    await api("/feeds/"+editingFeedId, {method:"PUT", body:JSON.stringify(pl)});
+    $("#edit-modal").hidden=true; editingFeedId=null; showInfo("Yem güncellendi.");
+    await refreshFeeds(); loadFeedsTable(); rebuildRationDropdowns(); rebuildDairyDropdowns();
+  } catch(err) { errEl.textContent=err.message; errEl.style.display="block"; }
+  finally { btn.disabled=false; btn.textContent="Kaydet"; }
 });
-
-function rebuildRationDropdowns() {
-  rationEl.querySelectorAll(".ration-row").forEach(row => {
-    const oldSel = row.querySelector(".feed-select");
-    const oldVal = oldSel.value;
-    const newSel = buildSelect(oldVal);
-    oldSel.replaceWith(newSel);
-  });
-}
 
 // ===== Bootstrap =====
 async function refreshFeeds() {
   const json = await api("/feeds");
-  feedsCache = json.feeds;
+  feedsCache  = json.feeds;
+  besiFeeds   = json.feeds.filter(f => !f.category || f.category==="besi" || f.category==="common");
+  dairyFeeds  = json.feeds.filter(f => f.category==="sut" || f.category==="common");
   breedsCache = json.breeds;
 }
 
-async function bootstrapApp() {
-  showApp();
-  showError("");
-  if (!currentUser) {
-    currentUser = await api("/auth/me");
-  }
+async function bootstrapApp(fromLogin) {
+  showApp(); showError("");
+  if (!currentUser) currentUser = await api("/auth/me");
   $("#who_name").textContent = currentUser.username;
   $("#who_admin_badge").hidden = !currentUser.is_admin;
-  $("#admin_tab_btn").hidden = !currentUser.is_admin;
+  $("#admin_tab_btn").hidden   = !currentUser.is_admin;
 
   await refreshFeeds();
-  const breedSel = $("#breed");
-  breedSel.innerHTML = '<option value="">— Seçin —</option>' +
-    breedsCache.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join("");
-  resetRows();
+  const breedOpts = '<option value="">— Seçin —</option>' +
+    breedsCache.map(b => '<option value="'+escapeHtml(b)+'">'+escapeHtml(b)+'</option>').join("");
+  $("#breed").innerHTML = breedOpts;
+  $("#d_breed").innerHTML = breedOpts;
 
-  // Reset results state
-  $("#results").hidden = true;
-  $("#results-empty").hidden = false;
-  $("#save_btn").disabled = true;
-  lastResults = null; lastInputs = null;
-  switchTab("calc");
+  resetRows(); resetDairyRows();
+  $("#results").hidden=true; $("#results-empty").hidden=false; $("#save_btn").disabled=true;
+  $("#dairy-results").hidden=true; $("#dairy-results-empty").hidden=false; $("#dairy_save_btn").disabled=true;
+  lastResults=null; lastInputs=null; dairyLastResults=null; dairyLastInputs=null;
+
+  const urlMode  = new URLSearchParams(window.location.search).get("mode");
+  const savedMode = localStorage.getItem(MODE_KEY);
+  const detected  = urlMode || savedMode;
+
+  if (fromLogin || !detected) {
+    if (currentUser) $("#landing_user_line").innerHTML = "Giriş yapıldı: <strong>"+escapeHtml(currentUser.username)+"</strong>";
+    showLanding();
+  } else {
+    showApp();
+    applyMode(detected === "sut" ? "sut" : "besi");
+  }
 }
 
 (async function init() {
   if (!token) { showLogin(); return; }
-  try {
-    await bootstrapApp();
-  } catch (err) {
-    // 401 already handled by api(); other errors here mean offline/etc.
-    if (token) {
-      showError("Bağlantı hatası: " + err.message);
-    }
-  }
+  try { await bootstrapApp(false); }
+  catch(err) { if(token) showError("Bağlantı hatası: "+err.message); else showLogin(); }
 })();
 </script>
 </body>

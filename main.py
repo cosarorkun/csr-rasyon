@@ -5,10 +5,11 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from auth import (
@@ -18,6 +19,7 @@ from auth import (
     verify_password,
 )
 from calculator import CalculationError, calculate
+from dairy_calculator import DairyCalculationError, calculate_dairy
 from data import BREEDS
 from database import Feed, SavedRation, User, feed_to_dict, get_db, init_db
 
@@ -64,6 +66,12 @@ class CalculateRequest(BaseModel):
     ration: List[RationItem]
 
 
+class DairyCalculateRequest(BaseModel):
+    live_weight: float = Field(gt=0)
+    breed: Optional[str] = None
+    ration: List[RationItem]
+
+
 class SaveRationRequest(BaseModel):
     customer_name: Optional[str] = None
     herd_name: Optional[str] = None
@@ -72,6 +80,7 @@ class SaveRationRequest(BaseModel):
     breed: Optional[str] = None
     ration: List[dict]
     results: dict
+    ration_type: str = "besi"
 
 
 class FeedCreateRequest(BaseModel):
@@ -85,6 +94,15 @@ class FeedCreateRequest(BaseModel):
     fat: float = Field(default=0, ge=0)
     ash: float = Field(default=0, ge=0)
     starch: float = Field(default=0, ge=0)
+    category: str = Field(default="besi")
+    rdp_pct_of_cp: Optional[float] = Field(default=None, ge=0, le=100)
+    rup_pct_of_cp: Optional[float] = Field(default=None, ge=0, le=100)
+    pdi_g_per_kg_dm: Optional[float] = Field(default=None, ge=0)
+    ufl_per_kg_dm: Optional[float] = Field(default=None, ge=0)
+    ndf_pct: Optional[float] = Field(default=None, ge=0, le=100)
+    ca_pct: Optional[float] = Field(default=None, ge=0)
+    p_pct: Optional[float] = Field(default=None, ge=0)
+    note: Optional[str] = None
 
 
 # --- Public routes ---
@@ -116,11 +134,20 @@ def me(user: User = Depends(get_current_user)):
 
 @app.get("/feeds")
 def list_feeds(
+    category: Optional[str] = Query(default=None),
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """All feeds visible to all authenticated users (needed for the dropdown)."""
-    feeds = db.query(Feed).order_by(Feed.name).all()
+    """Return feeds filtered by category.
+
+    - category='besi'  → feeds where category='besi' OR 'common'
+    - category='sut'   → feeds where category='sut'  OR 'common'
+    - no category      → all feeds (used by admin table)
+    """
+    q = db.query(Feed)
+    if category:
+        q = q.filter(or_(Feed.category == category, Feed.category == "common"))
+    feeds = q.order_by(Feed.name).all()
     return {
         "feeds": [feed_to_dict(f) for f in feeds],
         "breeds": BREEDS,
@@ -151,17 +178,15 @@ def update_feed(
     admin: User = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
-    """Update a custom feed's values. System feeds are read-only by policy."""
     feed = db.query(Feed).filter(Feed.id == feed_id).first()
     if feed is None:
         raise HTTPException(status_code=404, detail="Yem bulunamadı.")
-    if not feed.is_custom:
-        raise HTTPException(
-            status_code=400,
-            detail="Sistem yemleri düzenlenemez. Yalnızca özel yemler güncellenebilir.",
-        )
     if req.name != feed.name:
-        clash = db.query(Feed).filter(Feed.name == req.name, Feed.id != feed_id).first()
+        clash = (
+            db.query(Feed)
+            .filter(Feed.name == req.name, Feed.id != feed_id)
+            .first()
+        )
         if clash:
             raise HTTPException(
                 status_code=400, detail=f"'{req.name}' adlı yem zaten mevcut."
@@ -182,14 +207,12 @@ def delete_feed(
     feed = db.query(Feed).filter(Feed.id == feed_id).first()
     if feed is None:
         raise HTTPException(status_code=404, detail="Yem bulunamadı.")
-    if not feed.is_custom:
-        raise HTTPException(status_code=400, detail="Sistem yemleri silinemez.")
     db.delete(feed)
     db.commit()
     return {"ok": True}
 
 
-# --- Calculate ---
+# --- Calculate (beef) ---
 
 @app.post("/calculate")
 def calculate_endpoint(
@@ -210,6 +233,25 @@ def calculate_endpoint(
         raise HTTPException(status_code=400, detail=str(exc))
 
 
+# --- Calculate (dairy) ---
+
+@app.post("/api/dairy/calculate")
+def dairy_calculate_endpoint(
+    req: DairyCalculateRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    feeds_by_name = {f.name: feed_to_dict(f) for f in db.query(Feed).all()}
+    try:
+        return calculate_dairy(
+            live_weight=req.live_weight,
+            ration=[item.model_dump() for item in req.ration],
+            feeds_by_name=feeds_by_name,
+        )
+    except DairyCalculationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
 # --- Saved rations ---
 
 @app.post("/rations")
@@ -227,6 +269,7 @@ def save_ration(
         breed=req.breed,
         ration_json=json.dumps(req.ration, ensure_ascii=False),
         results_json=json.dumps(req.results, ensure_ascii=False),
+        ration_type=req.ration_type or "besi",
     )
     db.add(saved)
     db.commit()
@@ -259,6 +302,7 @@ def list_rations(
             "results": json.loads(r.results_json),
             "username": username,
             "owned": r.user_id == user.id,
+            "ration_type": r.ration_type or "besi",
         })
     return {"rations": out}
 
