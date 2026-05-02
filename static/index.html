@@ -1259,7 +1259,13 @@ function renderDairyResults(data) {
     '<div class="limit-badge">Sınırlayıcı faktör: <strong style="color:'+limColor+'">'+escapeHtml(m.limit_factor)+'</strong></div></div>';
 
   const t = data.tmr_summary;
-  const dCostBox = t.total_cost_tl > 0
+  const dNdfBox    = t.ndf_pct_dm    != null ? statBox("NDF (KM)",    fmt(t.ndf_pct_dm,1),   "%") : "";
+  const dNfcBox    = t.nfc_pct_dm    != null ? statBox("NFC (KM)",    fmt(t.nfc_pct_dm,1),   "%") : "";
+  const dEndfBox   = t.endf_pct_dm   != null ? statBox("eNDF (KM)",   fmt(t.endf_pct_dm,1),  "%") : "";
+  const dCaBox     = t.ca_pct_dm     != null ? statBox("Ca (KM)",     fmt(t.ca_pct_dm,2),    "%") : "";
+  const dPBox      = t.p_pct_dm      != null ? statBox("P (KM)",      fmt(t.p_pct_dm,2),     "%") : "";
+  const dStarchBox = t.starch_pct_dm != null ? statBox("Nişasta (KM)",fmt(t.starch_pct_dm,1),"%") : "";
+  const dCostBox   = t.total_cost_tl > 0
     ? statBox("Rasyon Maliyeti", fmt(t.total_cost_tl,2), "TL/gün") +
       statBox("Maliyet / kg KM", fmt(t.cost_per_kg_dm,2), "TL/kg") : "";
   $("#dairy_tmr_summary").innerHTML =
@@ -1267,20 +1273,20 @@ function renderDairyResults(data) {
     statBox("Toplam Kuru Madde", fmt(t.total_dm_kg,2),     "kg/gün") +
     statBox("Rasyon KM%",        fmt(t.ration_dm_pct,1),   "%") +
     statBox("UFL / kg KM",       fmt(t.ufl_per_kg_dm,3),   "") +
-    statBox("HP (KM)",           fmt(t.hp_pct_dm,1),       "%") +
-    statBox("NDF (KM)",          fmt(t.ndf_pct_dm,1),      "%") +
-    dCostBox;
+    statBox("PDI / kg KM",       fmt(t.pdi_per_kg_dm,1),   "g/kg KM") +
+    statBox("HP (KM)",           fmt(t.hp_pct_dm,1),        "%") +
+    dStarchBox + dNdfBox + dNfcBox + dEndfBox + dCaBox + dPBox + dCostBox;
 
   const maint = data.maintenance;
   const netUfl = Math.max(0, t.total_ufl - maint.ufl);
   const netPdi = Math.max(0, t.total_pdi_g - maint.pdi_g);
   $("#dairy_maintenance").innerHTML =
-    statBox("Bakım UFV",     fmt(maint.ufl,2),   "UFL/gün") +
-    statBox("Bakım PDI",     fmt(maint.pdi_g,0), "g/gün") +
-    statBox("Toplam UFL",    fmt(t.total_ufl,2), "UFL/gün") +
-    statBox("Toplam PDI",    fmt(t.total_pdi_g,0),"g/gün") +
-    statBox("Net UFL (süt)", fmt(netUfl,2),       "UFL/gün") +
-    statBox("Net PDI (süt)", fmt(netPdi,0),        "g/gün");
+    statBox("Toplam UFL",    fmt(t.total_ufl,2),    "UFL/gün") +
+    statBox("Toplam PDI",    fmt(t.total_pdi_g,0),  "g/gün") +
+    statBox("Bakım UFL",     fmt(maint.ufl,2),       "UFL/gün") +
+    statBox("Bakım PDI",     fmt(maint.pdi_g,0),     "g/gün") +
+    statBox("Net UFL (süt)", fmt(netUfl,2),           "UFL/gün") +
+    statBox("Net PDI (süt)", fmt(netPdi,0),            "g/gün");
 
   if (currentUser && currentUser.is_admin && Array.isArray(data.rows)) {
     $("#dairy_detail_card").hidden = false;
