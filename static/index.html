@@ -1266,8 +1266,10 @@ function renderDairyResults(data) {
   const dPBox      = t.p_pct_dm      != null ? statBox("P (KM)",      fmt(t.p_pct_dm,2),     "%") : "";
   const dStarchBox = t.starch_pct_dm != null ? statBox("Nişasta (KM)",fmt(t.starch_pct_dm,1),"%") : "";
   const dCostBox   = t.total_cost_tl > 0
-    ? statBox("Rasyon Maliyeti", fmt(t.total_cost_tl,2), "TL/gün") +
-      statBox("Maliyet / kg KM", fmt(t.cost_per_kg_dm,2), "TL/kg") : "";
+    ? statBox("Rasyon Maliyeti",   fmt(t.total_cost_tl,2),       "TL/gün") +
+      statBox("Maliyet / kg KM",   fmt(t.cost_per_kg_dm,2),      "TL/kg") +
+      (t.cost_per_liter_milk != null ? statBox("Maliyet / Lt Süt", fmt(t.cost_per_liter_milk,2), "TL/lt") : "")
+    : "";
   $("#dairy_tmr_summary").innerHTML =
     statBox("Toplam Yaş Madde",  fmt(t.total_as_fed_kg,2), "kg/gün") +
     statBox("Toplam Kuru Madde", fmt(t.total_dm_kg,2),     "kg/gün") +

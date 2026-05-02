@@ -131,7 +131,8 @@ def calculate_dairy(
     ration_dm_pct = (total_dm / total_as_fed * 100.0)            if total_as_fed > 0 else 0.0
     ufl_per_kg_dm = total_ufl   / total_dm if total_dm > 0 else 0.0
     pdi_per_kg_dm = total_pdi_g / total_dm if total_dm > 0 else 0.0
-    cost_per_kg_dm = total_cost_tl / total_dm if total_cost_tl > 0 else 0.0
+    cost_per_kg_dm    = total_cost_tl / total_dm         if total_cost_tl > 0 else 0.0
+    cost_per_liter_milk = total_cost_tl / predicted_milk_L if (total_cost_tl > 0 and predicted_milk_L > 0) else None
 
     return {
         "live_weight": live_weight,
@@ -150,8 +151,9 @@ def calculate_dairy(
             "p_pct_dm":         round(p_pct_dm,    2)  if p_pct_dm      is not None else None,
             "total_ufl":        round(total_ufl, 2),
             "total_pdi_g":      round(total_pdi_g, 0),
-            "total_cost_tl":    round(total_cost_tl, 2),
-            "cost_per_kg_dm":   round(cost_per_kg_dm, 2),
+            "total_cost_tl":      round(total_cost_tl, 2),
+            "cost_per_kg_dm":     round(cost_per_kg_dm, 2),
+            "cost_per_liter_milk": round(cost_per_liter_milk, 2) if cost_per_liter_milk is not None else None,
         },
         "maintenance": {
             "ufl":   round(maintenance_ufl, 2),
