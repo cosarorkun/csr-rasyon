@@ -133,7 +133,8 @@ def calculate(
         endf = feed.get("endf_pct")
         ca = feed.get("ca_pct")
         p = feed.get("p_pct")
-        ton_mal = feed.get("ton_maliyeti")
+        # Use item-level ton_maliyeti (from UI) if provided, else fall back to DB value
+        ton_mal = item.get("ton_maliyeti") if item.get("ton_maliyeti") is not None else feed.get("ton_maliyeti")
 
         ndf_kg  = dm_kg * (ndf  / 100.0) if ndf  is not None else None
         nfc_kg  = dm_kg * (nfc  / 100.0) if nfc  is not None else None

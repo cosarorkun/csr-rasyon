@@ -57,6 +57,7 @@ class UserOut(BaseModel):
 class RationItem(BaseModel):
     feed_name: str
     as_fed_kg: float = Field(ge=0)
+    ton_maliyeti: Optional[float] = Field(default=None, ge=0)
 
 
 class CalculateRequest(BaseModel):

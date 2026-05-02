@@ -55,7 +55,8 @@ def calculate_dairy(
         pdi_g = dm_kg * (feed.get("pdi_g_per_kg_dm") or feed.get("pdie") or 0.0)
         hp_g  = dm_kg * (feed["protein"] / 100.0) * 1000.0
         ndf_g = dm_kg * ((feed.get("ndf_pct") or 0.0) / 100.0) * 1000.0
-        ton_mal = feed.get("ton_maliyeti")
+        # Use item-level ton_maliyeti (from UI) if provided, else fall back to DB value
+        ton_mal = item.get("ton_maliyeti") if item.get("ton_maliyeti") is not None else feed.get("ton_maliyeti")
         row_cost = (as_fed / 1000.0) * ton_mal if ton_mal is not None else None
 
         rows.append({

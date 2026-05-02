@@ -132,7 +132,7 @@
     border-radius: 8px; padding: 8px;
   }
   .ration-row {
-    display: grid; grid-template-columns: 1fr 100px 36px;
+    display: grid; grid-template-columns: 1fr 88px 100px 36px;
     gap: 8px; align-items: center;
   }
   .ration-row .remove-btn {
@@ -144,12 +144,8 @@
   .ration-row-cost {
     margin-top: 5px; padding-top: 5px;
     border-top: 1px solid var(--border);
-    font-size: 11px; color: var(--muted);
-    display: flex; gap: 16px; flex-wrap: wrap;
+    font-size: 12px; color: var(--green-dark); font-weight: 600;
   }
-  .ration-row-cost .rc-item { display: flex; flex-direction: column; }
-  .ration-row-cost .rc-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
-  .ration-row-cost .rc-val { font-size: 13px; font-weight: 600; color: var(--green-dark); }
 
   /* Dairy ration rows */
   .dairy-ration-table { display: flex; flex-direction: column; gap: 6px; }
@@ -158,7 +154,7 @@
     border-radius: 8px; padding: 8px;
   }
   .dairy-row-top {
-    display: grid; grid-template-columns: 1fr 100px 36px;
+    display: grid; grid-template-columns: 1fr 88px 100px 36px;
     gap: 8px; align-items: center;
   }
   .dairy-row-top .remove-btn {
@@ -1006,15 +1002,12 @@ function buildSelect(list, sel) {
 const rationEl = $("#ration");
 
 function updateBesiRowCost(outerWrap) {
-  const feedName = outerWrap.querySelector(".feed-select").value;
   const kg = parseFloat(outerWrap.querySelector(".kg-input").value) || 0;
+  const priceVal = parseFloat(outerWrap.querySelector(".price-input").value);
   const costEl = outerWrap.querySelector(".ration-row-cost");
-  if (!feedName || kg <= 0) { costEl.hidden = true; return; }
-  const feed = besiFeeds.find(f => f.name === feedName);
-  if (!feed || feed.ton_maliyeti == null) { costEl.hidden = true; return; }
-  const rowCost = (kg / 1000) * feed.ton_maliyeti;
-  costEl.querySelector(".rc-price").textContent = feed.ton_maliyeti.toLocaleString("tr-TR") + " TL/ton";
-  costEl.querySelector(".rc-cost").textContent  = rowCost.toFixed(2) + " TL";
+  if (kg <= 0 || isNaN(priceVal) || priceVal <= 0) { costEl.hidden = true; return; }
+  const rowCost = (kg / 1000) * priceVal;
+  costEl.textContent = "Maliyet: " + rowCost.toFixed(2) + " TL/gün";
   costEl.hidden = false;
 }
 function addRow(prefill) {
@@ -1028,17 +1021,26 @@ function addRow(prefill) {
   kg.placeholder="kg/gün"; kg.className="kg-input";
   if (prefill && prefill.as_fed_kg) kg.value = prefill.as_fed_kg;
   row.appendChild(kg);
+  const price = document.createElement("input");
+  price.type="number"; price.min="0"; price.step="1"; price.inputMode="numeric";
+  price.placeholder="TL/ton"; price.className="price-input";
+  if (prefill && prefill.ton_maliyeti) price.value = prefill.ton_maliyeti;
+  row.appendChild(price);
   const rm = document.createElement("button");
   rm.type="button"; rm.className="remove-btn"; rm.textContent="\xD7";
   rm.addEventListener("click", () => { outerWrap.remove(); if(!rationEl.children.length) addRow(); updateAddBtn(); });
   row.appendChild(rm);
   outerWrap.appendChild(row);
   const cost = document.createElement("div"); cost.className = "ration-row-cost"; cost.hidden = true;
-  cost.innerHTML = '<div class="rc-item"><div class="rc-lbl">Fiyat</div><div class="rc-val rc-price">–</div></div>'+
-                   '<div class="rc-item"><div class="rc-lbl">Maliyet</div><div class="rc-val rc-cost">–</div></div>';
   outerWrap.appendChild(cost);
-  sel.addEventListener("change", () => updateBesiRowCost(outerWrap));
-  kg.addEventListener("input",   () => updateBesiRowCost(outerWrap));
+  // Pre-fill price from DB when feed is selected, then recalc
+  sel.addEventListener("change", () => {
+    const feed = besiFeeds.find(f => f.name === sel.value);
+    if (feed && feed.ton_maliyeti != null && !price.value) price.value = feed.ton_maliyeti;
+    updateBesiRowCost(outerWrap);
+  });
+  kg.addEventListener("input",    () => updateBesiRowCost(outerWrap));
+  price.addEventListener("input", () => updateBesiRowCost(outerWrap));
   rationEl.appendChild(outerWrap); updateAddBtn();
   if (prefill && prefill.as_fed_kg && prefill.feed_name) updateBesiRowCost(outerWrap);
 }
@@ -1053,15 +1055,25 @@ function gatherRation() {
   rationEl.querySelectorAll(".ration-row-wrap").forEach(outerWrap => {
     const n = outerWrap.querySelector(".feed-select").value;
     const k = parseFloat(outerWrap.querySelector(".kg-input").value);
-    if (n && !isNaN(k) && k>0) items.push({ feed_name:n, as_fed_kg:k });
+    const p = parseFloat(outerWrap.querySelector(".price-input").value);
+    if (n && !isNaN(k) && k>0) {
+      const item = { feed_name:n, as_fed_kg:k };
+      if (!isNaN(p) && p > 0) item.ton_maliyeti = p;
+      items.push(item);
+    }
   });
   return items;
 }
 function rebuildRationDropdowns() {
   rationEl.querySelectorAll(".ration-row-wrap").forEach(outerWrap => {
     const old = outerWrap.querySelector(".feed-select");
+    const price = outerWrap.querySelector(".price-input");
     const newSel = buildSelect(besiFeeds, old.value);
-    newSel.addEventListener("change", () => updateBesiRowCost(outerWrap));
+    newSel.addEventListener("change", () => {
+      const feed = besiFeeds.find(f => f.name === newSel.value);
+      if (feed && feed.ton_maliyeti != null && !price.value) price.value = feed.ton_maliyeti;
+      updateBesiRowCost(outerWrap);
+    });
     old.replaceWith(newSel);
     updateBesiRowCost(outerWrap);
   });
@@ -1082,7 +1094,10 @@ function updateDairyRowStats(rowWrap) {
   const pdi  = feed.pdi_g_per_kg_dm != null ? dmKg * feed.pdi_g_per_kg_dm : dmKg * (feed.pdie || 0);
   const hp   = dmKg * (feed.protein / 100) * 1000;
   const ndf  = feed.ndf_pct != null ? dmKg * (feed.ndf_pct / 100) * 1000 : null;
-  const cost = feed.ton_maliyeti != null ? (kg / 1000) * feed.ton_maliyeti : null;
+  const priceInput = rowWrap.querySelector(".price-input");
+  const priceVal = priceInput ? parseFloat(priceInput.value) : NaN;
+  const tonMal = !isNaN(priceVal) && priceVal > 0 ? priceVal : feed.ton_maliyeti;
+  const cost = tonMal != null ? (kg / 1000) * tonMal : null;
   statsEl.querySelector(".sr-dm").textContent  = dmKg.toFixed(2) + " kg";
   statsEl.querySelector(".sr-ufl").textContent = ufl != null ? ufl.toFixed(2) : "–";
   statsEl.querySelector(".sr-pdi").textContent = Math.round(pdi) + " g";
@@ -1104,6 +1119,11 @@ function addDairyRow(prefill) {
   kg.placeholder="kg/gün"; kg.className="kg-input";
   if (prefill && prefill.as_fed_kg) kg.value = prefill.as_fed_kg;
   top.appendChild(kg);
+  const price = document.createElement("input");
+  price.type="number"; price.min="0"; price.step="1"; price.inputMode="numeric";
+  price.placeholder="TL/ton"; price.className="price-input";
+  if (prefill && prefill.ton_maliyeti) price.value = prefill.ton_maliyeti;
+  top.appendChild(price);
   const rm = document.createElement("button");
   rm.type="button"; rm.className="remove-btn"; rm.textContent="\xD7";
   rm.addEventListener("click", () => { wrap.remove(); if(!dairyRationEl.children.length) addDairyRow(); updateDairyAddBtn(); });
@@ -1119,8 +1139,13 @@ function addDairyRow(prefill) {
     '<div class="sr"><div class="sr-lbl">NDF</div><div class="sr-val sr-ndf">–</div></div>'+
     '<div class="sr"><div class="sr-lbl">Maliyet</div><div class="sr-val sr-cost">–</div></div>';
   wrap.appendChild(stats);
-  sel.addEventListener("change", () => updateDairyRowStats(wrap));
-  kg.addEventListener("input",   () => updateDairyRowStats(wrap));
+  sel.addEventListener("change", () => {
+    const feed = dairyFeeds.find(f => f.name === sel.value);
+    if (feed && feed.ton_maliyeti != null && !price.value) price.value = feed.ton_maliyeti;
+    updateDairyRowStats(wrap);
+  });
+  kg.addEventListener("input",    () => updateDairyRowStats(wrap));
+  price.addEventListener("input", () => updateDairyRowStats(wrap));
   dairyRationEl.appendChild(wrap); updateDairyAddBtn();
   if (prefill && prefill.as_fed_kg && prefill.feed_name) updateDairyRowStats(wrap);
 }
@@ -1135,15 +1160,25 @@ function gatherDairyRation() {
   dairyRationEl.querySelectorAll(".dairy-row-wrap").forEach(row => {
     const n = row.querySelector(".feed-select").value;
     const k = parseFloat(row.querySelector(".kg-input").value);
-    if (n && !isNaN(k) && k>0) items.push({ feed_name:n, as_fed_kg:k });
+    const p = parseFloat(row.querySelector(".price-input").value);
+    if (n && !isNaN(k) && k>0) {
+      const item = { feed_name:n, as_fed_kg:k };
+      if (!isNaN(p) && p > 0) item.ton_maliyeti = p;
+      items.push(item);
+    }
   });
   return items;
 }
 function rebuildDairyDropdowns() {
   dairyRationEl.querySelectorAll(".dairy-row-wrap").forEach(row => {
     const old = row.querySelector(".feed-select");
+    const price = row.querySelector(".price-input");
     const newSel = buildSelect(dairyFeeds, old.value);
-    newSel.addEventListener("change", () => updateDairyRowStats(row));
+    newSel.addEventListener("change", () => {
+      const feed = dairyFeeds.find(f => f.name === newSel.value);
+      if (feed && feed.ton_maliyeti != null && !price.value) price.value = feed.ton_maliyeti;
+      updateDairyRowStats(row);
+    });
     old.replaceWith(newSel);
     updateDairyRowStats(row);
   });
