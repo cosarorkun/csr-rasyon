@@ -95,8 +95,11 @@ class Feed(Base):
     pdi_g_per_kg_dm = Column(Float, nullable=True)
     ufl_per_kg_dm = Column(Float, nullable=True)
     ndf_pct = Column(Float, nullable=True)
+    nfc_pct = Column(Float, nullable=True)
+    endf_pct = Column(Float, nullable=True)
     ca_pct = Column(Float, nullable=True)
     p_pct = Column(Float, nullable=True)
+    ton_maliyeti = Column(Float, nullable=True)
     note = Column(Text, nullable=True)
 
 
@@ -128,8 +131,11 @@ def feed_to_dict(feed: Feed) -> dict:
         "pdi_g_per_kg_dm": feed.pdi_g_per_kg_dm,
         "ufl_per_kg_dm": feed.ufl_per_kg_dm,
         "ndf_pct": feed.ndf_pct,
+        "nfc_pct": feed.nfc_pct,
+        "endf_pct": feed.endf_pct,
         "ca_pct": feed.ca_pct,
         "p_pct": feed.p_pct,
+        "ton_maliyeti": feed.ton_maliyeti,
         "note": feed.note,
     }
 
@@ -226,6 +232,102 @@ def _m004_add_dairy_columns_and_seed_dairy_feeds(conn) -> None:
                 f.get("note"),
             ),
         )
+        # nfc_pct/endf_pct/ton_maliyeti added by migration 005; update if present
+        if f.get("nfc_pct") is not None or f.get("endf_pct") is not None:
+            conn.exec_driver_sql(
+                "UPDATE feeds SET nfc_pct=?, endf_pct=? WHERE name=?",
+                (f.get("nfc_pct"), f.get("endf_pct"), f["name"]),
+            )
+
+
+def _m005_add_nfc_endf_cost_and_backfill(conn) -> None:
+    """Add nfc_pct, endf_pct, ton_maliyeti columns and backfill nutrient data."""
+    cols = {row[1] for row in conn.exec_driver_sql(
+        "PRAGMA table_info(feeds)"
+    ).fetchall()}
+    for col_name, col_def in [
+        ("nfc_pct",      "FLOAT"),
+        ("endf_pct",     "FLOAT"),
+        ("ton_maliyeti", "FLOAT"),
+    ]:
+        if col_name not in cols:
+            conn.exec_driver_sql(f"ALTER TABLE feeds ADD COLUMN {col_name} {col_def}")
+
+    # Backfill NDF, NFC, eNDF, Ca, P for the 37 besi feeds (from Excel BESİ sheet).
+    # Only updates rows where the value is currently NULL to preserve any admin edits.
+    _BACKFILL = [
+        ("Mısır silajı 35 KM iyi",   41.6,  45.0,   33.28,  0.08, 0.13),
+        ("Mısır silajı 35 KM orta",  47.7,  35.0,   38.16,  0.08, 0.13),
+        ("Mısır silajı 35 KM kötü",  54.8,  28.0,   43.84,  0.08, 0.13),
+        ("Mısır silajı 30 KM iyi",   44.4,  42.6,   35.52,  0.08, 0.13),
+        ("Mısır silajı 30 KM orta",  53.6,  30.5,   42.88,  0.08, 0.13),
+        ("Mısır silajı 30 KM kötü",  62.0,  21.8,   49.6,   0.08, 0.13),
+        ("Mısır silajı 25 KM iyi",   54.0,  31.7,   43.2,   0.08, 0.13),
+        ("Mısır silajı 25 KM orta",  58.0,  25.9,   46.4,   0.08, 0.13),
+        ("Mısır silajı 25 KM kötü",  61.0,  21.32,  48.8,   0.08, 0.13),
+        ("Yonca 15 prt",             50.4,  None,   44.352, 2.04, 0.26),
+        ("Yonca 17.5 prt",           47.7,  None,   41.976, 2.18, 0.26),
+        ("Yonca 18.5 prt",           46.4,  None,   40.832, 2.22, 0.26),
+        ("Yonca 23 prt",             37.7,  None,   33.176, 2.5,  0.26),
+        ("Pancar Posası",            48.0,  39.7,   None,   0.28, 0.08),
+        ("Yulaf Otu",                61.9,  15.5,   55.7,   None, None),
+        ("Fiğ Yulaf Otu",            55.9,  18.0,   50.3,   None, None),
+        ("Fiğ Otu",                  38.8,  19.0,   34.9,   None, None),
+        ("Arpa Otu",                 68.0,  None,   61.22,  0.14, 0.05),
+        ("Saman",                    79.8,  None,   75.81,  0.08, 0.05),
+        ("Arpa Posası",              53.2,  11.0,   53.2,   0.28, 0.5),
+        ("Arpa",                     21.2,  61.45,  None,   0.05, 0.29),
+        ("Mısır",                    10.5,  77.4,   None,   0.03, 0.23),
+        ("Arpa flake",               21.2,  61.45,  None,   0.05, 0.29),
+        ("Mısır flake",              10.5,  77.4,   None,   0.03, 0.23),
+        ("Buğday",                   13.7,  70.0,   None,   0.04, 0.26),
+        ("Razmol",                   35.5,  42.5,   None,   0.14, 0.98),
+        ("Bonkalit",                 11.0,  72.4,   None,   0.1,  0.4),
+        ("Pamuk Tohumu (çiğit)",     42.56, None,   None,   0.16, 0.63),
+        ("Arpamiks",                 32.4,  26.4,   None,   3.68, 0.79),
+        ("Ayçiçek Küspesi 26 prot",  45.9,  15.8,   None,   0.25, 0.76),
+        ("Ayçiçek Küspesi 35 prot",  39.7,  13.5,   None,   0.25, 0.8),
+        ("Pamuk Küspesi Exp 25 prot",46.5,  8.7,    None,   0.11, 0.7),
+        ("Pamuk Küspesi 30 prot",    39.33, 15.3,   None,   0.15, 0.81),
+        ("CSR CD BESİ",              19.91, 19.9,   7.8,    3.07, 0.8),
+        ("SDF H",                    21.8,  24.77,  7.4,    0.43, 0.8),
+        ("Soya küspesi",             9.8,   30.0,   None,   0.354,None),
+    ]
+    for name, ndf, nfc, endf, ca, p in _BACKFILL:
+        if ndf is not None:
+            conn.exec_driver_sql("UPDATE feeds SET ndf_pct=? WHERE name=? AND ndf_pct IS NULL",
+                                 (ndf, name))
+        if nfc is not None:
+            conn.exec_driver_sql("UPDATE feeds SET nfc_pct=? WHERE name=? AND nfc_pct IS NULL",
+                                 (nfc, name))
+        if endf is not None:
+            conn.exec_driver_sql("UPDATE feeds SET endf_pct=? WHERE name=? AND endf_pct IS NULL",
+                                 (endf, name))
+        if ca is not None:
+            conn.exec_driver_sql("UPDATE feeds SET ca_pct=? WHERE name=? AND ca_pct IS NULL",
+                                 (ca, name))
+        if p is not None:
+            conn.exec_driver_sql("UPDATE feeds SET p_pct=? WHERE name=? AND p_pct IS NULL",
+                                 (p, name))
+
+
+def _m006_add_new_users(conn) -> None:
+    """Seed orkun.cosar (admin) and yagiz.cosar (user) if not already present."""
+    from auth import hash_password as _hp
+    new_users = [
+        ("orkun.cosar",  "26051108Oc.19", True),
+        ("yagiz.cosar",  "26051108Yc",    False),
+    ]
+    for username, password, is_admin in new_users:
+        exists = conn.exec_driver_sql(
+            "SELECT 1 FROM users WHERE username = ?", (username,)
+        ).fetchone()
+        if not exists:
+            conn.exec_driver_sql(
+                "INSERT INTO users (username, hashed_password, is_admin, created_at) "
+                "VALUES (?, ?, ?, ?)",
+                (username, _hp(password), is_admin, datetime.utcnow().isoformat()),
+            )
 
 
 _MIGRATIONS: list[tuple[str, callable]] = [
@@ -233,6 +335,8 @@ _MIGRATIONS: list[tuple[str, callable]] = [
     ("002_remove_obsolete_feeds_and_fix_csr_sdf",       _m002_remove_obsolete_feeds_and_fix_csr_sdf),
     ("003_add_ration_type_to_saved_rations",            _m003_add_ration_type_to_saved_rations),
     ("004_add_dairy_columns_and_seed_dairy_feeds",      _m004_add_dairy_columns_and_seed_dairy_feeds),
+    ("005_add_nfc_endf_cost_and_backfill",              _m005_add_nfc_endf_cost_and_backfill),
+    ("006_add_new_users",                               _m006_add_new_users),
 ]
 
 
@@ -297,6 +401,9 @@ def init_db() -> None:
                     cf=f.get("cf", 0), fat=f.get("fat", 0),
                     ash=f.get("ash", 0), starch=f.get("starch", 0),
                     is_custom=False, category="besi",
+                    ndf_pct=f.get("ndf_pct"), nfc_pct=f.get("nfc_pct"),
+                    endf_pct=f.get("endf_pct"), ca_pct=f.get("ca_pct"),
+                    p_pct=f.get("p_pct"),
                 ))
             for f in SEED_DAIRY_FEEDS:
                 all_seeds.append(Feed(
@@ -310,10 +417,9 @@ def init_db() -> None:
                     rup_pct_of_cp=f.get("rup_pct_of_cp"),
                     pdi_g_per_kg_dm=f.get("pdi_g_per_kg_dm"),
                     ufl_per_kg_dm=f.get("ufl_per_kg_dm"),
-                    ndf_pct=f.get("ndf_pct"),
-                    ca_pct=f.get("ca_pct"),
-                    p_pct=f.get("p_pct"),
-                    note=f.get("note"),
+                    ndf_pct=f.get("ndf_pct"), nfc_pct=f.get("nfc_pct"),
+                    endf_pct=f.get("endf_pct"), ca_pct=f.get("ca_pct"),
+                    p_pct=f.get("p_pct"), note=f.get("note"),
                 ))
             db.add_all(all_seeds)
             db.commit()

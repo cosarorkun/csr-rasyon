@@ -100,9 +100,23 @@ class FeedCreateRequest(BaseModel):
     pdi_g_per_kg_dm: Optional[float] = Field(default=None, ge=0)
     ufl_per_kg_dm: Optional[float] = Field(default=None, ge=0)
     ndf_pct: Optional[float] = Field(default=None, ge=0, le=100)
+    nfc_pct: Optional[float] = Field(default=None, ge=0, le=100)
+    endf_pct: Optional[float] = Field(default=None, ge=0, le=100)
     ca_pct: Optional[float] = Field(default=None, ge=0)
     p_pct: Optional[float] = Field(default=None, ge=0)
+    ton_maliyeti: Optional[float] = Field(default=None, ge=0)
     note: Optional[str] = None
+
+
+class UserCreateRequest(BaseModel):
+    username: str = Field(min_length=2, max_length=60)
+    password: str = Field(min_length=4)
+    is_admin: bool = False
+
+
+class UserUpdateRequest(BaseModel):
+    password: Optional[str] = Field(default=None, min_length=4)
+    is_admin: Optional[bool] = None
 
 
 # --- Public routes ---
@@ -321,6 +335,91 @@ def delete_ration(
             status_code=403, detail="Bu rasyonu silme yetkiniz yok."
         )
     db.delete(r)
+    db.commit()
+    return {"ok": True}
+
+
+# --- User management (admin only) ---
+
+def _user_out(u: User) -> dict:
+    return {
+        "id": u.id,
+        "username": u.username,
+        "is_admin": u.is_admin,
+        "created_at": u.created_at.isoformat(),
+    }
+
+
+@app.get("/users")
+def list_users(
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    users = db.query(User).order_by(User.created_at).all()
+    return {"users": [_user_out(u) for u in users]}
+
+
+@app.post("/users")
+def add_user(
+    req: UserCreateRequest,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    from auth import hash_password
+    if db.query(User).filter(User.username == req.username).first():
+        raise HTTPException(
+            status_code=400, detail=f"'{req.username}' kullanıcı adı zaten mevcut."
+        )
+    user = User(
+        username=req.username,
+        hashed_password=hash_password(req.password),
+        is_admin=req.is_admin,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return _user_out(user)
+
+
+@app.put("/users/{user_id}")
+def update_user(
+    user_id: int,
+    req: UserUpdateRequest,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    from auth import hash_password
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı.")
+    if req.password is not None:
+        user.hashed_password = hash_password(req.password)
+    if req.is_admin is not None:
+        user.is_admin = req.is_admin
+    db.commit()
+    db.refresh(user)
+    return _user_out(user)
+
+
+@app.delete("/users/{user_id}")
+def delete_user(
+    user_id: int,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı.")
+    if user.id == admin.id:
+        raise HTTPException(status_code=400, detail="Kendi hesabınızı silemezsiniz.")
+    # Prevent deleting the last admin
+    if user.is_admin:
+        admin_count = db.query(User).filter(User.is_admin == True).count()
+        if admin_count <= 1:
+            raise HTTPException(
+                status_code=400, detail="Son yönetici hesabı silinemez."
+            )
+    db.delete(user)
     db.commit()
     return {"ok": True}
 

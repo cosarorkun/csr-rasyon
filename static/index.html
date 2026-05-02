@@ -126,7 +126,11 @@
   }
 
   /* Besi ration rows */
-  .ration-table { display: flex; flex-direction: column; gap: 8px; }
+  .ration-table { display: flex; flex-direction: column; gap: 6px; }
+  .ration-row-wrap {
+    background: #fafbfd; border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px;
+  }
   .ration-row {
     display: grid; grid-template-columns: 1fr 100px 36px;
     gap: 8px; align-items: center;
@@ -137,6 +141,15 @@
     font-size: 18px; cursor: pointer;
   }
   .ration-row .remove-btn:hover { background: var(--warn-bg); }
+  .ration-row-cost {
+    margin-top: 5px; padding-top: 5px;
+    border-top: 1px solid var(--border);
+    font-size: 11px; color: var(--muted);
+    display: flex; gap: 16px; flex-wrap: wrap;
+  }
+  .ration-row-cost .rc-item { display: flex; flex-direction: column; }
+  .ration-row-cost .rc-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .ration-row-cost .rc-val { font-size: 13px; font-weight: 600; color: var(--green-dark); }
 
   /* Dairy ration rows */
   .dairy-ration-table { display: flex; flex-direction: column; gap: 6px; }
@@ -462,7 +475,8 @@
     <button data-tab="calc"    id="besi_tab_btn" type="button" class="active">&#x1F402; Besi Hesaplayıcı</button>
     <button data-tab="sut"     id="sut_tab_btn"  type="button" hidden>&#x1F404; Süt Hesaplayıcı</button>
     <button data-tab="history" type="button">Geçmiş Rasyonlar</button>
-    <button data-tab="admin"   type="button" id="admin_tab_btn" hidden>Yönetim</button>
+    <button data-tab="admin"   type="button" id="admin_tab_btn"  hidden>Yönetim</button>
+    <button data-tab="users"   type="button" id="users_tab_btn"  hidden>&#x1F464; Kullanıcılar</button>
   </nav>
 
   <main>
@@ -686,6 +700,11 @@
           <div><label>Yağ %</label><input type="number" step="0.1" id="f_fat" /></div>
           <div><label>Kül %</label><input type="number" step="0.1" id="f_ash" /></div>
         </div>
+        <div class="row cols-3" style="margin-top:8px;">
+          <div><label>NFC %</label><input type="number" step="0.1" id="f_nfc_pct" placeholder="opsiyonel" /></div>
+          <div><label>eNDF %</label><input type="number" step="0.1" id="f_endf_pct" placeholder="opsiyonel" /></div>
+          <div><label>Ton Maliyeti (TL/ton)</label><input type="number" step="1" id="f_ton_maliyeti" placeholder="opsiyonel" /></div>
+        </div>
         <div class="dairy-fields-section">
           <div class="section-label">Süt / Ortak Yem Değerleri</div>
           <div class="row cols-4" style="margin-bottom:8px;">
@@ -715,6 +734,33 @@
         </p>
         <div class="scroll-x">
           <table class="list" id="feeds_table"></table>
+        </div>
+      </section>
+    </div>
+    <!-- ============ KULLANICILAR TAB (admin only) ============ -->
+    <div id="tab-users" hidden>
+      <section class="card">
+        <h2>Yeni Kullanıcı Ekle</h2>
+        <div class="row cols-3">
+          <div><label>Kullanıcı Adı</label><input type="text" id="u_username" autocomplete="off" /></div>
+          <div><label>Şifre</label><input type="password" id="u_password" autocomplete="new-password" /></div>
+          <div>
+            <label>Rol</label>
+            <select id="u_is_admin">
+              <option value="false">Kullanıcı</option>
+              <option value="true">Yönetici</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:12px;">
+          <button class="btn primary" id="add_user_btn" type="button">Ekle</button>
+        </div>
+      </section>
+      <section class="card">
+        <h2>Kullanıcı Listesi</h2>
+        <p class="admin-note">Kendi hesabınızı ve son yöneticiyi silemezsiniz.</p>
+        <div class="scroll-x">
+          <table class="list" id="users_table"></table>
         </div>
       </section>
     </div>
@@ -755,6 +801,11 @@
       <div><label>HS %</label><input type="number" step="0.1" id="e_cf" /></div>
       <div><label>Yağ %</label><input type="number" step="0.1" id="e_fat" /></div>
       <div><label>Kül %</label><input type="number" step="0.1" id="e_ash" /></div>
+    </div>
+    <div class="row cols-3" style="margin-bottom:8px;">
+      <div><label>NFC %</label><input type="number" step="0.1" id="e_nfc_pct" placeholder="opsiyonel" /></div>
+      <div><label>eNDF %</label><input type="number" step="0.1" id="e_endf_pct" placeholder="opsiyonel" /></div>
+      <div><label>Ton Maliyeti (TL/ton)</label><input type="number" step="1" id="e_ton_maliyeti" placeholder="opsiyonel" /></div>
     </div>
     <div class="dairy-fields-section">
       <div class="section-label">Süt / Ortak Yem Değerleri</div>
@@ -858,15 +909,17 @@ function applyMode(mode) {
 
 // ===== Tabs =====
 function switchTab(name) {
-  if (name === "admin" && (!currentUser || !currentUser.is_admin)) name = "calc";
+  if ((name === "admin" || name === "users") && (!currentUser || !currentUser.is_admin)) name = "calc";
   $$("nav.tabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
   $("#tab-calc").hidden    = (name !== "calc");
   $("#tab-sut").hidden     = (name !== "sut");
   $("#tab-history").hidden = (name !== "history");
   $("#tab-admin").hidden   = (name !== "admin");
+  $("#tab-users").hidden   = (name !== "users");
   showError("");
   if (name === "history") loadHistory();
   if (name === "admin")   loadFeedsTable();
+  if (name === "users")   loadUsersTable();
 }
 $$("nav.tabs button").forEach(b => b.addEventListener("click", () => switchTab(b.dataset.tab)));
 
@@ -952,23 +1005,44 @@ function buildSelect(list, sel) {
 // ===== BESI ration rows =====
 const rationEl = $("#ration");
 
+function updateBesiRowCost(outerWrap) {
+  const feedName = outerWrap.querySelector(".feed-select").value;
+  const kg = parseFloat(outerWrap.querySelector(".kg-input").value) || 0;
+  const costEl = outerWrap.querySelector(".ration-row-cost");
+  if (!feedName || kg <= 0) { costEl.hidden = true; return; }
+  const feed = besiFeeds.find(f => f.name === feedName);
+  if (!feed || feed.ton_maliyeti == null) { costEl.hidden = true; return; }
+  const rowCost = (kg / 1000) * feed.ton_maliyeti;
+  costEl.querySelector(".rc-price").textContent = feed.ton_maliyeti.toLocaleString("tr-TR") + " TL/ton";
+  costEl.querySelector(".rc-cost").textContent  = rowCost.toFixed(2) + " TL";
+  costEl.hidden = false;
+}
 function addRow(prefill) {
-  if (rationEl.querySelectorAll(".ration-row").length >= MAX_ROWS) return;
-  const wrap = document.createElement("div"); wrap.className = "ration-row";
+  if (rationEl.querySelectorAll(".ration-row-wrap").length >= MAX_ROWS) return;
+  const outerWrap = document.createElement("div"); outerWrap.className = "ration-row-wrap";
+  const row = document.createElement("div"); row.className = "ration-row";
   const sel = buildSelect(besiFeeds, prefill && prefill.feed_name);
-  wrap.appendChild(sel);
+  row.appendChild(sel);
   const kg = document.createElement("input");
   kg.type="number"; kg.min="0"; kg.step="0.1"; kg.inputMode="decimal";
   kg.placeholder="kg/gün"; kg.className="kg-input";
   if (prefill && prefill.as_fed_kg) kg.value = prefill.as_fed_kg;
-  wrap.appendChild(kg);
+  row.appendChild(kg);
   const rm = document.createElement("button");
   rm.type="button"; rm.className="remove-btn"; rm.textContent="\xD7";
-  rm.addEventListener("click", () => { wrap.remove(); if(!rationEl.children.length) addRow(); updateAddBtn(); });
-  wrap.appendChild(rm);
-  rationEl.appendChild(wrap); updateAddBtn();
+  rm.addEventListener("click", () => { outerWrap.remove(); if(!rationEl.children.length) addRow(); updateAddBtn(); });
+  row.appendChild(rm);
+  outerWrap.appendChild(row);
+  const cost = document.createElement("div"); cost.className = "ration-row-cost"; cost.hidden = true;
+  cost.innerHTML = '<div class="rc-item"><div class="rc-lbl">Fiyat</div><div class="rc-val rc-price">–</div></div>'+
+                   '<div class="rc-item"><div class="rc-lbl">Maliyet</div><div class="rc-val rc-cost">–</div></div>';
+  outerWrap.appendChild(cost);
+  sel.addEventListener("change", () => updateBesiRowCost(outerWrap));
+  kg.addEventListener("input",   () => updateBesiRowCost(outerWrap));
+  rationEl.appendChild(outerWrap); updateAddBtn();
+  if (prefill && prefill.as_fed_kg && prefill.feed_name) updateBesiRowCost(outerWrap);
 }
-function updateAddBtn() { $("#add_row").disabled = rationEl.querySelectorAll(".ration-row").length >= MAX_ROWS; }
+function updateAddBtn() { $("#add_row").disabled = rationEl.querySelectorAll(".ration-row-wrap").length >= MAX_ROWS; }
 function resetRows(pre) {
   rationEl.innerHTML = "";
   if (pre && pre.length) { pre.slice(0,MAX_ROWS).forEach(r=>addRow(r)); while(rationEl.children.length<INITIAL_ROWS&&rationEl.children.length<MAX_ROWS) addRow(); }
@@ -976,17 +1050,20 @@ function resetRows(pre) {
 }
 function gatherRation() {
   const items = [];
-  rationEl.querySelectorAll(".ration-row").forEach(row => {
-    const n = row.querySelector(".feed-select").value;
-    const k = parseFloat(row.querySelector(".kg-input").value);
+  rationEl.querySelectorAll(".ration-row-wrap").forEach(outerWrap => {
+    const n = outerWrap.querySelector(".feed-select").value;
+    const k = parseFloat(outerWrap.querySelector(".kg-input").value);
     if (n && !isNaN(k) && k>0) items.push({ feed_name:n, as_fed_kg:k });
   });
   return items;
 }
 function rebuildRationDropdowns() {
-  rationEl.querySelectorAll(".ration-row").forEach(row => {
-    const old = row.querySelector(".feed-select");
-    old.replaceWith(buildSelect(besiFeeds, old.value));
+  rationEl.querySelectorAll(".ration-row-wrap").forEach(outerWrap => {
+    const old = outerWrap.querySelector(".feed-select");
+    const newSel = buildSelect(besiFeeds, old.value);
+    newSel.addEventListener("change", () => updateBesiRowCost(outerWrap));
+    old.replaceWith(newSel);
+    updateBesiRowCost(outerWrap);
   });
 }
 
@@ -1005,11 +1082,14 @@ function updateDairyRowStats(rowWrap) {
   const pdi  = feed.pdi_g_per_kg_dm != null ? dmKg * feed.pdi_g_per_kg_dm : dmKg * (feed.pdie || 0);
   const hp   = dmKg * (feed.protein / 100) * 1000;
   const ndf  = feed.ndf_pct != null ? dmKg * (feed.ndf_pct / 100) * 1000 : null;
+  const cost = feed.ton_maliyeti != null ? (kg / 1000) * feed.ton_maliyeti : null;
   statsEl.querySelector(".sr-dm").textContent  = dmKg.toFixed(2) + " kg";
   statsEl.querySelector(".sr-ufl").textContent = ufl != null ? ufl.toFixed(2) : "–";
   statsEl.querySelector(".sr-pdi").textContent = Math.round(pdi) + " g";
   statsEl.querySelector(".sr-hp").textContent  = Math.round(hp)  + " g";
   statsEl.querySelector(".sr-ndf").textContent = ndf != null ? Math.round(ndf) + " g" : "–";
+  const srCost = statsEl.querySelector(".sr-cost");
+  if (srCost) srCost.textContent = cost != null ? cost.toFixed(2) + " TL" : "–";
   statsEl.hidden = false;
 }
 
@@ -1036,7 +1116,8 @@ function addDairyRow(prefill) {
     '<div class="sr"><div class="sr-lbl">UFL</div><div class="sr-val sr-ufl">–</div></div>'+
     '<div class="sr"><div class="sr-lbl">PDI</div><div class="sr-val sr-pdi">–</div></div>'+
     '<div class="sr"><div class="sr-lbl">HP</div><div class="sr-val sr-hp">–</div></div>'+
-    '<div class="sr"><div class="sr-lbl">NDF</div><div class="sr-val sr-ndf">–</div></div>';
+    '<div class="sr"><div class="sr-lbl">NDF</div><div class="sr-val sr-ndf">–</div></div>'+
+    '<div class="sr"><div class="sr-lbl">Maliyet</div><div class="sr-val sr-cost">–</div></div>';
   wrap.appendChild(stats);
   sel.addEventListener("change", () => updateDairyRowStats(wrap));
   kg.addEventListener("input",   () => updateDairyRowStats(wrap));
@@ -1072,13 +1153,22 @@ function rebuildDairyDropdowns() {
 function renderResults(data) {
   $("#results-empty").hidden = true; $("#results").hidden = false; $("#save_btn").disabled = false;
   const t = data.tmr_summary;
+  const ndfBox  = t.ndf_pct_dm  != null ? statBox("NDF (KM)",   fmt(t.ndf_pct_dm,1),  "%") : "";
+  const nfcBox  = t.nfc_pct_dm  != null ? statBox("NFC (KM)",   fmt(t.nfc_pct_dm,1),  "%") : "";
+  const endfBox = t.endf_pct_dm != null ? statBox("eNDF (KM)",  fmt(t.endf_pct_dm,1), "%") : "";
+  const caBox   = t.ca_pct_dm   != null ? statBox("Ca (KM)",    fmt(t.ca_pct_dm,2),   "%") : "";
+  const pBox    = t.p_pct_dm    != null ? statBox("P (KM)",     fmt(t.p_pct_dm,2),    "%") : "";
+  const costBox = t.total_cost_tl > 0
+    ? statBox("Rasyon Maliyeti", fmt(t.total_cost_tl,2), "TL/gün") +
+      statBox("Maliyet / kg KM", fmt(t.cost_per_kg_dm,2), "TL/kg") : "";
   $("#tmr_summary").innerHTML =
     statBox("Toplam Yaş Madde",  fmt(t.total_as_fed_kg,2), "kg/gün") +
     statBox("Toplam Kuru Madde", fmt(t.total_dm_kg,2),     "kg/gün") +
     statBox("Rasyon KM%",        fmt(t.ration_dm_pct,1),   "%") +
     statBox("UFV / kg KM",       fmt(t.ufv_per_kg_dm,2),   "") +
     statBox("Protein (KM)",      fmt(t.protein_pct_dm,1),  "%") +
-    statBox("Nişasta (KM)",      fmt(t.starch_pct_dm,1),   "%");
+    statBox("Nişasta (KM)",      fmt(t.starch_pct_dm,1),   "%") +
+    ndfBox + nfcBox + endfBox + caBox + pBox + costBox;
   const p = data.expected_performance;
   $("#performance_summary").innerHTML =
     statBox("Beklenen KMT (DMI)",  fmt(p.expected_dmi_kg,2),            "kg/gün") +
@@ -1107,10 +1197,11 @@ function renderResults(data) {
   // Detail — admin only
   if (currentUser && currentUser.is_admin && Array.isArray(data.rows)) {
     $("#detail_card").hidden = false;
-    const head = "<thead><tr><th>Yem</th><th>Yaş (kg)</th><th>KM (kg)</th><th>UFV</th><th>PDIE</th><th>Protein (kg)</th></tr></thead>";
+    const head = "<thead><tr><th>Yem</th><th>Yaş (kg)</th><th>KM (kg)</th><th>UFV</th><th>PDIE</th><th>Protein (kg)</th><th>Maliyet (TL)</th></tr></thead>";
     const body = data.rows.map(r =>
       "<tr><td>"+escapeHtml(r.name)+"</td><td>"+fmt(r.as_fed_kg,2)+"</td><td>"+fmt(r.dm_kg,2)+"</td>"+
-      "<td>"+fmt(r.ufv,2)+"</td><td>"+fmt(r.pdie,0)+"</td><td>"+fmt(r.protein_kg,2)+"</td></tr>"
+      "<td>"+fmt(r.ufv,2)+"</td><td>"+fmt(r.pdie,0)+"</td><td>"+fmt(r.protein_kg,2)+"</td>"+
+      "<td>"+(r.cost_tl != null ? fmt(r.cost_tl,2) : "–")+"</td></tr>"
     ).join("");
     $("#detail_table").innerHTML = head + "<tbody>"+body+"</tbody>";
   } else { $("#detail_card").hidden = true; }
@@ -1133,13 +1224,17 @@ function renderDairyResults(data) {
     '<div class="limit-badge">Sınırlayıcı faktör: <strong style="color:'+limColor+'">'+escapeHtml(m.limit_factor)+'</strong></div></div>';
 
   const t = data.tmr_summary;
+  const dCostBox = t.total_cost_tl > 0
+    ? statBox("Rasyon Maliyeti", fmt(t.total_cost_tl,2), "TL/gün") +
+      statBox("Maliyet / kg KM", fmt(t.cost_per_kg_dm,2), "TL/kg") : "";
   $("#dairy_tmr_summary").innerHTML =
     statBox("Toplam Yaş Madde",  fmt(t.total_as_fed_kg,2), "kg/gün") +
     statBox("Toplam Kuru Madde", fmt(t.total_dm_kg,2),     "kg/gün") +
     statBox("Rasyon KM%",        fmt(t.ration_dm_pct,1),   "%") +
     statBox("UFL / kg KM",       fmt(t.ufl_per_kg_dm,3),   "") +
     statBox("HP (KM)",           fmt(t.hp_pct_dm,1),       "%") +
-    statBox("NDF (KM)",          fmt(t.ndf_pct_dm,1),      "%");
+    statBox("NDF (KM)",          fmt(t.ndf_pct_dm,1),      "%") +
+    dCostBox;
 
   const maint = data.maintenance;
   const netUfl = Math.max(0, t.total_ufl - maint.ufl);
@@ -1154,10 +1249,11 @@ function renderDairyResults(data) {
 
   if (currentUser && currentUser.is_admin && Array.isArray(data.rows)) {
     $("#dairy_detail_card").hidden = false;
-    const head = "<thead><tr><th>Yem</th><th>Yaş (kg)</th><th>KM (kg)</th><th>UFL</th><th>PDI (g)</th><th>HP (g)</th><th>NDF (g)</th></tr></thead>";
+    const head = "<thead><tr><th>Yem</th><th>Yaş (kg)</th><th>KM (kg)</th><th>UFL</th><th>PDI (g)</th><th>HP (g)</th><th>NDF (g)</th><th>Maliyet (TL)</th></tr></thead>";
     const body = data.rows.map(r =>
       "<tr><td>"+escapeHtml(r.name)+"</td><td>"+fmt(r.as_fed_kg,2)+"</td><td>"+fmt(r.dm_kg,2)+"</td>"+
-      "<td>"+fmt(r.ufl,2)+"</td><td>"+fmt(r.pdi_g,0)+"</td><td>"+fmt(r.hp_g,0)+"</td><td>"+fmt(r.ndf_g,0)+"</td></tr>"
+      "<td>"+fmt(r.ufl,2)+"</td><td>"+fmt(r.pdi_g,0)+"</td><td>"+fmt(r.hp_g,0)+"</td><td>"+fmt(r.ndf_g,0)+"</td>"+
+      "<td>"+(r.cost_tl != null ? fmt(r.cost_tl,2) : "–")+"</td></tr>"
     ).join("");
     $("#dairy_detail_table").innerHTML = head + "<tbody>"+body+"</tbody>";
   } else { $("#dairy_detail_card").hidden = true; }
@@ -1352,8 +1448,11 @@ function buildFeedPayload(p) {
     ufl_per_kg_dm:   numOrNull(p+"ufl_per_kg_dm"),
     pdi_g_per_kg_dm: numOrNull(p+"pdi_g_per_kg_dm"),
     ndf_pct:         numOrNull(p+"ndf_pct"),
+    nfc_pct:         numOrNull(p+"nfc_pct"),
+    endf_pct:        numOrNull(p+"endf_pct"),
     ca_pct:          numOrNull(p+"ca_pct"),
     p_pct:           numOrNull(p+"p_pct"),
+    ton_maliyeti:    numOrNull(p+"ton_maliyeti"),
     rdp_pct_of_cp:   numOrNull(p+"rdp_pct_of_cp"),
     rup_pct_of_cp:   numOrNull(p+"rup_pct_of_cp"),
     note: ($("#"+p+"note").value||"").trim()||null,
@@ -1371,7 +1470,8 @@ function validateFeedPayload(pl) {
 
 function clearFeedForm() {
   ["f_name","f_dm_pct","f_ufv","f_protein","f_pdie","f_pdin","f_starch","f_cf","f_fat","f_ash",
-   "f_ufl_per_kg_dm","f_pdi_g_per_kg_dm","f_ndf_pct","f_ca_pct","f_p_pct","f_rdp_pct_of_cp","f_rup_pct_of_cp","f_note"]
+   "f_ufl_per_kg_dm","f_pdi_g_per_kg_dm","f_ndf_pct","f_nfc_pct","f_endf_pct","f_ca_pct","f_p_pct",
+   "f_ton_maliyeti","f_rdp_pct_of_cp","f_rup_pct_of_cp","f_note"]
   .forEach(id => { const el=$("#"+id); if(el) el.value=""; });
   const cat = $("#f_category"); if(cat) cat.value="besi";
 }
@@ -1395,11 +1495,13 @@ async function loadFeedsTable() {
   if (!currentUser||!currentUser.is_admin) return;
   await refreshFeeds();
   const catLabel = {besi:'<span class="pill muted">Besi</span>',sut:'<span class="pill blue">Süt</span>',common:'<span class="pill ok">Ortak</span>'};
-  const head = "<thead><tr><th>Yem</th><th>KM%</th><th>UFV</th><th>Prot%</th><th>PDIE</th><th>PDIN</th><th>Nis%</th><th>Kat.</th><th>Tip</th><th></th></tr></thead>";
+  const head = "<thead><tr><th>Yem</th><th>KM%</th><th>UFV</th><th>Prot%</th><th>PDIE</th><th>PDIN</th><th>Nis%</th><th>NDF%</th><th>TL/ton</th><th>Kat.</th><th>Tip</th><th></th></tr></thead>";
   const body = feedsCache.map(f =>
     "<tr><td>"+escapeHtml(f.name)+"</td>"+
     "<td>"+fmt(f.dm_pct,1)+"</td><td>"+fmt(f.ufv,3)+"</td><td>"+fmt(f.protein,1)+"</td>"+
     "<td>"+fmt(f.pdie,1)+"</td><td>"+fmt(f.pdin,1)+"</td><td>"+fmt(f.starch,1)+"</td>"+
+    "<td>"+(f.ndf_pct != null ? fmt(f.ndf_pct,1) : "–")+"</td>"+
+    "<td>"+(f.ton_maliyeti != null ? fmt(f.ton_maliyeti,0) : "–")+"</td>"+
     "<td>"+(catLabel[f.category]||catLabel.besi)+"</td>"+
     "<td>"+(f.is_custom?'<span class="pill warn">Özel</span>':'<span class="pill muted">Sistem</span>')+"</td>"+
     "<td>"+
@@ -1439,8 +1541,11 @@ function openEditFeed(feedId) {
   $("#e_ufl_per_kg_dm").value   = feed.ufl_per_kg_dm   != null ? feed.ufl_per_kg_dm   : "";
   $("#e_pdi_g_per_kg_dm").value = feed.pdi_g_per_kg_dm != null ? feed.pdi_g_per_kg_dm : "";
   $("#e_ndf_pct").value         = feed.ndf_pct         != null ? feed.ndf_pct         : "";
+  $("#e_nfc_pct").value         = feed.nfc_pct         != null ? feed.nfc_pct         : "";
+  $("#e_endf_pct").value        = feed.endf_pct        != null ? feed.endf_pct        : "";
   $("#e_ca_pct").value          = feed.ca_pct          != null ? feed.ca_pct          : "";
   $("#e_p_pct").value           = feed.p_pct           != null ? feed.p_pct           : "";
+  $("#e_ton_maliyeti").value    = feed.ton_maliyeti    != null ? feed.ton_maliyeti    : "";
   $("#e_rdp_pct_of_cp").value   = feed.rdp_pct_of_cp   != null ? feed.rdp_pct_of_cp   : "";
   $("#e_rup_pct_of_cp").value   = feed.rup_pct_of_cp   != null ? feed.rup_pct_of_cp   : "";
   $("#e_note").value = feed.note||"";
@@ -1462,12 +1567,85 @@ $("#edit_save").addEventListener("click", async () => {
   finally { btn.disabled=false; btn.textContent="Kaydet"; }
 });
 
+// ===== User Management =====
+async function loadUsersTable() {
+  if (!currentUser || !currentUser.is_admin) return;
+  let data;
+  try { data = await api("/users"); } catch(err) { showError(err.message); return; }
+  const head = "<thead><tr><th>ID</th><th>Kullanıcı Adı</th><th>Rol</th><th>Kayıt Tarihi</th><th></th></tr></thead>";
+  const body = data.users.map(u => {
+    const roleBadge = u.is_admin
+      ? '<span class="pill ok">Yönetici</span>'
+      : '<span class="pill muted">Kullanıcı</span>';
+    const isSelf = u.username === currentUser.username;
+    const delBtn = isSelf ? "" :
+      '<button class="btn danger small del-user-btn" data-id="'+u.id+'" data-name="'+escapeHtml(u.username)+'" type="button">Sil</button>';
+    const pwdBtn = '<button class="btn small chg-pwd-btn" data-id="'+u.id+'" data-name="'+escapeHtml(u.username)+'" type="button">Şifre</button>';
+    const roleBtn = isSelf ? "" :
+      '<button class="btn small chg-role-btn" data-id="'+u.id+'" data-admin="'+(u.is_admin?"true":"false")+'" data-name="'+escapeHtml(u.username)+'" type="button">'+(u.is_admin?"→ Kullanıcı":"→ Yönetici")+'</button>';
+    return "<tr data-id=\""+u.id+"\">" +
+      "<td>"+u.id+"</td><td>"+escapeHtml(u.username)+"</td><td>"+roleBadge+"</td>"+
+      "<td>"+u.created_at.slice(0,10)+"</td>"+
+      "<td style='display:flex;gap:4px;flex-wrap:wrap;'>"+pwdBtn+" "+roleBtn+" "+delBtn+"</td></tr>";
+  }).join("");
+  $("#users_table").innerHTML = head + "<tbody>"+body+"</tbody>";
+
+  $$("#users_table .del-user-btn").forEach(b => {
+    b.addEventListener("click", async () => {
+      if (!confirm('Kullanıcıyı silmek istediğinizden emin misiniz?\n\n"'+b.dataset.name+'"')) return;
+      try {
+        await api("/users/"+b.dataset.id, {method:"DELETE"});
+        showInfo("Kullanıcı silindi."); loadUsersTable();
+      } catch(err) { showError(err.message); }
+    });
+  });
+
+  $$("#users_table .chg-pwd-btn").forEach(b => {
+    b.addEventListener("click", async () => {
+      const newPwd = prompt('Yeni şifre ("'+b.dataset.name+'" için):');
+      if (!newPwd || !newPwd.trim()) return;
+      try {
+        await api("/users/"+b.dataset.id, {method:"PUT", body:JSON.stringify({password: newPwd.trim()})});
+        showInfo("Şifre güncellendi.");
+      } catch(err) { showError(err.message); }
+    });
+  });
+
+  $$("#users_table .chg-role-btn").forEach(b => {
+    b.addEventListener("click", async () => {
+      const newAdmin = b.dataset.admin === "true" ? false : true;
+      const label = newAdmin ? "yönetici" : "normal kullanıcı";
+      if (!confirm('"'+b.dataset.name+'" kullanıcısını '+label+' yapmak istediğinizden emin misiniz?')) return;
+      try {
+        await api("/users/"+b.dataset.id, {method:"PUT", body:JSON.stringify({is_admin: newAdmin})});
+        showInfo("Rol güncellendi."); loadUsersTable();
+      } catch(err) { showError(err.message); }
+    });
+  });
+}
+
+$("#add_user_btn").addEventListener("click", async () => {
+  if (!currentUser || !currentUser.is_admin) return;
+  const username = ($("#u_username").value||"").trim();
+  const password = ($("#u_password").value||"").trim();
+  const is_admin = $("#u_is_admin").value === "true";
+  if (!username) { showError("Kullanıcı adı zorunlu."); return; }
+  if (!password) { showError("Şifre zorunlu."); return; }
+  const btn = $("#add_user_btn"); btn.disabled=true; btn.textContent="Ekleniyor…";
+  try {
+    await api("/users", {method:"POST", body:JSON.stringify({username, password, is_admin})});
+    $("#u_username").value=""; $("#u_password").value=""; $("#u_is_admin").value="false";
+    showInfo("Kullanıcı eklendi."); loadUsersTable();
+  } catch(err) { showError(err.message); }
+  finally { btn.disabled=false; btn.textContent="Ekle"; }
+});
+
 // ===== Bootstrap =====
 async function refreshFeeds() {
   const json = await api("/feeds");
   feedsCache  = json.feeds;
-  besiFeeds   = json.feeds.filter(f => !f.category || f.category==="besi" || f.category==="common");
-  dairyFeeds  = json.feeds.filter(f => f.category==="sut" || f.category==="common");
+  besiFeeds   = json.feeds;
+  dairyFeeds  = json.feeds;
   breedsCache = json.breeds;
 }
 
@@ -1477,6 +1655,7 @@ async function bootstrapApp(fromLogin) {
   $("#who_name").textContent = currentUser.username;
   $("#who_admin_badge").hidden = !currentUser.is_admin;
   $("#admin_tab_btn").hidden   = !currentUser.is_admin;
+  $("#users_tab_btn").hidden   = !currentUser.is_admin;
 
   await refreshFeeds();
   const breedOpts = '<option value="">— Seçin —</option>' +

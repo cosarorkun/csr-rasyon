@@ -104,6 +104,13 @@ def calculate(
     total_pdin = 0.0
     total_protein_kg = 0.0
     total_starch_kg = 0.0
+    total_ndf_kg = 0.0
+    total_nfc_kg = 0.0
+    total_endf_kg = 0.0
+    total_ca_kg = 0.0
+    total_p_kg = 0.0
+    total_cost_tl = 0.0
+    has_ndf = has_nfc = has_endf = has_ca = has_p = False
 
     for item in ration:
         name = item.get("feed_name")
@@ -115,27 +122,49 @@ def calculate(
             raise CalculationError(f"Bilinmeyen yem: {name}")
 
         dm_kg = as_fed * (feed["dm_pct"] / 100.0)
-        ufv = dm_kg * feed["ufv"]
-        pdie = dm_kg * feed["pdie"]
-        pdin = dm_kg * feed["pdin"]
+        ufv = dm_kg * (feed["ufv"] or 0)
+        pdie = dm_kg * (feed["pdie"] or 0)
+        pdin = dm_kg * (feed["pdin"] or 0)
         protein_kg = dm_kg * (feed["protein"] / 100.0)
-        starch_kg = dm_kg * (feed["starch"] / 100.0)
+        starch_kg = dm_kg * ((feed.get("starch") or 0) / 100.0)
+
+        ndf = feed.get("ndf_pct")
+        nfc = feed.get("nfc_pct")
+        endf = feed.get("endf_pct")
+        ca = feed.get("ca_pct")
+        p = feed.get("p_pct")
+        ton_mal = feed.get("ton_maliyeti")
+
+        ndf_kg  = dm_kg * (ndf  / 100.0) if ndf  is not None else None
+        nfc_kg  = dm_kg * (nfc  / 100.0) if nfc  is not None else None
+        endf_kg = dm_kg * (endf / 100.0) if endf is not None else None
+        ca_kg   = dm_kg * (ca   / 100.0) if ca   is not None else None
+        p_kg    = dm_kg * (p    / 100.0) if p    is not None else None
+        row_cost = (as_fed / 1000.0) * ton_mal if ton_mal is not None else None
+
+        if ndf_kg  is not None: total_ndf_kg  += ndf_kg;  has_ndf  = True
+        if nfc_kg  is not None: total_nfc_kg  += nfc_kg;  has_nfc  = True
+        if endf_kg is not None: total_endf_kg += endf_kg; has_endf = True
+        if ca_kg   is not None: total_ca_kg   += ca_kg;   has_ca   = True
+        if p_kg    is not None: total_p_kg    += p_kg;    has_p    = True
+        if row_cost is not None: total_cost_tl += row_cost
 
         rows.append({
             "name": name,
-            "as_fed_kg": round(as_fed, 3),
-            "dm_kg": round(dm_kg, 3),
-            "ufv": round(ufv, 3),
-            "pdie": round(pdie, 1),
-            "pdin": round(pdin, 1),
+            "as_fed_kg":  round(as_fed, 3),
+            "dm_kg":      round(dm_kg, 3),
+            "ufv":        round(ufv, 3),
+            "pdie":       round(pdie, 1),
+            "pdin":       round(pdin, 1),
             "protein_kg": round(protein_kg, 3),
+            "cost_tl":    round(row_cost, 2) if row_cost is not None else None,
         })
 
-        total_as_fed += as_fed
-        total_dm += dm_kg
-        total_ufv += ufv
-        total_pdie += pdie
-        total_pdin += pdin
+        total_as_fed    += as_fed
+        total_dm        += dm_kg
+        total_ufv       += ufv
+        total_pdie      += pdie
+        total_pdin      += pdin
         total_protein_kg += protein_kg
         total_starch_kg += starch_kg
 
@@ -144,16 +173,22 @@ def calculate(
             "Rasyona en az bir yem (kg > 0) ekleyin. Toplam kuru madde 0."
         )
 
-    ufv_per_kg_dm = total_ufv / total_dm
-    pdie_per_kg_dm = total_pdie / total_dm
-    tmr_protein_pct = (total_protein_kg / total_dm) * 100.0
-    tmr_starch_pct = (total_starch_kg / total_dm) * 100.0
-    ration_dm_pct = (total_dm / total_as_fed) * 100.0 if total_as_fed > 0 else 0.0
+    ufv_per_kg_dm    = total_ufv / total_dm
+    pdie_per_kg_dm   = total_pdie / total_dm
+    tmr_protein_pct  = (total_protein_kg / total_dm) * 100.0
+    tmr_starch_pct   = (total_starch_kg  / total_dm) * 100.0
+    ration_dm_pct    = (total_dm / total_as_fed) * 100.0 if total_as_fed > 0 else 0.0
+    ndf_pct_dm       = (total_ndf_kg  / total_dm) * 100.0 if has_ndf  else None
+    nfc_pct_dm       = (total_nfc_kg  / total_dm) * 100.0 if has_nfc  else None
+    endf_pct_dm      = (total_endf_kg / total_dm) * 100.0 if has_endf else None
+    ca_pct_dm        = (total_ca_kg   / total_dm) * 100.0 if has_ca   else None
+    p_pct_dm         = (total_p_kg    / total_dm) * 100.0 if has_p    else None
+    cost_per_kg_dm   = total_cost_tl / total_dm if total_cost_tl > 0 else 0.0
 
     dmi_pct = lookup_dmi_pct(live_weight)
     expected_dmi_kg = live_weight * (dmi_pct / 100.0)
 
-    ration_ufv_total = ufv_per_kg_dm * expected_dmi_kg
+    ration_ufv_total  = ufv_per_kg_dm  * expected_dmi_kg
     ration_pdie_total = pdie_per_kg_dm * expected_dmi_kg
 
     gain_ufv = estimate_gain_from_provided(UFV_MATRIX, live_weight, ration_ufv_total)
@@ -167,25 +202,32 @@ def calculate(
         "live_weight": live_weight,
         "target_gain": target_gain,
         "tmr_summary": {
-            "total_as_fed_kg": round(total_as_fed, 2),
-            "total_dm_kg": round(total_dm, 2),
-            "ration_dm_pct": round(ration_dm_pct, 1),
-            "ufv_per_kg_dm": round(ufv_per_kg_dm, 2),
-            "pdie_per_kg_dm": round(pdie_per_kg_dm, 1),
-            "protein_pct_dm": round(tmr_protein_pct, 1),
-            "starch_pct_dm": round(tmr_starch_pct, 1),
-            "total_ufv": round(total_ufv, 2),
-            "total_pdie_g": round(total_pdie, 0),
+            "total_as_fed_kg":  round(total_as_fed, 2),
+            "total_dm_kg":      round(total_dm, 2),
+            "ration_dm_pct":    round(ration_dm_pct, 1),
+            "ufv_per_kg_dm":    round(ufv_per_kg_dm, 2),
+            "pdie_per_kg_dm":   round(pdie_per_kg_dm, 1),
+            "protein_pct_dm":   round(tmr_protein_pct, 1),
+            "starch_pct_dm":    round(tmr_starch_pct, 1),
+            "ndf_pct_dm":       round(ndf_pct_dm,  1) if ndf_pct_dm  is not None else None,
+            "nfc_pct_dm":       round(nfc_pct_dm,  1) if nfc_pct_dm  is not None else None,
+            "endf_pct_dm":      round(endf_pct_dm, 1) if endf_pct_dm is not None else None,
+            "ca_pct_dm":        round(ca_pct_dm,   2) if ca_pct_dm   is not None else None,
+            "p_pct_dm":         round(p_pct_dm,    2) if p_pct_dm    is not None else None,
+            "total_ufv":        round(total_ufv, 2),
+            "total_pdie_g":     round(total_pdie, 0),
+            "total_cost_tl":    round(total_cost_tl, 2),
+            "cost_per_kg_dm":   round(cost_per_kg_dm, 2),
         },
         "expected_performance": {
-            "dmi_pct_bw": round(dmi_pct, 1),
-            "expected_dmi_kg": round(expected_dmi_kg, 2),
-            "ration_ufv_total_at_dmi": round(ration_ufv_total, 2),
+            "dmi_pct_bw":               round(dmi_pct, 1),
+            "expected_dmi_kg":          round(expected_dmi_kg, 2),
+            "ration_ufv_total_at_dmi":  round(ration_ufv_total, 2),
             "ration_pdie_total_at_dmi_g": round(ration_pdie_total, 0),
-            "gain_ufv_limited_g": int(round(gain_ufv / 10.0) * 10),
-            "gain_pdi_limited_g": int(round(gain_pdi / 10.0) * 10),
-            "estimated_gain_g": int(round(final_gain / 10.0) * 10),
-            "bottleneck": bottleneck,
+            "gain_ufv_limited_g":       int(round(gain_ufv / 10.0) * 10),
+            "gain_pdi_limited_g":       int(round(gain_pdi / 10.0) * 10),
+            "estimated_gain_g":         int(round(final_gain / 10.0) * 10),
+            "bottleneck":               bottleneck,
         },
         "rows": rows,
     }
@@ -194,13 +236,13 @@ def calculate(
         ufv_required = required_at(UFV_MATRIX, live_weight, target_gain)
         pdi_required = required_at(PDI_MATRIX, live_weight, target_gain)
         result["inra_comparison"] = {
-            "target_gain_g": target_gain,
-            "ufv_required": round(ufv_required, 2),
-            "ufv_provided": round(ration_ufv_total, 2),
-            "ufv_met": ration_ufv_total >= ufv_required,
-            "pdi_required_g": round(pdi_required, 0),
-            "pdi_provided_g": round(ration_pdie_total, 0),
-            "pdi_met": ration_pdie_total >= pdi_required,
+            "target_gain_g":   target_gain,
+            "ufv_required":    round(ufv_required, 2),
+            "ufv_provided":    round(ration_ufv_total, 2),
+            "ufv_met":         ration_ufv_total >= ufv_required,
+            "pdi_required_g":  round(pdi_required, 0),
+            "pdi_provided_g":  round(ration_pdie_total, 0),
+            "pdi_met":         ration_pdie_total >= pdi_required,
         }
 
     return result
