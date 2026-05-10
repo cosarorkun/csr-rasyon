@@ -832,6 +832,13 @@ const INITIAL_ROWS = 5;
 const TOKEN_KEY  = "csr_token";
 const MODE_KEY   = "csr_mode";
 
+// ===== Debounce =====
+function debounce(fn, ms) {
+  let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+const scheduleCalc      = debounce(() => calculate(true), 700);
+const scheduleDairyCalc = debounce(() => dairyCalculate(true), 700);
+
 let token       = localStorage.getItem(TOKEN_KEY) || null;
 let currentUser = null;
 let currentMode = null; // 'besi' | 'sut'
@@ -1037,10 +1044,10 @@ function addRow(prefill) {
   sel.addEventListener("change", () => {
     const feed = besiFeeds.find(f => f.name === sel.value);
     if (feed && feed.ton_maliyeti != null && !price.value) price.value = feed.ton_maliyeti;
-    updateBesiRowCost(outerWrap);
+    updateBesiRowCost(outerWrap); scheduleCalc();
   });
-  kg.addEventListener("input",    () => updateBesiRowCost(outerWrap));
-  price.addEventListener("input", () => updateBesiRowCost(outerWrap));
+  kg.addEventListener("input",    () => { updateBesiRowCost(outerWrap); scheduleCalc(); });
+  price.addEventListener("input", () => { updateBesiRowCost(outerWrap); scheduleCalc(); });
   rationEl.appendChild(outerWrap); updateAddBtn();
   if (prefill && prefill.as_fed_kg && prefill.feed_name) updateBesiRowCost(outerWrap);
 }
@@ -1142,10 +1149,10 @@ function addDairyRow(prefill) {
   sel.addEventListener("change", () => {
     const feed = dairyFeeds.find(f => f.name === sel.value);
     if (feed && feed.ton_maliyeti != null && !price.value) price.value = feed.ton_maliyeti;
-    updateDairyRowStats(wrap);
+    updateDairyRowStats(wrap); scheduleDairyCalc();
   });
-  kg.addEventListener("input",    () => updateDairyRowStats(wrap));
-  price.addEventListener("input", () => updateDairyRowStats(wrap));
+  kg.addEventListener("input",    () => { updateDairyRowStats(wrap); scheduleDairyCalc(); });
+  price.addEventListener("input", () => { updateDairyRowStats(wrap); scheduleDairyCalc(); });
   dairyRationEl.appendChild(wrap); updateDairyAddBtn();
   if (prefill && prefill.as_fed_kg && prefill.feed_name) updateDairyRowStats(wrap);
 }
@@ -1305,25 +1312,28 @@ function renderDairyResults(data) {
 }
 
 // ===== BESI Calculate =====
-async function calculate() {
-  showError("");
+async function calculate(auto = false) {
+  if (!auto) showError("");
   const lw = parseFloat($("#live_weight").value);
-  if (isNaN(lw) || lw <= 0) { showError("Lütfen geçerli bir canlı ağırlık girin."); return; }
+  if (isNaN(lw) || lw <= 0) { if (!auto) showError("Lütfen geçerli bir canlı ağırlık girin."); return; }
   const tgRaw = $("#target_gain").value;
   const tg = tgRaw ? parseFloat(tgRaw) : null;
   const breed = $("#breed").value || null;
   const ration = gatherRation();
-  if (!ration.length) { showError("Rasyona en az bir yem ve kg değeri girin."); return; }
+  if (!ration.length) { if (!auto) showError("Rasyona en az bir yem ve kg değeri girin."); return; }
   const btn = $("#calc_btn"); btn.disabled=true; btn.textContent="Hesaplanıyor…";
   try {
     const json = await api("/calculate", { method:"POST",
       body: JSON.stringify({ live_weight:lw, target_gain:tg, breed, ration }) });
     lastResults=json; lastInputs={live_weight:lw,target_gain:tg,breed,ration};
     renderResults(json);
-  } catch(err) { showError(err.message); }
+  } catch(err) { if (!auto) showError(err.message); }
   finally { btn.disabled=false; btn.textContent="Hesapla"; }
 }
-$("#calc_btn").addEventListener("click", calculate);
+$("#calc_btn").addEventListener("click", () => calculate(false));
+$("#live_weight").addEventListener("input",  scheduleCalc);
+$("#target_gain").addEventListener("input",  scheduleCalc);
+$("#breed").addEventListener("change", scheduleCalc);
 $("#add_row").addEventListener("click", () => addRow());
 $("#reset_btn").addEventListener("click", () => {
   resetRows(); $("#results").hidden=true; $("#results-empty").hidden=false;
@@ -1331,23 +1341,25 @@ $("#reset_btn").addEventListener("click", () => {
 });
 
 // ===== DAIRY Calculate =====
-async function dairyCalculate() {
-  showError("");
+async function dairyCalculate(auto = false) {
+  if (!auto) showError("");
   const lw = parseFloat($("#d_live_weight").value);
-  if (isNaN(lw) || lw <= 0) { showError("Lütfen geçerli bir canlı ağırlık girin."); return; }
+  if (isNaN(lw) || lw <= 0) { if (!auto) showError("Lütfen geçerli bir canlı ağırlık girin."); return; }
   const breed = $("#d_breed").value || null;
   const ration = gatherDairyRation();
-  if (!ration.length) { showError("Rasyona en az bir yem ve kg değeri girin."); return; }
+  if (!ration.length) { if (!auto) showError("Rasyona en az bir yem ve kg değeri girin."); return; }
   const btn = $("#dairy_calc_btn"); btn.disabled=true; btn.textContent="Hesaplanıyor…";
   try {
     const json = await api("/api/dairy/calculate", { method:"POST",
       body: JSON.stringify({ live_weight:lw, breed, ration }) });
     dairyLastResults=json; dairyLastInputs={live_weight:lw,breed,ration};
     renderDairyResults(json);
-  } catch(err) { showError(err.message); }
+  } catch(err) { if (!auto) showError(err.message); }
   finally { btn.disabled=false; btn.textContent="Hesapla"; }
 }
-$("#dairy_calc_btn").addEventListener("click", dairyCalculate);
+$("#dairy_calc_btn").addEventListener("click", () => dairyCalculate(false));
+$("#d_live_weight").addEventListener("input",  scheduleDairyCalc);
+$("#d_breed").addEventListener("change", scheduleDairyCalc);
 $("#dairy_add_row").addEventListener("click", () => addDairyRow());
 $("#dairy_reset_btn").addEventListener("click", () => {
   resetDairyRows(); $("#dairy-results").hidden=true; $("#dairy-results-empty").hidden=false;
