@@ -205,8 +205,8 @@
   @media (min-width: 1024px) {
     .calc-grid {
       display: grid;
-      grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
-      gap: 14px; align-items: start;
+      grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
+      gap: 16px; align-items: start;
     }
     .calc-grid .right-col { position: sticky; top: 58px; }
   }
@@ -427,25 +427,50 @@
     body.app-mode .left-col, body.app-mode .right-col { overflow-y: auto; height: 100%; }
     body.app-mode .right-col { position: static !important; }
     body.app-mode footer.app-footer { display: none; }
-    body.app-mode .card { padding: 8px 10px; margin-bottom: 6px; }
+    body.app-mode .card { padding: 10px 12px; margin-bottom: 8px; }
     body.app-mode .card h2 { font-size: 12px; margin-bottom: 8px; }
-    /* More columns on right for dense stat display */
-    body.app-mode .stat-grid { grid-template-columns: repeat(4, 1fr); gap: 3px 10px; }
+
+    /* ── Right col: 3-column stat grid, compact values ── */
+    body.app-mode .stat-grid { grid-template-columns: repeat(3, 1fr); gap: 4px 12px; }
     body.app-mode .stat { padding: 5px 0; }
-    body.app-mode .stat .label { font-size: 10px; }
-    body.app-mode .stat .value { font-size: 14px; margin-top: 1px; }
+    body.app-mode .stat .label { font-size: 10.5px; }
+    body.app-mode .stat .value { font-size: 15px; margin-top: 1px; }
     body.app-mode .stat .unit  { font-size: 11px; }
-    /* Compact gain highlight */
-    body.app-mode .gain-highlight { padding: 10px 14px; margin-bottom: 10px; }
-    body.app-mode .gain-highlight .big { font-size: 28px; }
+
+    /* ── Gain highlight compact ── */
+    body.app-mode .gain-highlight { padding: 10px 14px; margin-bottom: 8px; }
+    body.app-mode .gain-highlight .big { font-size: 30px; }
     body.app-mode .gain-highlight .label { font-size: 11px; }
-    /* Compact milk cards — 3 across so they don't stack */
-    body.app-mode .milk-cards { grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 6px; }
-    body.app-mode .milk-card { padding: 8px 10px; }
-    body.app-mode .milk-card .milk-big { font-size: 24px; }
+    body.app-mode .gain-highlight .bottleneck { margin-top: 6px; font-size: 11px; }
+
+    /* ── Milk cards: 3 across, compact ── */
+    body.app-mode .milk-cards { grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }
+    body.app-mode .milk-card { padding: 10px 12px; }
+    body.app-mode .milk-card .milk-big { font-size: 26px; }
     body.app-mode .milk-card .milk-lbl { font-size: 10px; }
-    body.app-mode .milk-card .milk-unit { font-size: 13px; }
-    body.app-mode .milk-card .limit-badge { margin-top: 3px; font-size: 11px; }
+    body.app-mode .milk-card .milk-unit { font-size: 14px; }
+    body.app-mode .milk-card .limit-badge { margin-top: 4px; font-size: 11px; }
+
+    /* ── Ration rows: daraltılmış inputs, yem adı için daha fazla alan ── */
+    body.app-mode .ration-row {
+      grid-template-columns: 1fr 70px 88px 32px; gap: 5px;
+    }
+    body.app-mode .dairy-row-top {
+      grid-template-columns: 1fr 70px 88px 32px; gap: 5px;
+    }
+    body.app-mode .ration-row .kg-input,
+    body.app-mode .dairy-row-top .kg-input { font-size: 13px; padding: 8px 6px; }
+    body.app-mode .ration-row .price-input,
+    body.app-mode .dairy-row-top .price-input { font-size: 13px; padding: 8px 6px; }
+    body.app-mode .ration-row .remove-btn,
+    body.app-mode .dairy-row-top .remove-btn { height: 36px; font-size: 16px; }
+    /* Smaller row stats */
+    body.app-mode .besi-row-stats,
+    body.app-mode .dairy-row-stats { gap: 4px 10px; margin-top: 5px; padding-top: 5px; }
+    body.app-mode .besi-row-stats .sr-val,
+    body.app-mode .dairy-row-stats .sr-val { font-size: 12px; }
+    body.app-mode .ration-row-wrap,
+    body.app-mode .dairy-row-wrap { padding: 7px 8px; }
   }
 
   /* ===== Mobile: prevent iOS zoom on input focus ===== */
