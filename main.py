@@ -1,12 +1,13 @@
 """FastAPI app for the CSR Rasyon Hesaplayıcı."""
 
+import io
 import json
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sqlalchemy import or_
@@ -33,6 +34,56 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="CSR Rasyon Hesaplayıcı", lifespan=lifespan)
 
 STATIC_DIR = Path(__file__).parent / "static"
+
+# ── PDF font setup (runs once at import time) ────────────────────────────────
+_PDF_FONT       = "Helvetica"
+_PDF_FONT_BOLD  = "Helvetica-Bold"
+_PDF_UNICODE    = False
+_PDF_LOADED     = False
+_TR_TAB = str.maketrans("ğüşıöçĞÜŞİÖÇ", "gusiocGUSIOC")
+
+try:
+    from reportlab.pdfbase import pdfmetrics as _pm
+    from reportlab.pdfbase.ttfonts import TTFont as _TTFont
+    _PDF_LOADED = True
+    for _r, _b in [
+        ("/Library/Fonts/Arial.ttf",                                          "/Library/Fonts/Arial Bold.ttf"),
+        ("/System/Library/Fonts/Supplemental/Arial.ttf",                      "/System/Library/Fonts/Supplemental/Arial Bold.ttf"),
+        ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",                   "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
+        ("/usr/share/fonts/dejavu/DejaVuSans.ttf",                            "/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf"),
+    ]:
+        if _r and Path(_r).exists():
+            try:
+                _pm.registerFont(_TTFont("_PDFFont", _r))
+                _PDF_FONT = "_PDFFont"
+                if _b and Path(_b).exists():
+                    _pm.registerFont(_TTFont("_PDFFontBold", _b))
+                    _PDF_FONT_BOLD = "_PDFFontBold"
+                else:
+                    _PDF_FONT_BOLD = "_PDFFont"
+                _PDF_UNICODE = True
+                break
+            except Exception:
+                pass
+except ImportError:
+    pass
+
+
+def _ptxt(s) -> str:
+    """Return PDF-safe string — Unicode if a TTF font is registered, else ASCII-transliterated."""
+    if s is None:
+        return ""
+    s = str(s)
+    return s if _PDF_UNICODE else s.translate(_TR_TAB)
+
+
+def _pfmt(n, decimals: int = 2) -> str:
+    if n is None:
+        return "–"
+    try:
+        return f"{float(n):.{decimals}f}"
+    except Exception:
+        return str(n)
 
 
 # --- Schemas ---
@@ -118,6 +169,17 @@ class UserCreateRequest(BaseModel):
 class UserUpdateRequest(BaseModel):
     password: Optional[str] = Field(default=None, min_length=4)
     is_admin: Optional[bool] = None
+
+
+class ReportRequest(BaseModel):
+    ration_type: str = "besi"
+    customer_name: Optional[str] = None
+    herd_name: Optional[str] = None
+    live_weight: float
+    target_gain: Optional[float] = None
+    breed: Optional[str] = None
+    ration: List[dict]
+    results: dict
 
 
 # --- Public routes ---
@@ -423,6 +485,289 @@ def delete_user(
     db.delete(user)
     db.commit()
     return {"ok": True}
+
+
+# --- PDF Report ---
+
+@app.post("/api/report/pdf")
+def generate_pdf_report(
+    req: ReportRequest,
+    user: User = Depends(get_current_user),
+):
+    if not _PDF_LOADED:
+        raise HTTPException(
+            status_code=501,
+            detail="PDF özelliği için 'reportlab' paketi gereklidir. pip install reportlab",
+        )
+
+    from datetime import datetime
+
+    from reportlab.lib import colors
+    from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.lib.units import cm
+    from reportlab.platypus import (
+        Image,
+        Paragraph,
+        SimpleDocTemplate,
+        Spacer,
+        Table,
+        TableStyle,
+    )
+
+    buf = io.BytesIO()
+    logo_path = STATIC_DIR / "csr-logo.png"
+
+    doc = SimpleDocTemplate(
+        buf,
+        pagesize=A4,
+        rightMargin=1.5 * cm,
+        leftMargin=1.5 * cm,
+        topMargin=1.5 * cm,
+        bottomMargin=1.5 * cm,
+    )
+
+    F  = _PDF_FONT
+    FB = _PDF_FONT_BOLD
+    navy      = colors.HexColor("#1e3a73")
+    green     = colors.HexColor("#14803c")
+    light_bg  = colors.HexColor("#f8fafd")
+    row_alt   = colors.HexColor("#eef2f9")
+    border_c  = colors.HexColor("#d8dee8")
+
+    _align_map = {"LEFT": TA_LEFT, "CENTER": TA_CENTER, "RIGHT": TA_RIGHT}
+
+    def P(text, size=10, bold=False, color=colors.black, align="LEFT"):
+        style = ParagraphStyle(
+            "s",
+            fontName=FB if bold else F,
+            fontSize=size,
+            textColor=color,
+            alignment=_align_map.get(align, TA_LEFT),
+            spaceAfter=2,
+            leading=size * 1.3,
+        )
+        return Paragraph(_ptxt(str(text)) if text is not None else "", style)
+
+    story = []
+
+    # ── Header ────────────────────────────────────────────────────────────────
+    logo_cell: object = ""
+    if logo_path.exists():
+        try:
+            logo_cell = Image(str(logo_path), width=1.2 * cm, height=1.2 * cm)
+        except Exception:
+            pass
+
+    hdr_table = Table(
+        [[logo_cell, P("CSR Rasyon Hesaplayici", 16, bold=True, color=navy)]],
+        colWidths=[1.5 * cm, None],
+    )
+    hdr_table.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+    ]))
+    story.append(hdr_table)
+
+    mode_str = "Sut Rasyonu Raporu" if req.ration_type == "sut" else "Besi Rasyonu Raporu"
+    story.append(P(mode_str, 13, bold=True, color=navy))
+    story.append(P(
+        f"Tarih: {datetime.now().strftime('%d.%m.%Y %H:%M')}  |  Hazirlayan: {user.username}",
+        9, color=colors.grey,
+    ))
+    story.append(Spacer(1, 0.3 * cm))
+
+    # ── Customer info ─────────────────────────────────────────────────────────
+    info_rows: list = []
+    if req.customer_name:
+        info_rows.append([P("Musteri / Isletme:", 9, bold=True), P(req.customer_name, 10)])
+    if req.herd_name:
+        info_rows.append([P("Suru / Not:", 9, bold=True), P(req.herd_name, 10)])
+    info_rows.append([P("Canli Agirlik:", 9, bold=True), P(f"{req.live_weight:.0f} kg", 10)])
+    if req.breed:
+        info_rows.append([P("Irk:", 9, bold=True), P(req.breed, 10)])
+    if req.target_gain:
+        info_rows.append([P("Hedef CA Artisi:", 9, bold=True), P(f"{req.target_gain:.0f} g/gun", 10)])
+
+    info_t = Table(info_rows, colWidths=[4 * cm, None])
+    info_t.setStyle(TableStyle([
+        ("TOPPADDING",    (0, 0), (-1, -1), 3),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+    ]))
+    story.append(info_t)
+    story.append(Spacer(1, 0.35 * cm))
+
+    # ── Ration table ──────────────────────────────────────────────────────────
+    story.append(P("Rasyon Bilesimi", 11, bold=True, color=navy))
+    story.append(Spacer(1, 0.12 * cm))
+
+    rows_data = req.results.get("rows", [])
+    page_w = A4[0] - 3 * cm
+    name_w = 4.5 * cm
+
+    if req.ration_type == "sut":
+        ration_cols = ["Yem", "Yas (kg)", "KM (kg)", "UFL", "PDI (g)", "HP (g)", "NDF (g)", "Maliyet (TL)"]
+        n_other = len(ration_cols) - 1
+        col_widths = [name_w] + [(page_w - name_w) / n_other] * n_other
+        def _row_sut(r):
+            ndf = _pfmt(r.get("ndf_g"), 0) if r.get("ndf_g") is not None else "–"
+            cost = _pfmt(r.get("cost_tl"), 2) if r.get("cost_tl") is not None else "–"
+            return [
+                P(r.get("name", ""), 9),
+                P(_pfmt(r.get("as_fed_kg"), 2), 9, align="RIGHT"),
+                P(_pfmt(r.get("dm_kg"), 2), 9, align="RIGHT"),
+                P(_pfmt(r.get("ufl"), 2), 9, align="RIGHT"),
+                P(_pfmt(r.get("pdi_g"), 0), 9, align="RIGHT"),
+                P(_pfmt(r.get("hp_g"), 0), 9, align="RIGHT"),
+                P(ndf, 9, align="RIGHT"),
+                P(cost, 9, align="RIGHT"),
+            ]
+        ration_body = [_row_sut(r) for r in rows_data]
+    else:
+        ration_cols = ["Yem", "Yas (kg)", "KM (kg)", "UFV", "PDIE", "Protein (kg)", "Maliyet (TL)"]
+        n_other = len(ration_cols) - 1
+        col_widths = [name_w] + [(page_w - name_w) / n_other] * n_other
+        def _row_besi(r):
+            cost = _pfmt(r.get("cost_tl"), 2) if r.get("cost_tl") is not None else "–"
+            return [
+                P(r.get("name", ""), 9),
+                P(_pfmt(r.get("as_fed_kg"), 2), 9, align="RIGHT"),
+                P(_pfmt(r.get("dm_kg"), 2), 9, align="RIGHT"),
+                P(_pfmt(r.get("ufv"), 2), 9, align="RIGHT"),
+                P(_pfmt(r.get("pdie"), 0), 9, align="RIGHT"),
+                P(_pfmt(r.get("protein_kg"), 2), 9, align="RIGHT"),
+                P(cost, 9, align="RIGHT"),
+            ]
+        ration_body = [_row_besi(r) for r in rows_data]
+
+    thead_row = [P(h, 8, bold=True) for h in ration_cols]
+    rat_table = Table([thead_row] + ration_body, colWidths=col_widths, repeatRows=1)
+    rat_table.setStyle(TableStyle([
+        ("BACKGROUND",     (0, 0), (-1, 0),  navy),
+        ("TEXTCOLOR",      (0, 0), (-1, 0),  colors.white),
+        ("TOPPADDING",     (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING",  (0, 0), (-1, -1), 4),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [light_bg, colors.white]),
+        ("GRID",           (0, 0), (-1, -1), 0.4, border_c),
+        ("ALIGN",          (1, 0), (-1, -1), "RIGHT"),
+    ]))
+    story.append(rat_table)
+    story.append(Spacer(1, 0.4 * cm))
+
+    # ── TMR Summary ───────────────────────────────────────────────────────────
+    story.append(P("TMR Ozeti", 11, bold=True, color=navy))
+    story.append(Spacer(1, 0.12 * cm))
+    t = req.results.get("tmr_summary", {})
+
+    if req.ration_type == "sut":
+        summary_items = [
+            ("Toplam Yas Madde",  f"{_pfmt(t.get('total_as_fed_kg'), 2)} kg/gun"),
+            ("Toplam Kuru Madde", f"{_pfmt(t.get('total_dm_kg'), 2)} kg/gun"),
+            ("Rasyon KM%",        f"{_pfmt(t.get('ration_dm_pct'), 1)} %"),
+            ("UFL / kg KM",       _pfmt(t.get("ufl_per_kg_dm"), 3)),
+            ("PDI / kg KM",       f"{_pfmt(t.get('pdi_per_kg_dm'), 1)} g/kg KM"),
+            ("HP (KM)",           f"{_pfmt(t.get('hp_pct_dm'), 1)} %"),
+        ]
+        if t.get("ndf_pct_dm") is not None:
+            summary_items.append(("NDF (KM)", f"{_pfmt(t.get('ndf_pct_dm'), 1)} %"))
+        if t.get("nfc_pct_dm") is not None:
+            summary_items.append(("NFC (KM)", f"{_pfmt(t.get('nfc_pct_dm'), 1)} %"))
+        if (t.get("total_cost_tl") or 0) > 0:
+            summary_items += [
+                ("Rasyon Maliyeti",   f"{_pfmt(t.get('total_cost_tl'), 2)} TL/gun"),
+                ("Maliyet / kg KM",   f"{_pfmt(t.get('cost_per_kg_dm'), 2)} TL/kg"),
+            ]
+            if t.get("cost_per_liter_milk") is not None:
+                summary_items.append(("Maliyet / Lt Sut", f"{_pfmt(t.get('cost_per_liter_milk'), 2)} TL/lt"))
+    else:
+        summary_items = [
+            ("Toplam Yas Madde",  f"{_pfmt(t.get('total_as_fed_kg'), 2)} kg/gun"),
+            ("Toplam Kuru Madde", f"{_pfmt(t.get('total_dm_kg'), 2)} kg/gun"),
+            ("Rasyon KM%",        f"{_pfmt(t.get('ration_dm_pct'), 1)} %"),
+            ("UFV / kg KM",       _pfmt(t.get("ufv_per_kg_dm"), 2)),
+            ("Protein (KM)",      f"{_pfmt(t.get('protein_pct_dm'), 1)} %"),
+            ("Nisasta (KM)",      f"{_pfmt(t.get('starch_pct_dm'), 1)} %"),
+        ]
+        if t.get("ndf_pct_dm") is not None:
+            summary_items.append(("NDF (KM)", f"{_pfmt(t.get('ndf_pct_dm'), 1)} %"))
+        if t.get("nfc_pct_dm") is not None:
+            summary_items.append(("NFC (KM)", f"{_pfmt(t.get('nfc_pct_dm'), 1)} %"))
+        if (t.get("total_cost_tl") or 0) > 0:
+            summary_items += [
+                ("Rasyon Maliyeti", f"{_pfmt(t.get('total_cost_tl'), 2)} TL/gun"),
+                ("Maliyet / kg KM", f"{_pfmt(t.get('cost_per_kg_dm'), 2)} TL/kg"),
+            ]
+
+    # Render summary as 2-column layout
+    half_w = (page_w) / 2
+    sum_rows = []
+    for i in range(0, len(summary_items), 2):
+        row: list = []
+        for j in range(2):
+            if i + j < len(summary_items):
+                k, v = summary_items[i + j]
+                row += [P(k + ":", 9, bold=True), P(v, 9)]
+            else:
+                row += [P(""), P("")]
+        sum_rows.append(row)
+    sum_table = Table(sum_rows, colWidths=[3.5 * cm, half_w - 3.5 * cm, 3.5 * cm, half_w - 3.5 * cm])
+    sum_table.setStyle(TableStyle([
+        ("TOPPADDING",     (0, 0), (-1, -1), 3),
+        ("BOTTOMPADDING",  (0, 0), (-1, -1), 3),
+        ("ROWBACKGROUNDS", (0, 0), (-1, -1), [light_bg, colors.white]),
+    ]))
+    story.append(sum_table)
+    story.append(Spacer(1, 0.4 * cm))
+
+    # ── Performance / Milk ────────────────────────────────────────────────────
+    if req.ration_type == "sut":
+        m = req.results.get("milk_estimate", {})
+        story.append(P("Sut Miktari Tahmini", 11, bold=True, color=navy))
+        story.append(Spacer(1, 0.12 * cm))
+        perf_rows = [
+            [P("Enerji Bazli Tahmini Sut:",   9, bold=True), P(f"{_pfmt(m.get('milk_by_energy_L'), 1)} L/gun", 10)],
+            [P("Protein Bazli Tahmini Sut:",  9, bold=True), P(f"{_pfmt(m.get('milk_by_pdi_L'), 1)} L/gun", 10)],
+            [P("Tahmini Gunluk Sut Uretimi:", 9, bold=True), P(f"{_pfmt(m.get('predicted_milk_L'), 1)} L/gun", 13, bold=True, color=green)],
+            [P("Sinirlatici Faktor:",         9, bold=True), P(_ptxt(m.get("limit_factor", "")), 10)],
+        ]
+    else:
+        p = req.results.get("expected_performance", {})
+        story.append(P("Beklenen Performans", 11, bold=True, color=navy))
+        story.append(Spacer(1, 0.12 * cm))
+        perf_rows = [
+            [P("Tahmini CA Artisi:",        9, bold=True), P(f"{_pfmt(p.get('estimated_gain_g'), 0)} g/gun", 13, bold=True, color=green)],
+            [P("Sinirlatici besin ogesi:",  9, bold=True), P(_ptxt(p.get("bottleneck", "")), 10)],
+            [P("UFV-bazli tahmin:",         9, bold=True), P(f"{_pfmt(p.get('gain_ufv_limited_g'), 0)} g/gun", 10)],
+            [P("PDI-bazli tahmin:",         9, bold=True), P(f"{_pfmt(p.get('gain_pdi_limited_g'), 0)} g/gun", 10)],
+        ]
+
+    perf_table = Table(perf_rows, colWidths=[4.5 * cm, None])
+    perf_table.setStyle(TableStyle([
+        ("TOPPADDING",     (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING",  (0, 0), (-1, -1), 4),
+        ("ROWBACKGROUNDS", (0, 0), (-1, -1), [light_bg, colors.white]),
+    ]))
+    story.append(perf_table)
+
+    # ── Footer ────────────────────────────────────────────────────────────────
+    story.append(Spacer(1, 0.6 * cm))
+    story.append(P(
+        "Bu rapor CSR Rasyon Hesaplayici tarafindan otomatik olarak olusturulmustur.",
+        8, color=colors.grey, align="CENTER",
+    ))
+
+    doc.build(story)
+    buf.seek(0)
+
+    safe_name = (req.customer_name or "rasyon").replace(" ", "_")[:20]
+    filename = f"rasyon_{req.ration_type}_{safe_name}.pdf"
+
+    return StreamingResponse(
+        buf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")

@@ -402,6 +402,53 @@
   footer.app-footer .foot-line { letter-spacing: 0.8px; font-size: 11px; text-transform: uppercase; }
 
   [hidden] { display: none !important; }
+
+  /* ===== Desktop viewport dashboard layout ===== */
+  @media (min-width: 1024px) {
+    body.app-mode #app-view {
+      display: flex; flex-direction: column;
+      height: 100dvh; overflow: hidden;
+    }
+    body.app-mode #app-view > header.topbar,
+    body.app-mode #app-view > nav.tabs { flex-shrink: 0; }
+    body.app-mode #app-view > nav.tabs { position: static; }
+    body.app-mode #app-view > main {
+      flex: 1; min-height: 0;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      padding: 10px 14px;
+    }
+    body.app-mode #app-view > main.scroll-tab { overflow-y: auto; }
+    body.app-mode #app-view > main > #error,
+    body.app-mode #app-view > main > #info { flex-shrink: 0; }
+    body.app-mode #tab-calc,
+    body.app-mode #tab-sut { flex: 1; min-height: 0; overflow: hidden; }
+    body.app-mode .calc-grid { height: 100%; align-items: stretch; overflow: hidden; }
+    body.app-mode .left-col, body.app-mode .right-col { overflow-y: auto; height: 100%; }
+    body.app-mode .right-col { position: static !important; }
+    body.app-mode footer.app-footer { display: none; }
+    body.app-mode .card { padding: 10px 12px; margin-bottom: 8px; }
+  }
+
+  /* ===== Mobile: prevent iOS zoom on input focus ===== */
+  @media (max-width: 767px) {
+    input[type="number"], input[type="text"], input[type="password"], select, textarea {
+      font-size: 16px !important;
+    }
+  }
+
+  /* ===== PDF download button ===== */
+  .btn.pdf { color: var(--blue-dark); border-color: var(--blue-border); }
+  .btn.pdf:hover { background: var(--blue-bg); }
+
+  /* ===== Accordion detail cards ===== */
+  .card.collapsible > h2 {
+    cursor: pointer; user-select: none;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .card.collapsible > h2::after { content: "▾"; font-size: 11px; opacity: 0.55; margin-left: 6px; }
+  .card.collapsible.collapsed > h2::after { content: "▸"; }
+  .card.collapsible.collapsed .card-body { display: none; }
 </style>
 </head>
 <body>
@@ -562,11 +609,17 @@
               <div class="compare" id="inra_compare"></div>
             </div>
             <!-- Detail table: admin only -->
-            <div class="card" id="detail_card" hidden>
+            <div class="card collapsible collapsed" id="detail_card" hidden>
               <h2>Rasyon Detay Tablosu (Yönetici)</h2>
-              <div class="scroll-x">
-                <table class="detail" id="detail_table"></table>
+              <div class="card-body">
+                <div class="scroll-x">
+                  <table class="detail" id="detail_table"></table>
+                </div>
               </div>
+            </div>
+            <!-- PDF download -->
+            <div id="besi_pdf_row" style="margin-bottom:10px;" hidden>
+              <button class="btn pdf" id="besi_pdf_btn" type="button">&#x1F4C4; PDF &#x0130;ndir</button>
             </div>
           </div>
         </div>
@@ -638,11 +691,17 @@
               <div class="stat-grid" id="dairy_maintenance"></div>
             </div>
             <!-- Detail table: admin only -->
-            <div class="card" id="dairy_detail_card" hidden>
+            <div class="card collapsible collapsed" id="dairy_detail_card" hidden>
               <h2>Rasyon Detay Tablosu (Yönetici)</h2>
-              <div class="scroll-x">
-                <table class="detail" id="dairy_detail_table"></table>
+              <div class="card-body">
+                <div class="scroll-x">
+                  <table class="detail" id="dairy_detail_table"></table>
+                </div>
               </div>
+            </div>
+            <!-- PDF download -->
+            <div id="dairy_pdf_row" style="margin-bottom:10px;" hidden>
+              <button class="btn pdf" id="dairy_pdf_btn" type="button">&#x1F4C4; PDF &#x0130;ndir</button>
             </div>
             <div class="dairy-footer-notes">
               <p>&#x2699;&#xFE0F; UFL ve PDI hesaplamaları INRA 2018 sistemine dayalıdır; yem değerlerine göre değişir.</p>
@@ -837,12 +896,15 @@ const INITIAL_ROWS = 5;
 const TOKEN_KEY  = "csr_token";
 const MODE_KEY   = "csr_mode";
 
-// ===== Debounce =====
+// ===== Debounce & mobile detection =====
 function debounce(fn, ms) {
   let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
 }
-const scheduleCalc      = debounce(() => calculate(true), 700);
-const scheduleDairyCalc = debounce(() => dairyCalculate(true), 700);
+function isMobileViewport() {
+  return window.matchMedia("(max-width: 768px)").matches;
+}
+const scheduleCalc      = debounce(() => { if (!isMobileViewport()) calculate(true); }, 700);
+const scheduleDairyCalc = debounce(() => { if (!isMobileViewport()) dairyCalculate(true); }, 700);
 
 let token       = localStorage.getItem(TOKEN_KEY) || null;
 let currentUser = null;
@@ -896,9 +958,9 @@ function showInfo(msg) {
 }
 
 // ===== View routing =====
-function showLogin()   { $("#login-view").hidden=false; $("#landing-view").hidden=true;  $("#app-view").hidden=true; }
-function showLanding() { $("#login-view").hidden=true;  $("#landing-view").hidden=false; $("#app-view").hidden=true; }
-function showApp()     { $("#login-view").hidden=true;  $("#landing-view").hidden=true;  $("#app-view").hidden=false; }
+function showLogin()   { $("#login-view").hidden=false; $("#landing-view").hidden=true;  $("#app-view").hidden=true;  document.body.classList.remove("app-mode"); }
+function showLanding() { $("#login-view").hidden=true;  $("#landing-view").hidden=false; $("#app-view").hidden=true;  document.body.classList.remove("app-mode"); }
+function showApp()     { $("#login-view").hidden=true;  $("#landing-view").hidden=true;  $("#app-view").hidden=false; document.body.classList.add("app-mode"); }
 
 // ===== Mode =====
 function applyMode(mode) {
@@ -924,12 +986,23 @@ function switchTab(name) {
   $("#tab-history").hidden = (name !== "history");
   $("#tab-admin").hidden   = (name !== "admin");
   $("#tab-users").hidden   = (name !== "users");
+  // viewport mode: non-calc tabs need normal scroll
+  const mainEl = document.querySelector("#app-view > main");
+  if (mainEl) mainEl.classList.toggle("scroll-tab", name !== "calc" && name !== "sut");
   showError("");
   if (name === "history") loadHistory();
   if (name === "admin")   loadFeedsTable();
   if (name === "users")   loadUsersTable();
 }
 $$("nav.tabs button").forEach(b => b.addEventListener("click", () => switchTab(b.dataset.tab)));
+
+// ===== Accordion: collapsible cards =====
+document.addEventListener("click", (e) => {
+  const h2 = e.target.closest(".card.collapsible > h2");
+  if (!h2) return;
+  const card = h2.closest(".card.collapsible");
+  if (card) card.classList.toggle("collapsed");
+});
 
 // ===== Login =====
 $("#login-form").addEventListener("submit", async (e) => {
@@ -1217,8 +1290,46 @@ function rebuildDairyDropdowns() {
   });
 }
 
+// ===== PDF Download =====
+async function downloadPdf(mode, inputs, results, btn) {
+  const origText = btn ? btn.textContent : "";
+  if (btn) { btn.disabled = true; btn.textContent = "Hazirlaniyor…"; }
+  try {
+    const payload = {
+      ration_type:   mode,
+      customer_name: (inputs && inputs.customer_name) || null,
+      herd_name:     (inputs && inputs.herd_name)     || null,
+      live_weight:   inputs && inputs.live_weight,
+      target_gain:   (inputs && inputs.target_gain)   || null,
+      breed:         (inputs && inputs.breed)         || null,
+      ration:        (inputs && inputs.ration)        || [],
+      results:       results || {},
+    };
+    const res = await fetch("/api/report/pdf", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body:    JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error((err && err.detail) || "PDF oluşturulamadı.");
+    }
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    const safe = ((inputs && inputs.customer_name) || "rasyon").replace(/[^a-zA-Z0-9À-ſ]/g, "_").slice(0, 20);
+    a.href     = url;
+    a.download = "rasyon_" + mode + "_" + safe + ".pdf";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 15000);
+  } catch(err) { showError(err.message); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = origText; } }
+}
+
 // ===== BESI renderResults =====
-function renderResults(data) {
+function renderResults(data, auto = false) {
+  const rightCol = document.querySelector("#tab-calc .right-col");
+  const savedScroll = (auto && rightCol) ? rightCol.scrollTop : null;
   $("#results-empty").hidden = true; $("#results").hidden = false; $("#save_btn").disabled = false;
   const t = data.tmr_summary;
   const ndfBox  = t.ndf_pct_dm  != null ? statBox("NDF (KM)",   fmt(t.ndf_pct_dm,1),  "%") : "";
@@ -1274,11 +1385,24 @@ function renderResults(data) {
     $("#detail_table").innerHTML = head + "<tbody>"+body+"</tbody>";
   } else { $("#detail_card").hidden = true; }
 
-  if (window.innerWidth < 1024) $("#results").scrollIntoView({ behavior:"smooth", block:"start" });
+  // PDF button
+  const pdfRow = $("#besi_pdf_row");
+  if (pdfRow) pdfRow.hidden = false;
+  const pdfBtn = $("#besi_pdf_btn");
+  if (pdfBtn) pdfBtn.onclick = () => downloadPdf("besi", lastInputs, lastResults, pdfBtn);
+
+  // Scroll handling
+  if (savedScroll !== null && rightCol) {
+    requestAnimationFrame(() => { rightCol.scrollTop = savedScroll; });
+  } else if (!auto && window.innerWidth < 1024) {
+    $("#results").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
 }
 
 // ===== DAIRY renderDairyResults =====
-function renderDairyResults(data) {
+function renderDairyResults(data, auto = false) {
+  const rightCol = document.querySelector("#tab-sut .right-col");
+  const savedScroll = (auto && rightCol) ? rightCol.scrollTop : null;
   $("#dairy-results-empty").hidden = true; $("#dairy-results").hidden = false; $("#dairy_save_btn").disabled = false;
   const m = data.milk_estimate;
   const limColor = m.limit_factor === "ENERJİ" ? "var(--blue-dark)" : "var(--warn)";
@@ -1334,7 +1458,18 @@ function renderDairyResults(data) {
     $("#dairy_detail_table").innerHTML = head + "<tbody>"+body+"</tbody>";
   } else { $("#dairy_detail_card").hidden = true; }
 
-  if (window.innerWidth < 1024) $("#dairy-results").scrollIntoView({ behavior:"smooth", block:"start" });
+  // PDF button
+  const dPdfRow = $("#dairy_pdf_row");
+  if (dPdfRow) dPdfRow.hidden = false;
+  const dPdfBtn = $("#dairy_pdf_btn");
+  if (dPdfBtn) dPdfBtn.onclick = () => downloadPdf("sut", dairyLastInputs, dairyLastResults, dPdfBtn);
+
+  // Scroll handling
+  if (savedScroll !== null && rightCol) {
+    requestAnimationFrame(() => { rightCol.scrollTop = savedScroll; });
+  } else if (!auto && window.innerWidth < 1024) {
+    $("#dairy-results").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
 }
 
 // ===== BESI Calculate =====
@@ -1352,7 +1487,7 @@ async function calculate(auto = false) {
     const json = await api("/calculate", { method:"POST",
       body: JSON.stringify({ live_weight:lw, target_gain:tg, breed, ration }) });
     lastResults=json; lastInputs={live_weight:lw,target_gain:tg,breed,ration};
-    renderResults(json);
+    renderResults(json, auto);
   } catch(err) { if (!auto) showError(err.message); }
   finally { btn.disabled=false; btn.textContent="Hesapla"; }
 }
@@ -1379,7 +1514,7 @@ async function dairyCalculate(auto = false) {
     const json = await api("/api/dairy/calculate", { method:"POST",
       body: JSON.stringify({ live_weight:lw, breed, ration }) });
     dairyLastResults=json; dairyLastInputs={live_weight:lw,breed,ration};
-    renderDairyResults(json);
+    renderDairyResults(json, auto);
   } catch(err) { if (!auto) showError(err.message); }
   finally { btn.disabled=false; btn.textContent="Hesapla"; }
 }
@@ -1468,7 +1603,9 @@ function renderHistory(rations) {
       "<td>"+fmt(r.live_weight,0)+"</td>"+
       "<td>"+resultStr+"</td>"+
       "<td>"+(escapeHtml(r.breed)||"—")+"</td>"+
-      "<td>"+(canDelete?'<button class="btn danger small del-btn" data-id="'+r.id+'" type="button">Sil</button>':"")+
+      "<td style='display:flex;gap:4px;flex-wrap:wrap;'>"+
+        '<button class="btn pdf small pdf-hist-btn" data-id="'+r.id+'" type="button">PDF</button>'+
+        (canDelete?'<button class="btn danger small del-btn" data-id="'+r.id+'" type="button">Sil</button>':"")+
       "</td></tr>";
   }).join("");
   wrap.innerHTML = '<div class="scroll-x"><table class="list" id="history_table">'+head+'<tbody>'+body+'</tbody></table></div>';
@@ -1487,6 +1624,23 @@ function renderHistory(rations) {
       if (!confirm("Bu rasyonu silmek istediğinize emin misiniz?")) return;
       try { await api("/rations/"+b.dataset.id, {method:"DELETE"}); await loadHistory(); }
       catch(err) { showError(err.message); }
+    });
+  });
+  $$("#history_table .pdf-hist-btn").forEach(b => {
+    b.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const id = parseInt(b.dataset.id, 10);
+      const r  = filtered.find(x => x.id === id);
+      if (!r) return;
+      const inputs = {
+        customer_name: r.customer_name,
+        herd_name:     r.herd_name,
+        live_weight:   r.live_weight,
+        target_gain:   r.target_gain,
+        breed:         r.breed,
+        ration:        r.ration,
+      };
+      await downloadPdf(r.ration_type || "besi", inputs, r.results, b);
     });
   });
 }
