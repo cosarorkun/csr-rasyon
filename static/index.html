@@ -205,8 +205,8 @@
   @media (min-width: 1024px) {
     .calc-grid {
       display: grid;
-      grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-      gap: 18px; align-items: start;
+      grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+      gap: 14px; align-items: start;
     }
     .calc-grid .right-col { position: sticky; top: 58px; }
   }
@@ -427,7 +427,25 @@
     body.app-mode .left-col, body.app-mode .right-col { overflow-y: auto; height: 100%; }
     body.app-mode .right-col { position: static !important; }
     body.app-mode footer.app-footer { display: none; }
-    body.app-mode .card { padding: 10px 12px; margin-bottom: 8px; }
+    body.app-mode .card { padding: 8px 10px; margin-bottom: 6px; }
+    body.app-mode .card h2 { font-size: 12px; margin-bottom: 8px; }
+    /* More columns on right for dense stat display */
+    body.app-mode .stat-grid { grid-template-columns: repeat(4, 1fr); gap: 3px 10px; }
+    body.app-mode .stat { padding: 5px 0; }
+    body.app-mode .stat .label { font-size: 10px; }
+    body.app-mode .stat .value { font-size: 14px; margin-top: 1px; }
+    body.app-mode .stat .unit  { font-size: 11px; }
+    /* Compact gain highlight */
+    body.app-mode .gain-highlight { padding: 10px 14px; margin-bottom: 10px; }
+    body.app-mode .gain-highlight .big { font-size: 28px; }
+    body.app-mode .gain-highlight .label { font-size: 11px; }
+    /* Compact milk cards — 3 across so they don't stack */
+    body.app-mode .milk-cards { grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 6px; }
+    body.app-mode .milk-card { padding: 8px 10px; }
+    body.app-mode .milk-card .milk-big { font-size: 24px; }
+    body.app-mode .milk-card .milk-lbl { font-size: 10px; }
+    body.app-mode .milk-card .milk-unit { font-size: 13px; }
+    body.app-mode .milk-card .limit-badge { margin-top: 3px; font-size: 11px; }
   }
 
   /* ===== Mobile: prevent iOS zoom on input focus ===== */
@@ -580,6 +598,12 @@
             <button class="btn primary" id="calc_btn" type="button">Hesapla</button>
             <button class="btn success" id="save_btn" type="button" disabled>Kaydet</button>
           </div>
+          <div style="margin-top:6px;padding:0 2px;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);cursor:pointer;user-select:none;">
+              <input type="checkbox" id="scaled_mode_toggle" style="width:14px;height:14px;cursor:pointer;" />
+              <span>TMR Yoğunluk / Ölçekleme Modu <em style="font-size:11px;">(gelişmiş — beklenen DMİ üzerinden hesapla)</em></span>
+            </label>
+          </div>
         </div>
 
         <div class="right-col">
@@ -602,6 +626,7 @@
                 <div class="bottleneck" id="bottleneck_note"></div>
               </div>
               <div class="stat-grid" id="performance_summary" style="margin-top:14px;"></div>
+              <div id="besi_warnings" style="margin-top:10px;display:none;"></div>
             </div>
             <!-- INRA comparison: shown to admin only -->
             <div class="card" id="inra_card" hidden>
@@ -1340,26 +1365,80 @@ function renderResults(data, auto = false) {
   const costBox = t.total_cost_tl > 0
     ? statBox("Rasyon Maliyeti", fmt(t.total_cost_tl,2), "TL/gün") +
       statBox("Maliyet / kg KM", fmt(t.cost_per_kg_dm,2), "TL/kg") : "";
+  // PDI fields (new — backward compat via || null)
+  const pdiSupply = t.pdi_supply_g != null ? t.pdi_supply_g : null;
+  const pdinTotal = t.total_pdin_g != null ? t.total_pdin_g : null;
+  const pdiBox = pdiSupply != null
+    ? statBox("Toplam PDIE", fmt(t.total_pdie_g,0), "g/gün") +
+      statBox("Toplam PDIN", fmt(pdinTotal,0), "g/gün") +
+      statBox("PDI Arzı (min)", fmt(pdiSupply,0), "g/gün")
+    : statBox("Toplam PDI (PDIE)", fmt(t.total_pdie_g,0), "g/gün");
   $("#tmr_summary").innerHTML =
     statBox("Toplam Yaş Madde",  fmt(t.total_as_fed_kg,2), "kg/gün") +
     statBox("Toplam Kuru Madde", fmt(t.total_dm_kg,2),     "kg/gün") +
     statBox("Rasyon KM%",        fmt(t.ration_dm_pct,1),   "%") +
     statBox("UFV / kg KM",       fmt(t.ufv_per_kg_dm,2),   "") +
+    statBox("Toplam UFV",        fmt(t.total_ufv,2),        "") +
     statBox("Protein (KM)",      fmt(t.protein_pct_dm,1),  "%") +
     statBox("Nişasta (KM)",      fmt(t.starch_pct_dm,1),   "%") +
-    ndfBox + nfcBox + endfBox + caBox + pBox + costBox;
+    pdiBox + ndfBox + nfcBox + endfBox + caBox + pBox + costBox;
+
   const p = data.expected_performance;
-  $("#performance_summary").innerHTML =
-    statBox("Beklenen KMT (DMI)",  fmt(p.expected_dmi_kg,2),            "kg/gün") +
-    statBox("DMI / Canlı Ağırlık", fmt(p.dmi_pct_bw,1),                 "%") +
-    statBox("Toplam UFV",           fmt(p.ration_ufv_total_at_dmi,2),    "") +
-    statBox("Toplam PDI",           fmt(p.ration_pdie_total_at_dmi_g,0), "g/gün") +
-    statBox("UFV-bazlı tahmin",     fmt(p.gain_ufv_limited_g,0),         "g/gün") +
-    statBox("PDI-bazlı tahmin",     fmt(p.gain_pdi_limited_g,0),         "g/gün");
+  const isScaled = (data.calc_mode || p.calc_mode) === "scaled";
+  // Actual supply values (new fields — backward compat)
+  const actualUfv  = p.ration_ufv_actual  != null ? p.ration_ufv_actual  : p.ration_ufv_total_at_dmi;
+  const actualPdi  = p.ration_pdi_supply_g != null ? p.ration_pdi_supply_g : p.ration_pdie_total_at_dmi_g;
+  const actualPdie = p.ration_pdie_actual_g != null ? p.ration_pdie_actual_g : null;
+  const actualPdin = p.ration_pdin_actual_g != null ? p.ration_pdin_actual_g : null;
+  const actualKmPct = p.actual_dm_pct_bw != null ? p.actual_dm_pct_bw : null;
+
+  let perfHTML =
+    statBox("Beklenen KMT (DMI)",   fmt(p.expected_dmi_kg,2),  "kg/gün") +
+    statBox("Tabl. DMI% CA",        fmt(p.dmi_pct_bw,1),       "%");
+  if (actualKmPct != null) {
+    perfHTML += statBox("Gerçek KM% CA", fmt(actualKmPct,2), "%");
+  }
+  perfHTML +=
+    statBox("Gerçek UFV",           fmt(actualUfv,2),           "") +
+    statBox("Gerçek PDI Arzı",      fmt(actualPdi,0),           "g/gün");
+  if (isScaled) {
+    perfHTML +=
+      statBox("Ölçekli UFV (DMI)",  fmt(p.ration_ufv_total_at_dmi,2),    "") +
+      statBox("Ölçekli PDI (DMI)",  fmt(p.ration_pdie_total_at_dmi_g,0), "g/gün");
+  }
+  perfHTML +=
+    statBox("UFV-bazlı tahmin",     fmt(p.gain_ufv_limited_g,0), "g/gün") +
+    statBox("PDI-bazlı tahmin",     fmt(p.gain_pdi_limited_g,0), "g/gün");
+  $("#performance_summary").innerHTML = perfHTML;
+
   $("#estimated_gain").textContent = fmt(p.estimated_gain_g, 0);
+  const bnColor = p.bottleneck === "Dengeli" ? "var(--ok)" :
+                  p.bottleneck && p.bottleneck.startsWith("ENERJİ") ? "var(--blue-dark)" : "var(--warn)";
+  const modeNote = isScaled ? ' <em style="font-size:11px;color:var(--muted);">[Ölçekleme modu]</em>' : '';
   $("#bottleneck_note").innerHTML =
-    "Sınırlayıcı besin ögesi: <strong>"+escapeHtml(p.bottleneck)+"</strong> " +
-    "(UFV "+fmt(p.gain_ufv_limited_g,0)+" g/gün, PDI "+fmt(p.gain_pdi_limited_g,0)+" g/gün)";
+    'Sınırlayıcı: <strong style="color:'+bnColor+'">'+escapeHtml(p.bottleneck || "–")+'</strong> ' +
+    '(UFV '+fmt(p.gain_ufv_limited_g,0)+' g/gün, PDI '+fmt(p.gain_pdi_limited_g,0)+' g/gün)'+modeNote;
+
+  // Warnings
+  const warnEl = $("#besi_warnings");
+  const warnings = p.warnings || [];
+  const breedNote = p.breed_note || null;
+  if (warnEl) {
+    if (warnings.length > 0 || breedNote) {
+      let wHtml = "";
+      warnings.forEach(w => {
+        wHtml += '<div style="background:var(--warn-bg);border:1px solid #f5c6c2;border-radius:7px;padding:8px 12px;font-size:12px;color:#7b1a13;margin-bottom:6px;">⚠️ '+escapeHtml(w)+'</div>';
+      });
+      if (breedNote) {
+        wHtml += '<div style="background:#f0f4ff;border:1px solid #c5d0ea;border-radius:7px;padding:8px 12px;font-size:12px;color:#2d3d7a;margin-bottom:6px;">ℹ️ '+escapeHtml(breedNote)+'</div>';
+      }
+      warnEl.innerHTML = wHtml;
+      warnEl.style.display = "block";
+    } else {
+      warnEl.style.display = "none";
+      warnEl.innerHTML = "";
+    }
+  }
 
   // INRA — admin only
   if (data.inra_comparison && currentUser && currentUser.is_admin) {
@@ -1376,10 +1455,10 @@ function renderResults(data, auto = false) {
   // Detail — admin only
   if (currentUser && currentUser.is_admin && Array.isArray(data.rows)) {
     $("#detail_card").hidden = false;
-    const head = "<thead><tr><th>Yem</th><th>Yaş (kg)</th><th>KM (kg)</th><th>UFV</th><th>PDIE</th><th>Protein (kg)</th><th>Maliyet (TL)</th></tr></thead>";
+    const head = "<thead><tr><th>Yem</th><th>Yaş (kg)</th><th>KM (kg)</th><th>UFV</th><th>PDIE</th><th>PDIN</th><th>Protein (kg)</th><th>Maliyet (TL)</th></tr></thead>";
     const body = data.rows.map(r =>
       "<tr><td>"+escapeHtml(r.name)+"</td><td>"+fmt(r.as_fed_kg,2)+"</td><td>"+fmt(r.dm_kg,2)+"</td>"+
-      "<td>"+fmt(r.ufv,2)+"</td><td>"+fmt(r.pdie,0)+"</td><td>"+fmt(r.protein_kg,2)+"</td>"+
+      "<td>"+fmt(r.ufv,2)+"</td><td>"+fmt(r.pdie,0)+"</td><td>"+fmt(r.pdin,0)+"</td><td>"+fmt(r.protein_kg,2)+"</td>"+
       "<td>"+(r.cost_tl != null ? fmt(r.cost_tl,2) : "–")+"</td></tr>"
     ).join("");
     $("#detail_table").innerHTML = head + "<tbody>"+body+"</tbody>";
@@ -1482,11 +1561,12 @@ async function calculate(auto = false) {
   const breed = $("#breed").value || null;
   const ration = gatherRation();
   if (!ration.length) { if (!auto) showError("Rasyona en az bir yem ve kg değeri girin."); return; }
+  const calcMode = ($("#scaled_mode_toggle") && $("#scaled_mode_toggle").checked) ? "scaled" : "actual";
   const btn = $("#calc_btn"); btn.disabled=true; btn.textContent="Hesaplanıyor…";
   try {
     const json = await api("/calculate", { method:"POST",
-      body: JSON.stringify({ live_weight:lw, target_gain:tg, breed, ration }) });
-    lastResults=json; lastInputs={live_weight:lw,target_gain:tg,breed,ration};
+      body: JSON.stringify({ live_weight:lw, target_gain:tg, breed, ration, calc_mode:calcMode }) });
+    lastResults=json; lastInputs={live_weight:lw,target_gain:tg,breed,ration,calc_mode:calcMode};
     renderResults(json, auto);
   } catch(err) { if (!auto) showError(err.message); }
   finally { btn.disabled=false; btn.textContent="Hesapla"; }
@@ -1495,6 +1575,9 @@ $("#calc_btn").addEventListener("click", () => calculate(false));
 $("#live_weight").addEventListener("input",  scheduleCalc);
 $("#target_gain").addEventListener("input",  scheduleCalc);
 $("#breed").addEventListener("change", scheduleCalc);
+// Mode toggle: immediate recalculate if results are already shown
+const _scaledToggle = $("#scaled_mode_toggle");
+if (_scaledToggle) _scaledToggle.addEventListener("change", () => { if (lastResults) calculate(false); });
 $("#add_row").addEventListener("click", () => addRow());
 $("#reset_btn").addEventListener("click", () => {
   resetRows(); $("#results").hidden=true; $("#results-empty").hidden=false;

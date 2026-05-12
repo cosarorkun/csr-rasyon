@@ -91,16 +91,23 @@ PDI_MATRIX = {
 WEIGHT_ROWS = sorted(UFV_MATRIX.keys())
 GAIN_COLS = sorted(UFV_MATRIX[WEIGHT_ROWS[0]].keys())
 
-DMI_TABLE = [
-    (181.2, 3.0),
-    (249.15, 2.8),
-    (317.1, 2.6),
-    (385.05, 2.4),
-    (453.0, 2.2),
-    (543.6, 2.0),
-    (543.6, 1.8),
+# Linear-interpolation anchor points: (live_weight_kg, dmi_pct_of_bw)
+# Replaces the old step-function DMI_TABLE (which had a duplicate 543.6 entry).
+DMI_ANCHORS = [
+    (180,  3.0),
+    (250,  2.8),
+    (320,  2.6),
+    (385,  2.4),
+    (455,  2.2),
+    (545,  2.0),
+    (650,  1.8),
+    (750,  1.65),
 ]
 DMI_FALLBACK_PCT = 1.6
+
+# Keep DMI_TABLE as a compatibility alias so any code that still imports it
+# won't break immediately.
+DMI_TABLE = DMI_ANCHORS
 
 BREEDS = ["Holstein", "Simmental", "Charolais/Limousin"]
 

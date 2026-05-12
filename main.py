@@ -116,6 +116,7 @@ class CalculateRequest(BaseModel):
     target_gain: Optional[float] = Field(default=None, ge=0)
     breed: Optional[str] = None
     ration: List[RationItem]
+    calc_mode: str = "actual"  # "actual" | "scaled"
 
 
 class DairyCalculateRequest(BaseModel):
@@ -305,6 +306,7 @@ def calculate_endpoint(
             target_gain=req.target_gain,
             breed=req.breed,
             feeds_by_name=feeds_by_name,
+            calc_mode=req.calc_mode,
         )
     except CalculationError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
